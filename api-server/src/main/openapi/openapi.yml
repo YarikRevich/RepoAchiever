@@ -1,0 +1,279 @@
+openapi: 3.0.1
+info:
+  title: OpenAPI document of RepoAchiever API Server
+  description: RepoAchiever API Server Open API documentation
+  version: "1.0"
+
+tags:
+  - name: ContentResource
+    description: Contains all endpoints related to operations on processed content.
+  - name: RegistratorResource
+    description: Contains all endpoints related to operations on external resources been scheduled.
+  - name: ValidationResource
+    description: Contains all endpoints related to both data validation and its further retrieval.
+  - name: InfoResource
+    description: Contains all endpoints related to general info of API Server.
+  - name: HealthResource
+    description: Contains all endpoints related to general API Server health information.
+
+paths:
+  /v1/content:
+    get:
+      tags:
+        - ContentResource
+      responses:
+        200:
+          description: A list of all available content at the registered locations
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContentResult"
+  /v1/content/download:
+    get:
+      tags:
+        - ContentResource
+      parameters:
+        - in: query
+          name: id
+          schema:
+            type: integer
+          description: The identificator of content to be downloaded
+      responses:
+        200:
+          description: A content wrapped into compressed representation
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+  /v1/registrator/location:
+    post:
+      tags:
+        - RegistratorResource
+      requestBody:
+        required: true
+        description: The identificator of the location to perform registration
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LocationRegistrationApplication"
+      responses:
+        200:
+          description: Location has been successfully created
+  /v1/secrets/acquire:
+    post:
+      tags:
+        - ValidationResource
+      requestBody:
+        required: true
+        description: Checks if the given secrets file contains correct data
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ValidationSecretsApplication"
+      responses:
+        201:
+          description: Given secrets file is confirmed to be correct
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationSecretsApplicationResult"
+        400:
+          description: Given secrets application contains incorrect data
+  /v1/info/version:
+    get:
+      tags:
+        - InfoResource
+      responses:
+        200:
+          description: General information about running API Server
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VersionInfoResult"
+  /v1/info/cluster:
+    get:
+      tags:
+        - InfoResource
+      responses:
+        200:
+          description: General information about running clusters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClusterInfoResult"
+  /v1/info/telemetry:
+    get:
+      tags:
+        - InfoResource
+      responses:
+        200:
+          description: A set of Prometheus samples used by Grafana instance
+          content:
+            text/plain:
+              schema:
+                type: string
+  /v1/health:
+    get:
+      tags:
+        - HealthResource
+      responses:
+        200:
+          description: General health information about running API Server
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthCheckResult"
+  /v1/readiness:
+    post:
+      tags:
+        - HealthResource
+      requestBody:
+        required: true
+        description: Check if API Server is ready to serve for the given user
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReadinessCheckApplication"
+      responses:
+        200:
+          description: General health information about running API Server
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReadinessCheckResult"
+components:
+  schemas:
+    ContentResult:
+      properties:
+        test:
+          type: object
+    LocationRegistrationApplication:
+      required:
+        - name
+      properties:
+        name:
+          type: string
+    Provider:
+      type: string
+      enum:
+        - git-local
+        - git-github
+    ValidationSecretsApplication:
+      required:
+        - id
+        - provider
+        - credentials
+      properties:
+        id:
+          type: string
+          format: uuid
+        provider:
+          $ref: "#/components/schemas/Provider"
+        credentials:
+          $ref: "#/components/schemas/CredentialsFields"
+    CredentialsFields:
+      anyOf:
+        - $ref: "#/components/schemas/GitLocalCredentials"
+        - $ref: "#/components/schemas/GitGitHubCredentials"
+    GitLocalCredentials:
+      required:
+        - stub
+      properties:
+        stub:
+          type: string
+          default: "stub"
+    GitGitHubCredentials:
+      required:
+        - token
+      properties:
+        token:
+          type: string
+    ValidationSecretsApplicationResult:
+      required:
+        - valid
+      properties:
+        valid:
+          type: boolean
+    VersionInfoResult:
+      properties:
+        externalApi:
+          $ref: "#/components/schemas/VersionExternalApiInfoResult"
+    VersionExternalApiInfoResult:
+      required:
+        - version
+        - hash
+      properties:
+        version:
+          type: string
+        hash:
+          type: string
+    ClusterInfoResult:
+      type: array
+      items:
+        $ref: "#/components/schemas/ClusterInfoUnit"
+    ClusterInfoUnit:
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        health:
+          type: boolean
+        workers:
+          type: integer
+    HealthCheckResult:
+      required:
+        - status
+        - checks
+      properties:
+        status:
+          $ref: "#/components/schemas/HealthCheckStatus"
+        checks:
+          type: array
+          items:
+            $ref: "#/components/schemas/HealthCheckUnit"
+    HealthCheckUnit:
+      required:
+        - name
+        - status
+      properties:
+        name:
+          type: string
+        status:
+          $ref: "#/components/schemas/HealthCheckStatus"
+    HealthCheckStatus:
+      type: string
+      enum:
+        - UP
+        - DOWN
+    ReadinessCheckApplication:
+      properties:
+        test:
+          type: object
+    ReadinessCheckResult:
+      required:
+        - name
+        - status
+        - data
+      properties:
+        name:
+          type: string
+        status:
+          $ref: "#/components/schemas/ReadinessCheckStatus"
+        data:
+          type: object
+    ReadinessCheckUnit:
+      required:
+        - name
+        - status
+      properties:
+        name:
+          type: string
+        status:
+          $ref: "#/components/schemas/ReadinessCheckStatus"
+    ReadinessCheckStatus:
+      type: string
+      enum:
+        - UP
+        - DOWN

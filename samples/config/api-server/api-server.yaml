@@ -1,0 +1,19 @@
+# Represents section used for RepoAchiever API Server connection configuration.
+connection:
+  # Represents port of RepoAchiever API Server used for connection establishment.
+  port: 8080
+
+# Represents section used to define RepoAchiever resource options configuration.
+options:
+  # Represents a set of options used for diagnostics configuration.
+  diagnostics:
+    # Enables diagnostics functionality.
+    enabled: true
+
+    # Represents port of deployed Grafana instance.
+    port: 8090
+
+  # Represents a set of options used for RepoAchiever Worker configuration.
+  worker:
+    # Represents frequency of requests to selected VCS provider resources.
+    frequency: "10 * * * * *"

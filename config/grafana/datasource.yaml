@@ -1,0 +1,18 @@
+apiVersion: 1
+datasources:
+  - name: Default
+    type: prometheus
+    access: proxy
+    orgId: 1
+    url: {{ default.host }}
+    user: repoachiever-user
+    database: repoachiever
+    password: repoachiever-password
+    basicAuth: false
+    withCredentials: false
+    isDefault: true
+    jsonData:
+      tlsAuth: false
+      tlsAuthWithCACert: false
+    version: 0.0.1
+    editable: false
