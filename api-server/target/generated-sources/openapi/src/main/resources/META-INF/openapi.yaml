@@ -51,7 +51,7 @@ paths:
               schema:
                 format: binary
                 type: string
-          description: A content wrapped into compressed representation
+          description: A content was successfully retrieved
       tags:
       - ContentResource
       x-accepts: application/octet-stream
@@ -75,14 +75,14 @@ paths:
       x-accepts: application/json
       x-tags:
       - tag: RegistratorResource
-  /v1/secrets/acquire:
+  /v1/validation/secrets:
     post:
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/ValidationSecretsApplication'
-        description: Checks if the given secrets file contains correct data
+        description: Checks if the given secrets are valid
         required: true
       responses:
         "201":
@@ -90,7 +90,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationSecretsApplicationResult'
-          description: Given secrets file is confirmed to be correct
+          description: Given secrets are confirmed to be valid
         "400":
           description: Given secrets application contains incorrect data
       tags:
@@ -182,17 +182,37 @@ components:
     ContentResult:
       example:
         test: "{}"
+        provider: null
+        credentials:
+          internal:
+            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          external: null
       properties:
         test:
           type: object
+        provider:
+          $ref: '#/components/schemas/Provider'
+        credentials:
+          $ref: '#/components/schemas/CredentialsFieldsFull'
     LocationRegistrationApplication:
       example:
+        provider: null
+        credentials:
+          internal:
+            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          external: null
         name: name
       properties:
         name:
           type: string
+        provider:
+          $ref: '#/components/schemas/Provider'
+        credentials:
+          $ref: '#/components/schemas/CredentialsFieldsFull'
       required:
+      - credentials
       - name
+      - provider
     Provider:
       enum:
       - git-local
@@ -202,30 +222,33 @@ components:
       example:
         provider: null
         credentials: null
+      properties:
+        provider:
+          $ref: '#/components/schemas/Provider'
+        credentials:
+          $ref: '#/components/schemas/CredentialsFieldsExternal'
+      required:
+      - provider
+    CredentialsFieldsFull:
+      example:
+        internal:
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        external: null
+      properties:
+        internal:
+          $ref: '#/components/schemas/CredentialsFieldsInternal'
+        external:
+          $ref: '#/components/schemas/CredentialsFieldsExternal'
+    CredentialsFieldsInternal:
+      example:
         id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
       properties:
         id:
           format: uuid
           type: string
-        provider:
-          $ref: '#/components/schemas/Provider'
-        credentials:
-          $ref: '#/components/schemas/CredentialsFields'
-      required:
-      - credentials
-      - id
-      - provider
-    CredentialsFields:
+    CredentialsFieldsExternal:
       anyOf:
-      - $ref: '#/components/schemas/GitLocalCredentials'
       - $ref: '#/components/schemas/GitGitHubCredentials'
-    GitLocalCredentials:
-      properties:
-        stub:
-          default: stub
-          type: string
-      required:
-      - stub
     GitGitHubCredentials:
       properties:
         token:

@@ -1,7 +1,6 @@
 package com.repoachiever.model;
 
 import com.repoachiever.model.GitGitHubCredentials;
-import com.repoachiever.model.GitLocalCredentials;
 import java.io.Serializable;
 import jakarta.validation.constraints.*;
 import jakarta.validation.Valid;
@@ -14,35 +13,15 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 
 
-@JsonTypeName("CredentialsFields")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", date = "2024-04-19T11:12:35.929414+02:00[Europe/Warsaw]")@lombok.Data @lombok.NoArgsConstructor @lombok.AllArgsConstructor(staticName = "of")
+@JsonTypeName("CredentialsFieldsExternal")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", date = "2024-04-20T13:09:08.079025+02:00[Europe/Warsaw]")@lombok.Data @lombok.NoArgsConstructor @lombok.AllArgsConstructor(staticName = "of")
 
-public class CredentialsFields  implements Serializable {
-  private @Valid String stub = "stub";
+public class CredentialsFieldsExternal  implements Serializable {
   private @Valid String token;
 
   /**
    **/
-  public CredentialsFields stub(String stub) {
-    this.stub = stub;
-    return this;
-  }
-
-  
-  @JsonProperty("stub")
-  @NotNull
-  public String getStub() {
-    return stub;
-  }
-
-  @JsonProperty("stub")
-  public void setStub(String stub) {
-    this.stub = stub;
-  }
-
-  /**
-   **/
-  public CredentialsFields token(String token) {
+  public CredentialsFieldsExternal token(String token) {
     this.token = token;
     return this;
   }
@@ -68,22 +47,20 @@ public class CredentialsFields  implements Serializable {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    CredentialsFields credentialsFields = (CredentialsFields) o;
-    return Objects.equals(this.stub, credentialsFields.stub) &&
-        Objects.equals(this.token, credentialsFields.token);
+    CredentialsFieldsExternal credentialsFieldsExternal = (CredentialsFieldsExternal) o;
+    return Objects.equals(this.token, credentialsFieldsExternal.token);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(stub, token);
+    return Objects.hash(token);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class CredentialsFields {\n");
+    sb.append("class CredentialsFieldsExternal {\n");
     
-    sb.append("    stub: ").append(toIndentedString(stub)).append("\n");
     sb.append("    token: ").append(toIndentedString(token)).append("\n");
     sb.append("}");
     return sb.toString();

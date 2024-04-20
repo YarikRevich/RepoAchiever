@@ -1,5 +1,7 @@
 package com.repoachiever.model;
 
+import com.repoachiever.model.CredentialsFieldsFull;
+import com.repoachiever.model.Provider;
 import java.io.Serializable;
 import jakarta.validation.constraints.*;
 import jakarta.validation.Valid;
@@ -13,10 +15,12 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 
 @JsonTypeName("LocationRegistrationApplication")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", date = "2024-04-19T11:12:35.929414+02:00[Europe/Warsaw]")@lombok.Data @lombok.NoArgsConstructor @lombok.AllArgsConstructor(staticName = "of")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", date = "2024-04-20T13:09:08.079025+02:00[Europe/Warsaw]")@lombok.Data @lombok.NoArgsConstructor @lombok.AllArgsConstructor(staticName = "of")
 
 public class LocationRegistrationApplication  implements Serializable {
   private @Valid String name;
+  private @Valid Provider provider;
+  private @Valid CredentialsFieldsFull credentials;
 
   /**
    **/
@@ -37,6 +41,44 @@ public class LocationRegistrationApplication  implements Serializable {
     this.name = name;
   }
 
+  /**
+   **/
+  public LocationRegistrationApplication provider(Provider provider) {
+    this.provider = provider;
+    return this;
+  }
+
+  
+  @JsonProperty("provider")
+  @NotNull
+  public Provider getProvider() {
+    return provider;
+  }
+
+  @JsonProperty("provider")
+  public void setProvider(Provider provider) {
+    this.provider = provider;
+  }
+
+  /**
+   **/
+  public LocationRegistrationApplication credentials(CredentialsFieldsFull credentials) {
+    this.credentials = credentials;
+    return this;
+  }
+
+  
+  @JsonProperty("credentials")
+  @NotNull
+  public CredentialsFieldsFull getCredentials() {
+    return credentials;
+  }
+
+  @JsonProperty("credentials")
+  public void setCredentials(CredentialsFieldsFull credentials) {
+    this.credentials = credentials;
+  }
+
 
   @Override
   public boolean equals(Object o) {
@@ -47,12 +89,14 @@ public class LocationRegistrationApplication  implements Serializable {
       return false;
     }
     LocationRegistrationApplication locationRegistrationApplication = (LocationRegistrationApplication) o;
-    return Objects.equals(this.name, locationRegistrationApplication.name);
+    return Objects.equals(this.name, locationRegistrationApplication.name) &&
+        Objects.equals(this.provider, locationRegistrationApplication.provider) &&
+        Objects.equals(this.credentials, locationRegistrationApplication.credentials);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name);
+    return Objects.hash(name, provider, credentials);
   }
 
   @Override
@@ -61,6 +105,8 @@ public class LocationRegistrationApplication  implements Serializable {
     sb.append("class LocationRegistrationApplication {\n");
     
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
+    sb.append("    credentials: ").append(toIndentedString(credentials)).append("\n");
     sb.append("}");
     return sb.toString();
   }

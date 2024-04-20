@@ -1,5 +1,6 @@
 package com.repoachiever.model;
 
+import java.util.UUID;
 import java.io.Serializable;
 import jakarta.validation.constraints.*;
 import jakarta.validation.Valid;
@@ -12,29 +13,28 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 
 
-@JsonTypeName("GitLocalCredentials")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", date = "2024-04-19T11:12:35.929414+02:00[Europe/Warsaw]")@lombok.Data @lombok.NoArgsConstructor @lombok.AllArgsConstructor(staticName = "of")
+@JsonTypeName("CredentialsFieldsInternal")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", date = "2024-04-20T13:09:08.079025+02:00[Europe/Warsaw]")@lombok.Data @lombok.NoArgsConstructor @lombok.AllArgsConstructor(staticName = "of")
 
-public class GitLocalCredentials  implements Serializable {
-  private @Valid String stub = "stub";
+public class CredentialsFieldsInternal  implements Serializable {
+  private @Valid UUID id;
 
   /**
    **/
-  public GitLocalCredentials stub(String stub) {
-    this.stub = stub;
+  public CredentialsFieldsInternal id(UUID id) {
+    this.id = id;
     return this;
   }
 
   
-  @JsonProperty("stub")
-  @NotNull
-  public String getStub() {
-    return stub;
+  @JsonProperty("id")
+  public UUID getId() {
+    return id;
   }
 
-  @JsonProperty("stub")
-  public void setStub(String stub) {
-    this.stub = stub;
+  @JsonProperty("id")
+  public void setId(UUID id) {
+    this.id = id;
   }
 
 
@@ -46,21 +46,21 @@ public class GitLocalCredentials  implements Serializable {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    GitLocalCredentials gitLocalCredentials = (GitLocalCredentials) o;
-    return Objects.equals(this.stub, gitLocalCredentials.stub);
+    CredentialsFieldsInternal credentialsFieldsInternal = (CredentialsFieldsInternal) o;
+    return Objects.equals(this.id, credentialsFieldsInternal.id);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(stub);
+    return Objects.hash(id);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class GitLocalCredentials {\n");
+    sb.append("class CredentialsFieldsInternal {\n");
     
-    sb.append("    stub: ").append(toIndentedString(stub)).append("\n");
+    sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("}");
     return sb.toString();
   }

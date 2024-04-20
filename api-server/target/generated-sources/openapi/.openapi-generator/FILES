@@ -12,9 +12,10 @@ src/main/java/com/repoachiever/api/RegistratorResourceApi.java
 src/main/java/com/repoachiever/api/ValidationResourceApi.java
 src/main/java/com/repoachiever/model/ClusterInfoUnit.java
 src/main/java/com/repoachiever/model/ContentResult.java
-src/main/java/com/repoachiever/model/CredentialsFields.java
+src/main/java/com/repoachiever/model/CredentialsFieldsExternal.java
+src/main/java/com/repoachiever/model/CredentialsFieldsFull.java
+src/main/java/com/repoachiever/model/CredentialsFieldsInternal.java
 src/main/java/com/repoachiever/model/GitGitHubCredentials.java
-src/main/java/com/repoachiever/model/GitLocalCredentials.java
 src/main/java/com/repoachiever/model/HealthCheckResult.java
 src/main/java/com/repoachiever/model/HealthCheckStatus.java
 src/main/java/com/repoachiever/model/HealthCheckUnit.java

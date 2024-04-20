@@ -2,12 +2,13 @@ package com.repoachiever.service.workspace.facade;
 
 import com.repoachiever.entity.PropertiesEntity;
 import com.repoachiever.exception.*;
-import com.repoachiever.model.CredentialsFields;
+import com.repoachiever.model.CredentialsFieldsFull;
 import com.repoachiever.model.Provider;
 import com.repoachiever.service.workspace.WorkspaceService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import java.io.InputStream;
 import java.util.Objects;
 
 /**
@@ -29,26 +30,55 @@ public class WorkspaceFacade {
      * @param credentialsFields given credentials.
      * @return result of the readiness check for the given configuration.
      */
-    public String createUnitKey(String id, Provider provider, CredentialsFields credentialsFields) {
+    public String createUnitKey(String id, Provider provider, CredentialsFieldsFull credentialsFields) {
         return switch (provider) {
             case LOCAL -> workspaceService.createUnitKey(id);
-            case GITHUB -> workspaceService.createUnitKey(id, credentialsFields.getToken());
+            case GITHUB -> workspaceService.createUnitKey(id, credentialsFields.getExternal().getToken());
         };
     }
 
-
-    public void addContentVersion(String token) {
+    /**
+     *
+     * @param input
+     * @param hash
+     * @param id
+     * @param provider
+     * @param credentialsFields
+     */
+    public void addContent(
+            InputStream input, String hash, String id, Provider provider, CredentialsFieldsFull credentialsFields) {
 
     }
 
-    public void updatePRsMetadataFile() {
+    /**
+     *
+     * @param id
+     * @param provider
+     * @param credentialsFields
+     */
+    public void updatePRsMetadataFile(
+            String id, Provider provider, CredentialsFieldsFull credentialsFields) {
 
     }
 
-    public void updateIssuesMetadataFile() {
+    /**
+     *
+     * @param id
+     * @param provider
+     * @param credentialsFields
+     */
+    public void updateIssuesMetadataFile(
+            String id, Provider provider, CredentialsFieldsFull credentialsFields) {
     }
 
-    public void updateReleasesMetadataFile() {
+    /**
+     *
+     * @param id
+     * @param provider
+     * @param credentialsFields
+     */
+    public void updateReleasesMetadataFile(
+            String id, Provider provider, CredentialsFieldsFull credentialsFields) {
     }
 
 //    /**

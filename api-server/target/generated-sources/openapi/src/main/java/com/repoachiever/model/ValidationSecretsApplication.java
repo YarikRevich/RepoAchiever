@@ -1,8 +1,7 @@
 package com.repoachiever.model;
 
-import com.repoachiever.model.CredentialsFields;
+import com.repoachiever.model.CredentialsFieldsExternal;
 import com.repoachiever.model.Provider;
-import java.util.UUID;
 import java.io.Serializable;
 import jakarta.validation.constraints.*;
 import jakarta.validation.Valid;
@@ -16,31 +15,11 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 
 @JsonTypeName("ValidationSecretsApplication")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", date = "2024-04-19T11:12:35.929414+02:00[Europe/Warsaw]")@lombok.Data @lombok.NoArgsConstructor @lombok.AllArgsConstructor(staticName = "of")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", date = "2024-04-20T13:09:08.079025+02:00[Europe/Warsaw]")@lombok.Data @lombok.NoArgsConstructor @lombok.AllArgsConstructor(staticName = "of")
 
 public class ValidationSecretsApplication  implements Serializable {
-  private @Valid UUID id;
   private @Valid Provider provider;
-  private @Valid CredentialsFields credentials;
-
-  /**
-   **/
-  public ValidationSecretsApplication id(UUID id) {
-    this.id = id;
-    return this;
-  }
-
-  
-  @JsonProperty("id")
-  @NotNull
-  public UUID getId() {
-    return id;
-  }
-
-  @JsonProperty("id")
-  public void setId(UUID id) {
-    this.id = id;
-  }
+  private @Valid CredentialsFieldsExternal credentials;
 
   /**
    **/
@@ -63,20 +42,19 @@ public class ValidationSecretsApplication  implements Serializable {
 
   /**
    **/
-  public ValidationSecretsApplication credentials(CredentialsFields credentials) {
+  public ValidationSecretsApplication credentials(CredentialsFieldsExternal credentials) {
     this.credentials = credentials;
     return this;
   }
 
   
   @JsonProperty("credentials")
-  @NotNull
-  public CredentialsFields getCredentials() {
+  public CredentialsFieldsExternal getCredentials() {
     return credentials;
   }
 
   @JsonProperty("credentials")
-  public void setCredentials(CredentialsFields credentials) {
+  public void setCredentials(CredentialsFieldsExternal credentials) {
     this.credentials = credentials;
   }
 
@@ -90,14 +68,13 @@ public class ValidationSecretsApplication  implements Serializable {
       return false;
     }
     ValidationSecretsApplication validationSecretsApplication = (ValidationSecretsApplication) o;
-    return Objects.equals(this.id, validationSecretsApplication.id) &&
-        Objects.equals(this.provider, validationSecretsApplication.provider) &&
+    return Objects.equals(this.provider, validationSecretsApplication.provider) &&
         Objects.equals(this.credentials, validationSecretsApplication.credentials);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, provider, credentials);
+    return Objects.hash(provider, credentials);
   }
 
   @Override
@@ -105,7 +82,6 @@ public class ValidationSecretsApplication  implements Serializable {
     StringBuilder sb = new StringBuilder();
     sb.append("class ValidationSecretsApplication {\n");
     
-    sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    credentials: ").append(toIndentedString(credentials)).append("\n");
     sb.append("}");
