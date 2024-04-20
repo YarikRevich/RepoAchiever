@@ -19,6 +19,8 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 
 import lombok.SneakyThrows;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.FileSystemUtils;
@@ -46,16 +48,40 @@ public class WorkspaceService {
     }
 
     /**
+     * Creates content directory in the given workspace unit directory
+     *
+     * @param workspaceUnitDirectory given workspace unit directory
+     * @throws WorkspaceContentDirectoryCreationFailureException if workspace content directory creation operation failed.
+     */
+    public void createContentDirectory(String workspaceUnitDirectory) throws
+            WorkspaceContentDirectoryCreationFailureException {
+        Path unitDirectoryPath = Path.of(workspaceUnitDirectory, properties.getWorkspaceContentDirectory());
+
+        if (Files.notExists(unitDirectoryPath)) {
+            try {
+                Files.createDirectory(unitDirectoryPath);
+            } catch (IOException e) {
+                throw new WorkspaceContentDirectoryCreationFailureException(e.getMessage());
+            }
+        }
+    }
+
+    /**
      * Creates workspace unit with the help of the given key.
      *
      * @param key given workspace unit key.
-     * @throws IOException if IO operation failed.
+     * @throws WorkspaceUnitDirectoryCreationFailureException if workspace unit directory creation operation failed.
      */
-    public void createUnitDirectory(String key) throws IOException {
+    public void createUnitDirectory(String key) throws
+            WorkspaceUnitDirectoryCreationFailureException {
         Path unitDirectoryPath = Path.of(properties.getWorkspaceDirectory(), key);
 
         if (Files.notExists(unitDirectoryPath)) {
-            Files.createDirectory(unitDirectoryPath);
+            try {
+                Files.createDirectory(unitDirectoryPath);
+            } catch (IOException e) {
+                throw new WorkspaceUnitDirectoryCreationFailureException(e.getMessage());
+            }
         }
     }
 
@@ -63,10 +89,14 @@ public class WorkspaceService {
      * Removes workspace unit with the help of the given key.
      *
      * @param key given workspace unit key.
-     * @throws IOException if IO operation failed.
+     * @throws WorkspaceUnitDirectoryRemovalFailureException if IO operation failed.
      */
-    public void removeUnitDirectory(String key) throws IOException {
-        FileSystemUtils.deleteRecursively(Path.of(properties.getWorkspaceDirectory(), key));
+    public void removeUnitDirectory(String key) throws WorkspaceUnitDirectoryRemovalFailureException {
+        try {
+            FileSystemUtils.deleteRecursively(Path.of(properties.getWorkspaceDirectory(), key));
+        } catch (IOException e) {
+            throw new WorkspaceUnitDirectoryRemovalFailureException(e.getMessage());
+        }
     }
 
     /**
@@ -97,26 +127,85 @@ public class WorkspaceService {
     }
 
     /**
+     * Writes given content repository to the given workspace unit directory.
+     *
+     * @param workspaceUnitDirectory given workspace unit directory.
+     * @param name given content repository name.
+     * @param input given content repository input.
+     * @throws ContentFileWriteFailureException if content file cannot be created.
+     */
+    public void createContentFile(String workspaceUnitDirectory, String name, InputStream input) throws
+            ContentFileWriteFailureException {
+        Path contentDirectoryPath = Path.of(workspaceUnitDirectory, properties.getWorkspaceContentDirectory(), name);
+
+        File file = new File(contentDirectoryPath.toString());
+
+        try {
+            FileUtils.copyInputStreamToFile(input, file);
+        } catch (IOException e) {
+            throw new ContentFileWriteFailureException(e.getMessage());
+        }
+    }
+
+    /**
+     * Removes content file in the given workspace unit.
+     *
+     * @param workspaceUnitDirectory given workspace unit directory.
+     * @param name given content repository name.
+     * @throws ContentFileRemovalFailureException if content file cannot be created.
+     */
+    public void removeContentFile(String workspaceUnitDirectory, String name) throws
+            ContentFileRemovalFailureException {
+        try {
+            FileSystemUtils.deleteRecursively(
+                    Path.of(workspaceUnitDirectory, properties.getWorkspaceContentDirectory(), name));
+        } catch (IOException e) {
+            throw new ContentFileRemovalFailureException(e);
+        }
+    }
+
+    /**
+     * Retrieves content file of the given name with the help of the given workspace unit directory.
+     *
+     * @param workspaceUnitDirectory given workspace unit directory.
+     * @param name                   given name of the content file.
+     * @return content file entity.
+     * @throws ContentFileNotFoundException if the content file not found.
+     */
+    public OutputStream getContentFile(String workspaceUnitDirectory, String name) throws
+            ContentFileNotFoundException {
+        Path contentDirectoryPath = Path.of(workspaceUnitDirectory, properties.getWorkspaceContentDirectory(), name);
+
+        File file = new File(contentDirectoryPath.toString());
+
+        try {
+            return new FileOutputStream(file);
+        } catch (FileNotFoundException e) {
+            throw new ContentFileNotFoundException(e);
+        }
+    }
+
+    /**
      * Writes metadata file input of the given type to the given workspace unit directory.
      *
      * @param workspaceUnitDirectory given workspace unit directory.
      * @param type                   given type of the metadata file.
      * @param input                  given metadata file entity input.
-     * @throws VariableFileWriteFailureException if metadata file cannot be created.
+     * @throws MetadataFileWriteFailureException if metadata file cannot be created.
      */
     private void createMetadataFile(String workspaceUnitDirectory, String type, MetadataFileEntity input)
-            throws VariableFileWriteFailureException {
+            throws MetadataFileWriteFailureException {
         ObjectMapper mapper = new ObjectMapper();
 
         File variableFile =
                 new File(
-                        Paths.get(workspaceUnitDirectory, type)
+                        Paths.get(workspaceUnitDirectory, properties.getWorkspaceMetadataDirectory(), type)
                                 .toString());
 
         try {
             mapper.writeValue(variableFile, input);
         } catch (IOException e) {
-            throw new VariableFileWriteFailureException(e.getMessage());
+            throw new MetadataFileWriteFailureException(e.getMessage());
         }
     }
 
@@ -125,10 +214,10 @@ public class WorkspaceService {
      *
      * @param workspaceUnitDirectory given workspace unit directory.
      * @param input                  given metadata file entity input.
-     * @throws VariableFileWriteFailureException if metadata file cannot be created.
+     * @throws MetadataFileWriteFailureException if metadata file cannot be created.
      */
     public void createPRsMetadataFile(String workspaceUnitDirectory, MetadataFileEntity input)
-            throws VariableFileWriteFailureException {
+            throws MetadataFileWriteFailureException {
         createMetadataFile(workspaceUnitDirectory, properties.getWorkspacePRsMetadataFileName(), input);
     }
 
@@ -137,10 +226,10 @@ public class WorkspaceService {
      *
      * @param workspaceUnitDirectory given workspace unit directory.
      * @param input                  given metadata file entity input.
-     * @throws VariableFileWriteFailureException if metadata file cannot be created.
+     * @throws MetadataFileWriteFailureException if metadata file cannot be created.
      */
     public void createIssuesMetadataFile(String workspaceUnitDirectory, MetadataFileEntity input)
-            throws VariableFileWriteFailureException {
+            throws MetadataFileWriteFailureException {
         createMetadataFile(workspaceUnitDirectory, properties.getWorkspaceIssuesMetadataFileName(), input);
     }
 
@@ -149,10 +238,10 @@ public class WorkspaceService {
      *
      * @param workspaceUnitDirectory given workspace unit directory.
      * @param input                  given metadata file entity input.
-     * @throws VariableFileWriteFailureException if metadata file cannot be created.
+     * @throws MetadataFileWriteFailureException if metadata file cannot be created.
      */
     public void createReleasesMetadataFile(String workspaceUnitDirectory, MetadataFileEntity input)
-            throws VariableFileWriteFailureException {
+            throws MetadataFileWriteFailureException {
         createMetadataFile(workspaceUnitDirectory, properties.getWorkspaceReleasesMetadataFileName(), input);
     }
 
@@ -165,7 +254,7 @@ public class WorkspaceService {
      */
     private boolean isMetadataFileExist(String workspaceUnitDirectory, String type) {
         return Files.exists(
-                Paths.get(workspaceUnitDirectory, type));
+                Paths.get(workspaceUnitDirectory, properties.getWorkspaceMetadataDirectory(), type));
     }
 
     /**
@@ -175,8 +264,7 @@ public class WorkspaceService {
      * @return result if metadata file exists in the given workspace unit directory.
      */
     private boolean isPRsMetadataFileExist(String workspaceUnitDirectory) {
-        return Files.exists(
-                Paths.get(workspaceUnitDirectory, properties.getWorkspacePRsMetadataFileName()));
+        return isMetadataFileExist(workspaceUnitDirectory, properties.getWorkspacePRsMetadataFileName());
     }
 
     /**
@@ -186,8 +274,7 @@ public class WorkspaceService {
      * @return result if metadata file exists in the given workspace unit directory.
      */
     private boolean isIssuesMetadataFileExist(String workspaceUnitDirectory) {
-        return Files.exists(
-                Paths.get(workspaceUnitDirectory, properties.getWorkspaceIssuesMetadataFileName()));
+        return isMetadataFileExist(workspaceUnitDirectory, properties.getWorkspaceIssuesMetadataFileName());
     }
 
     /**
@@ -197,20 +284,19 @@ public class WorkspaceService {
      * @return result if metadata file exists in the given workspace unit directory.
      */
     private boolean isReleasesMetadataFileExist(String workspaceUnitDirectory) {
-        return Files.exists(
-                Paths.get(workspaceUnitDirectory, properties.getWorkspaceReleasesMetadataFileName()));
+        return isMetadataFileExist(workspaceUnitDirectory, properties.getWorkspaceReleasesMetadataFileName());
     }
 
     /**
      * Retrieves metadata file content of the given type with the help of the given workspace unit directory.
      *
      * @param workspaceUnitDirectory given workspace unit directory.
-     * @param type given type of the metadata file.
+     * @param type                   given type of the metadata file.
      * @return metadata file entity.
-     * @throws VariableFileNotFoundException if the metadata file not found.
+     * @throws MetadataFileNotFoundException if the metadata file not found.
      */
     public MetadataFileEntity getMetadataFileContent(String workspaceUnitDirectory, String type)
-            throws VariableFileNotFoundException {
+            throws MetadataFileNotFoundException {
         ObjectMapper mapper =
                 new ObjectMapper()
                         .configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true)
@@ -224,10 +310,10 @@ public class WorkspaceService {
         try {
             variableFile =
                     new FileInputStream(
-                            Paths.get(workspaceUnitDirectory, type)
+                            Paths.get(workspaceUnitDirectory, properties.getWorkspaceMetadataDirectory(), type)
                                     .toString());
         } catch (FileNotFoundException e) {
-            throw new VariableFileNotFoundException(e.getMessage());
+            throw new MetadataFileNotFoundException(e.getMessage());
         }
 
         try {
@@ -244,10 +330,10 @@ public class WorkspaceService {
      *
      * @param workspaceUnitDirectory given workspace unit directory.
      * @return metadata file entity.
-     * @throws VariableFileNotFoundException if the metadata variable file not found.
+     * @throws MetadataFileNotFoundException if the metadata variable file not found.
      */
     public MetadataFileEntity getPRsMetadataFileContent(String workspaceUnitDirectory)
-            throws VariableFileNotFoundException {
+            throws MetadataFileNotFoundException {
         return getMetadataFileContent(workspaceUnitDirectory, properties.getWorkspacePRsMetadataFileName());
     }
 
@@ -256,10 +342,10 @@ public class WorkspaceService {
      *
      * @param workspaceUnitDirectory given workspace unit directory.
      * @return metadata file entity.
-     * @throws VariableFileNotFoundException if the metadata variable file not found.
+     * @throws MetadataFileNotFoundException if the metadata variable file not found.
      */
     public MetadataFileEntity getIssuesMetadataFileContent(String workspaceUnitDirectory)
-            throws VariableFileNotFoundException {
+            throws MetadataFileNotFoundException {
         return getMetadataFileContent(workspaceUnitDirectory, properties.getWorkspaceIssuesMetadataFileName());
     }
 
@@ -268,10 +354,10 @@ public class WorkspaceService {
      *
      * @param workspaceUnitDirectory given workspace unit directory.
      * @return metadata file entity.
-     * @throws VariableFileNotFoundException if the metadata variable file not found.
+     * @throws MetadataFileNotFoundException if the metadata variable file not found.
      */
     public MetadataFileEntity getReleasesMetadataFileContent(String workspaceUnitDirectory)
-            throws VariableFileNotFoundException {
+            throws MetadataFileNotFoundException {
         return getMetadataFileContent(workspaceUnitDirectory, properties.getWorkspaceReleasesMetadataFileName());
     }
 }

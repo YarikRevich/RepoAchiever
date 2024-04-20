@@ -29,6 +29,9 @@ public class PropertiesEntity {
     @ConfigProperty(name = "workspace.content.directory")
     String workspaceContentDirectory;
 
+    @ConfigProperty(name = "workspace.content.version-amount")
+    Integer workspaceContentVersionAmount;
+
     @ConfigProperty(name = "workspace.metadata.directory")
     String workspaceMetadataDirectory;
 
@@ -43,7 +46,6 @@ public class PropertiesEntity {
 
     @ConfigProperty(name = "repoachiever-cluster.context.alias")
     String repoAchieverClusterContextAlias;
-
 
     @ConfigProperty(name = "git.commit.id.abbrev")
     String gitCommitId;

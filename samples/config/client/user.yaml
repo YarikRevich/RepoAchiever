@@ -6,9 +6,6 @@ filter:
 
 # Represents section used for VCS provider configuration.
 service:
-  # Represents session identificator, used to distinguish different workspaces and thus separate content inside.
-  id: "b06dac1f-c1c2-4c9a-a025-516a33b0ef6e"
-
   # Represents the selected VCS provider for RepoAchiever. The first part divided by the hyphen represents
   # selected VCS core type and the second part defines external provider. Supported providers are "git-local"
   # and "git-github"
@@ -17,6 +14,9 @@ service:
   # Represents credentials used for the selected VCS provider. Can be left null, if the provider does not
   # require it.
   credentials:
+    # Represents session identificator, used to distinguish different workspaces and thus separate content inside.
+    id: "1"
+
     # Represents authentication token intended to be used for VCS provider API access permission.
     token: "ghp_ns3gkhpNADVVYAB1HkpX1lwBIzLYlR19oNwA"
 
