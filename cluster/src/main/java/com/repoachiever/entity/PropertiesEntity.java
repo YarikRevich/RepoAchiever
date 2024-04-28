@@ -8,6 +8,6 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Configuration
 public class PropertiesEntity {
-  @Value("${REPOACHIEVER_CLUSTER_CONTEXT}")
+  @Value("${REPOACHIEVER_CLUSTER_CONTEXT:null}")
   private String clusterContext;
 }

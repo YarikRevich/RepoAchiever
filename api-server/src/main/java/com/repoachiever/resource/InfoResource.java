@@ -1,6 +1,5 @@
 package com.repoachiever.resource;
 
-import com.amazonaws.services.kafka.model.ClusterInfo;
 import com.repoachiever.api.InfoResourceApi;
 import com.repoachiever.entity.PropertiesEntity;
 import com.repoachiever.model.ClusterInfoUnit;

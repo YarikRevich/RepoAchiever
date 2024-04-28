@@ -3,15 +3,47 @@ connection:
   # Represents port of RepoAchiever API Server used for connection establishment.
   port: 8080
 
-# Represents section used to define RepoAchiever resource options configuration.
-options:
-  # Represents a set of options used for diagnostics configuration.
-  diagnostics:
-    # Enables diagnostics functionality.
-    enabled: true
+# Represents section used for RepoAchiever API Server internal communication configuration.
+communication:
+  # Represents port of RMI registry used for RepoAchiever API Server to RepoAchiever Cluster communication.
+  port: 8089
 
-    # Represents port of deployed Grafana instance.
+# Represents section used for RepoAchiever API Server content configuration.
+content:
+  # Represents format used for content download requests.
+  format: "zip"
+
+# Represents section used for RepoAchiever API Server database configuration.
+database:
+  # Enables re-initialization of database if core user configuration has been changed.
+  re-init: true
+
+# Represents section used for RepoAchiever API Server diagnostics configuration.
+diagnostics:
+  # Enables diagnostics functionality.
+  enabled: false
+
+  # Represents section used for RepoAchiever diagnostics Grafana instance.
+  grafana:
+    # Represents port used for Grafana instance deployment.
     port: 8090
+
+  # Represents section used for RepoAchiever diagnostics Prometheus instance.
+  prometheus:
+    # Represents port used for Prometheus instance deployment.
+    port: 8120
+
+  # Represents section used for RepoAchiever diagnostics Prometheus Node Exporter instance.
+  node-exporter:
+    # Represents port used for Prometheus Node Exporter instance deployment.
+    port: 8121
+
+# Represents section used for RepoAchiever resource configuration.
+resource:
+  # Represents a set of options used for RepoAchiever Cluster configuration.
+  cluster:
+    # Represents the highest amount of allocated workers per cluster.
+    max-workers: 5
 
   # Represents a set of options used for RepoAchiever Worker configuration.
   worker:

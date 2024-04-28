@@ -20,8 +20,17 @@ public class PropertiesEntity {
     @ConfigProperty(name = "quarkus.http.port")
     Integer applicationPort;
 
+    @ConfigProperty(name = "bin.directory")
+    String binDirectory;
+
+    @ConfigProperty(name = "bin.cluster.name")
+    String binClusterName;
+
     @ConfigProperty(name = "config.directory")
     String configDirectory;
+
+    @ConfigProperty(name = "config.name")
+    String configName;
 
     @ConfigProperty(name = "workspace.directory")
     String workspaceDirectory;
@@ -45,7 +54,25 @@ public class PropertiesEntity {
     String workspaceReleasesMetadataFileName;
 
     @ConfigProperty(name = "repoachiever-cluster.context.alias")
-    String repoAchieverClusterContextAlias;
+    String clusterContextAlias;
+
+    @ConfigProperty(name = "communication.provider.name")
+    String communicationProviderName;
+
+    @ConfigProperty(name = "communication.cluster.base")
+    String communicationClusterBase;
+
+    @ConfigProperty(name = "diagnostics.common.docker.network.name")
+    String diagnosticsCommonDockerNetworkName;
+
+    @ConfigProperty(name = "diagnostics.grafana.docker.name")
+    String diagnosticsGrafanaDockerName;
+
+    @ConfigProperty(name = "diagnostics.prometheus.docker.name")
+    String diagnosticsPrometheusDockerName;
+
+    @ConfigProperty(name = "diagnostics.prometheus.node-exporter.docker.name")
+    String diagnosticsPrometheusNodeExporterDockerName;
 
     @ConfigProperty(name = "git.commit.id.abbrev")
     String gitCommitId;

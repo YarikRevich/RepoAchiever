@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="WARN">
+<Configuration packages="com.repoachiever.logging" status="WARN" xmlns:xi="http://www.w3.org/2001/XInclude">
     <Appenders>
-        <FatalAppender name="FatalAppender" />
+        <fatalappender name="fatalappender" />
         <Console name="console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
         </Console>
@@ -47,14 +47,14 @@
         </File>
     </Appenders>
     <Loggers>
-        <Root level="debug">
+        <Root level="info">
             <AppenderRef ref="console" />
             <AppenderRef ref="fatal_logs_file" />
             <AppenderRef ref="error_logs_file" />
             <AppenderRef ref="warn_logs_file" />
             <AppenderRef ref="info_logs_file" />
             <AppenderRef ref="debug_logs_file" />
-            <AppenderRef ref="FatalAppender" />
+            <AppenderRef ref="fatalappender" />
         </Root>
     </Loggers>
 </Configuration>

@@ -37,6 +37,10 @@ endif
 create-local-api-server: ## Create ResourceTracker local directory for API Server
 ifeq (,$(wildcard $(HOME)/.repoachiever))
 	@mkdir -p $(HOME)/.repoachiever/config
+	@mkdir -p $(HOME)/.repoachiever/diagnostics/prometheus/internal
+	@mkdir $(HOME)/.repoachiever/diagnostics/prometheus/config
+	@mkdir -p $(HOME)/.repoachiever/diagnostics/grafana/internal
+	@mkdir $(HOME)/.repoachiever/diagnostics/grafana/config
 	@mkdir $(HOME)/.repoachiever/workspace
 endif
 ifeq (,$(wildcard $(HOME)/.repoachiever/workspace))
@@ -45,15 +49,18 @@ endif
 
 .PHONY: clone-client-config
 clone-client-config: ## Clone configuration files to local directory
-ifeq (,$(wildcard $(HOME)/.repoachiever/config/user.yaml))
 	@cp -r ./samples/config/client/user.yaml $(HOME)/.repoachiever/config
-endif
 
 .PHONY: clone-api-server-config
 clone-api-server-config: ## Clone RepoAchiever API Server configuration files to local directory
-ifeq (,$(wildcard $(HOME)/.repoachiever/config/api-server.yaml))
 	@cp -r ./samples/config/api-server/api-server.yaml $(HOME)/.repoachiever/config
-endif
+
+.PHONY: clone-diagnostics-prometheus-config
+clone-diagnostics-prometheus-config:
+
+
+.PHONY: clone-diagnostics-grafana-config
+clone-diagnostics-grafana-config:
 
 .PHONY: clone-worker
 clone-worker: ## Clone Worker JAR into a RepoAchiever local directory

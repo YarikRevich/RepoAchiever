@@ -1,0 +1,23 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: YarikRevich
+      changes:
+        - createTable:
+            tableName: config
+            columns:
+              - column:
+                  name: test_column
+                  type: INT
+                  constraints:
+                    primaryKey:  true
+                    nullable:  false
+        - createTable:
+            tableName: topology
+            columns:
+              - column:
+                  name: test_column
+                  type: INT
+                  constraints:
+                    primaryKey: true
+                    nullable: false

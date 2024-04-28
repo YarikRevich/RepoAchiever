@@ -2,41 +2,30 @@ package com.repoachiever;
 
 import com.repoachiever.entity.PropertiesEntity;
 import com.repoachiever.service.config.ConfigService;
-import com.repoachiever.service.config.common.ValidConfigService;
-import com.repoachiever.service.scheduler.SchedulerService;
-import com.repoachiever.service.scheduler.executor.CommandExecutorService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.repoachiever.service.integration.logging.LoggingStateConfigService;
+import com.repoachiever.service.executor.CommandExecutorService;
+import com.repoachiever.service.waiter.WaiterHelper;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
+/**
+ * Represents initialization point for the RepoAchiever Cluster application.
+ */
 @Component
 @Import({
-  SchedulerService.class,
-  ConfigService.class,
-  ValidConfigService.class,
-  CommandExecutorService.class,
-  PropertiesEntity.class
+        ConfigService.class,
+        CommandExecutorService.class,
+        PropertiesEntity.class,
+        LoggingStateConfigService.class
 })
 public class App implements ApplicationRunner {
-  private static final Logger logger = LogManager.getLogger(App.class);
-
-  @Autowired private ValidConfigService validConfigService;
-
-  @Autowired private SchedulerService schedulerService;
-
-  @Override
-  public void run(ApplicationArguments args) {
-    try {
-      validConfigService.validate();
-    } catch (Exception e) {
-      logger.fatal(e.getMessage());
-      return;
+    /**
+     * @see ApplicationRunner
+     */
+    @Override
+    public void run(ApplicationArguments args) {
+        WaiterHelper.waitForExit();
     }
-
-    schedulerService.start();
-  }
 }

@@ -13,7 +13,7 @@
 
   <properties>
     <start-class>
-      com.repoachiever.Agent
+      com.repoachiever.Cluster
     </start-class>
   </properties>
 
@@ -30,14 +30,20 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-logging</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-validation</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.springframework.kafka</groupId>
-      <artifactId>spring-kafka</artifactId>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-log4j2</artifactId>
     </dependency>
 
     <!-- THIRD PARTY -->
@@ -97,7 +103,7 @@
   </dependencies>
 
   <build>
-      <finalName>agent</finalName>
+      <finalName>cluster</finalName>
       <plugins>
         <plugin>
           <groupId>org.springframework.boot</groupId>
@@ -117,6 +123,18 @@
             <source>19</source>
             <target>19</target>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>com.coderplus.maven.plugins</groupId>
+          <artifactId>copy-rename-maven-plugin</artifactId>
+          <executions>
+            <execution>
+              <configuration>
+                <sourceFile>${basedir}/target/cluster.jar</sourceFile>
+                <destinationFile>${main.basedir}/../bin/cluster/cluster.jar</destinationFile>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <groupId>com.diffplug.spotless</groupId>

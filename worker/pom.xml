@@ -13,7 +13,7 @@
 
   <properties>
     <start-class>
-      com.repoachiever.Agent
+      com.repoachiever.Cluster
     </start-class>
   </properties>
 

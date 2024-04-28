@@ -8,6 +8,10 @@ import java.util.Formatter;
  * Represents exception used to indicate configuration validation failure.
  */
 public class ConfigValidationException extends IOException {
+  public ConfigValidationException() {
+    this("");
+  }
+
   public ConfigValidationException(Object... message) {
     super(
         new Formatter()

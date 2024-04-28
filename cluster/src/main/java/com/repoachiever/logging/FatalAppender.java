@@ -3,6 +3,8 @@ package com.repoachiever.logging;
 import java.time.Instant;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import com.repoachiever.service.state.StateService;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.Core;
@@ -14,13 +16,13 @@ import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
 import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 
-/** FatalAppender provides custom flow for logging process. */
-@Plugin(name = "FatalAppender", category = Core.CATEGORY_NAME, elementType = Appender.ELEMENT_TYPE)
+/**
+ * Service used for logging fatal level application state changes.
+ */
+@Plugin(name = "fatalappender", category = Core.CATEGORY_NAME, elementType = Appender.ELEMENT_TYPE)
 public class FatalAppender extends AbstractAppender {
-  private ConcurrentMap<String, LogEvent> eventMap = new ConcurrentHashMap<>();
-
   protected FatalAppender(String name, Filter filter) {
-    super(name, filter, null);
+    super(name, filter, null, false, null);
   }
 
   @PluginFactory
@@ -32,9 +34,7 @@ public class FatalAppender extends AbstractAppender {
   @Override
   public void append(LogEvent event) {
     if (event.getLevel().equals(Level.FATAL)) {
-      System.exit(1);
+      StateService.setExit(true);
     }
-
-    eventMap.put(Instant.now().toString(), event);
   }
 }

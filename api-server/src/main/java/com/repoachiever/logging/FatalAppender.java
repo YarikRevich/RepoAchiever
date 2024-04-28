@@ -1,8 +1,6 @@
 package com.repoachiever.logging;
 
-import java.time.Instant;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import io.quarkus.runtime.Quarkus;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.Core;
@@ -14,12 +12,13 @@ import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
 import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 
+/**
+ * Service used for logging fatal level application state changes.
+ */
 @Plugin(name = "FatalAppender", category = Core.CATEGORY_NAME, elementType = Appender.ELEMENT_TYPE)
 public class FatalAppender extends AbstractAppender {
-  private ConcurrentMap<String, LogEvent> eventMap = new ConcurrentHashMap<>();
-
   protected FatalAppender(String name, Filter filter) {
-    super(name, filter, null);
+    super(name, filter, null, false, null);
   }
 
   @PluginFactory
@@ -31,9 +30,7 @@ public class FatalAppender extends AbstractAppender {
   @Override
   public void append(LogEvent event) {
     if (event.getLevel().equals(Level.FATAL)) {
-      System.exit(1);
+      Quarkus.asyncExit(1);
     }
-
-    eventMap.put(Instant.now().toString(), event);
   }
 }
