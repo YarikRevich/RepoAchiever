@@ -32,6 +32,9 @@ public class PropertiesEntity {
     @ConfigProperty(name = "database.tables.secret.name")
     String databaseSecretTableName;
 
+    @ConfigProperty(name = "database.statement.close-delay")
+    Integer databaseStatementCloseDelay;
+
     @ConfigProperty(name = "bin.directory")
     String binDirectory;
 

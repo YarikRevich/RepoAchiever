@@ -65,17 +65,11 @@ public class TopologyConfigService {
      */
 //    @PreDestroy
     public void close(@Observes Shutdown event) {
-        List<String> removable = new ArrayList<>();
-
         for (ClusterAllocationDto clusterAllocation : StateService.getClusterAllocations()) {
             try {
                 clusterService.destroy(clusterAllocation.getPid());
             } catch (ClusterDestructionFailureException ignored) {
             }
-
-            removable.add(clusterAllocation.getName());
         }
-
-        StateService.removeClusterAllocationByNames(removable);
     }
 }
