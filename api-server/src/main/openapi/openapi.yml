@@ -7,8 +7,8 @@ info:
 tags:
   - name: ContentResource
     description: Contains all endpoints related to operations on processed content.
-  - name: RegistratorResource
-    description: Contains all endpoints related to operations on external resources been scheduled.
+  - name: StateResource
+    description: Contains all endpoints related to state processing.
   - name: ValidationResource
     description: Contains all endpoints related to both data validation and its further retrieval.
   - name: InfoResource
@@ -18,26 +18,49 @@ tags:
 
 paths:
   /v1/content:
-    get:
+    post:
       tags:
         - ContentResource
+      requestBody:
+        required: true
+        description: Content retrieval application
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContentRetrievalApplication"
       responses:
-        200:
-          description: A list of all available content at the registered locations
+        201:
+          description: A list of all available content
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ContentResult"
+                $ref: "#/components/schemas/ContentRetrievalResult"
+  /v1/content/apply:
+    post:
+      tags:
+        - ContentResource
+      requestBody:
+        required: true
+        description: Content configuration application
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContentApplication"
+      responses:
+        201:
+          description: Given content configuration was successfully applied
+        400:
+          description: Given content configuration was not applied
   /v1/content/download:
     get:
       tags:
         - ContentResource
       parameters:
         - in: query
-          name: id
+          name: location
           schema:
-            type: integer
-          description: The identificator of content to be downloaded
+            type: string
+          description: Name of content location to be downloaded
       responses:
         200:
           description: A content was successfully retrieved
@@ -46,20 +69,24 @@ paths:
               schema:
                 type: string
                 format: binary
-  /v1/registrator/location:
+  /v1/state/content:
     post:
       tags:
-        - RegistratorResource
+        - StateResource
       requestBody:
         required: true
-        description: The identificator of the location to perform registration
+        description: Given content state key
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/LocationRegistrationApplication"
+              $ref: "#/components/schemas/ContentStateApplication"
       responses:
-        200:
-          description: Location has been successfully created
+        201:
+          description: Content state hash is retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContentStateApplicationResult"
   /v1/validation/secrets:
     post:
       tags:
@@ -73,7 +100,7 @@ paths:
               $ref: "#/components/schemas/ValidationSecretsApplication"
       responses:
         201:
-          description: Given secrets are confirmed to be valid
+          description: Given secrets to be validated
           content:
             application/json:
               schema:
@@ -144,39 +171,11 @@ paths:
                 $ref: "#/components/schemas/ReadinessCheckResult"
 components:
   schemas:
-    ContentResult:
-      properties:
-        test:
-          type: object
-        provider:
-          $ref: "#/components/schemas/Provider"
-        credentials:
-          $ref: "#/components/schemas/CredentialsFieldsFull"
-    LocationRegistrationApplication:
-      required:
-        - name
-        - provider
-        - credentials
-      properties:
-        name:
-          type: string
-        provider:
-          $ref: "#/components/schemas/Provider"
-        credentials:
-          $ref: "#/components/schemas/CredentialsFieldsFull"
     Provider:
       type: string
       enum:
         - git-local
         - git-github
-    ValidationSecretsApplication:
-      required:
-        - provider
-      properties:
-        provider:
-          $ref: "#/components/schemas/Provider"
-        credentials:
-          $ref: "#/components/schemas/CredentialsFieldsExternal"
     CredentialsFieldsFull:
       properties:
         internal:
@@ -197,6 +196,60 @@ components:
       properties:
         token:
           type: string
+    ContentRetrievalApplication:
+      required:
+        - provider
+        - credentials
+      properties:
+        provider:
+          $ref: "#/components/schemas/Provider"
+        credentials:
+          $ref: "#/components/schemas/CredentialsFieldsFull"
+    ContentRetrievalResult:
+      required:
+        - locations
+      properties:
+        locations:
+          type: array
+          items:
+            type: string
+    ContentApplication:
+      required:
+        - locations
+        - provider
+        - credentials
+      properties:
+        locations:
+          type: array
+          items:
+            type: string
+        provider:
+          $ref: "#/components/schemas/Provider"
+        credentials:
+          $ref: "#/components/schemas/CredentialsFieldsFull"
+    ContentStateApplication:
+      required:
+        - provider
+        - credentials
+      properties:
+        provider:
+          $ref: "#/components/schemas/Provider"
+        credentials:
+          $ref: "#/components/schemas/CredentialsFieldsFull"
+    ContentStateApplicationResult:
+      required:
+        - hash
+      properties:
+        hash:
+          type: string
+    ValidationSecretsApplication:
+      required:
+        - provider
+      properties:
+        provider:
+          $ref: "#/components/schemas/Provider"
+        credentials:
+          $ref: "#/components/schemas/CredentialsFieldsExternal"
     ValidationSecretsApplicationResult:
       required:
         - valid

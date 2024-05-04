@@ -1,17 +1,24 @@
 package com.repoachiever.service.cluster;
 
+import com.repoachiever.converter.ClusterContextToJsonConverter;
 import com.repoachiever.dto.CommandExecutorOutputDto;
-import com.repoachiever.entity.PropertiesEntity;
-import com.repoachiever.exception.ClusterDeploymentFailedException;
+import com.repoachiever.entity.common.ClusterContextEntity;
+import com.repoachiever.entity.common.ConfigEntity;
+import com.repoachiever.entity.common.PropertiesEntity;
+import com.repoachiever.exception.ClusterDeploymentFailureException;
+import com.repoachiever.exception.ClusterDestructionFailureException;
 import com.repoachiever.exception.CommandExecutorException;
-import com.repoachiever.exception.DockerIsNotAvailableException;
-import com.repoachiever.service.cluster.common.ClusterConfigurationHelper;
-import com.repoachiever.service.command.cluster.DeployCommandService;
+import com.repoachiever.service.command.cluster.deploy.DeployCommandService;
+import com.repoachiever.service.command.cluster.destroy.DestroyCommandService;
+import com.repoachiever.service.config.ConfigService;
 import com.repoachiever.service.executor.CommandExecutorService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Service used for cluster deployment management, including distribution process.
@@ -24,24 +31,51 @@ public class ClusterService {
     @Inject
     CommandExecutorService commandExecutorService;
 
-    // TODO: implement automatic destruction of deployed clusters on the end of API Server execution.
     /**
-     * Retrieves amount of allocated workers.
-     * @return
+     * Perform segregation of the given content locations according to the given segregation limitations.
+     *
+     * @param locations given content locations.
+     * @param separator given content location segregation separator.
+     * @return segregated content locations.
      */
-    public Integer retrieveWorkerAmount() {
-        return 0;
+    public List<List<String>> performContentLocationsSegregation(List<String> locations, Integer separator) {
+        List<List<String>> result = new ArrayList<>();
+
+        List<String> temp = new ArrayList<>();
+
+        Integer counter = 0;
+
+        for (Integer i = 0; i < locations.size(); i++) {
+            temp.add(locations.get(0));
+
+            if (counter > separator) {
+                result.add(new ArrayList<>(temp));
+
+                temp.clear();
+            } else {
+                counter++;
+            }
+        }
+
+        if (!temp.isEmpty()) {
+            result.add(new ArrayList<>(temp));
+        }
+
+        return result;
     }
 
     /**
-     * Creates new RepoAchiever Cluster instance.
+     * Performs deployment of RepoAchiever Cluster allocation.
      *
-     * @throws ClusterDeploymentFailedException if deployment operation failed.
+     * @param clusterContext given RepoAchiever Cluster context.
+     * @throws ClusterDeploymentFailureException if deployment operation failed.
      */
-    public void createInstance() throws ClusterDeploymentFailedException {
+    public void deploy(String clusterContext) throws ClusterDeploymentFailureException {
         DeployCommandService deployCommandService =
                 new DeployCommandService(
-                        properties.getBinDirectory(), properties.getBinClusterName());
+                        clusterContext,
+                        properties.getBinDirectory(),
+                        properties.getBinClusterLocation());
 
         CommandExecutorOutputDto deployCommandOutput;
 
@@ -49,13 +83,42 @@ public class ClusterService {
             deployCommandOutput =
                     commandExecutorService.executeCommand(deployCommandService);
         } catch (CommandExecutorException e) {
-            throw new ClusterDeploymentFailedException(e.getMessage());
+            throw new ClusterDeploymentFailureException(e.getMessage());
         }
 
         String deployCommandErrorOutput = deployCommandOutput.getErrorOutput();
 
+        if (Objects.nonNull(deployCommandErrorOutput) && !deployCommandErrorOutput.isEmpty()) {
+            throw new ClusterDeploymentFailureException();
+        }
+
         System.out.println(deployCommandErrorOutput);
         System.out.println(deployCommandOutput.getNormalOutput());
+    }
+
+    /**
+     * Performs destruction of RepoAchiever Cluster allocation.
+     *
+     * @param pid given RepoAchiever Cluster allocation process id.
+     * @throws ClusterDestructionFailureException if destruction operation failed.
+     */
+    public void destroy(Integer pid) throws ClusterDestructionFailureException {
+        DestroyCommandService destroyCommandService = new DestroyCommandService(pid);
+
+        CommandExecutorOutputDto destroyCommandOutput;
+
+        try {
+            destroyCommandOutput =
+                    commandExecutorService.executeCommand(destroyCommandService);
+        } catch (CommandExecutorException e) {
+            throw new ClusterDestructionFailureException(e.getMessage());
+        }
+
+        String destroyCommandErrorOutput = destroyCommandOutput.getErrorOutput();
+
+        if (Objects.nonNull(destroyCommandErrorOutput) && !destroyCommandErrorOutput.isEmpty()) {
+            throw new ClusterDestructionFailureException();
+        }
     }
 }
 

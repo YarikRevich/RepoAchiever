@@ -1,6 +1,6 @@
 package com.repoachiever.service.integration.http;
 
-import com.repoachiever.entity.ConfigEntity;
+import com.repoachiever.entity.common.ConfigEntity;
 import com.repoachiever.service.config.ConfigService;
 import io.quarkus.vertx.http.HttpServerOptionsCustomizer;
 import io.vertx.core.http.HttpServerOptions;

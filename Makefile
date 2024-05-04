@@ -29,23 +29,17 @@ lint: ## Run Apache Spotless linter
 
 .PHONY: create-local-client
 create-local-client: ## Create ResourceTracker local directory for client
-ifeq (,$(wildcard $(HOME)/.repoachiever))
 	@mkdir -p $(HOME)/.repoachiever/config
-endif
 
 .PHONY: create-local-api-server
 create-local-api-server: ## Create ResourceTracker local directory for API Server
-ifeq (,$(wildcard $(HOME)/.repoachiever))
 	@mkdir -p $(HOME)/.repoachiever/config
 	@mkdir -p $(HOME)/.repoachiever/diagnostics/prometheus/internal
-	@mkdir $(HOME)/.repoachiever/diagnostics/prometheus/config
+	@mkdir -p $(HOME)/.repoachiever/diagnostics/prometheus/config
 	@mkdir -p $(HOME)/.repoachiever/diagnostics/grafana/internal
-	@mkdir $(HOME)/.repoachiever/diagnostics/grafana/config
-	@mkdir $(HOME)/.repoachiever/workspace
-endif
-ifeq (,$(wildcard $(HOME)/.repoachiever/workspace))
+	@mkdir -p $(HOME)/.repoachiever/diagnostics/grafana/config
 	@mkdir -p $(HOME)/.repoachiever/workspace
-endif
+	@mkdir -p $(HOME)/.repoachiever/internal
 
 .PHONY: clone-client-config
 clone-client-config: ## Clone configuration files to local directory

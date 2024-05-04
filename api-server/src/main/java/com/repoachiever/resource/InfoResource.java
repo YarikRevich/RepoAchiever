@@ -1,7 +1,7 @@
 package com.repoachiever.resource;
 
 import com.repoachiever.api.InfoResourceApi;
-import com.repoachiever.entity.PropertiesEntity;
+import com.repoachiever.entity.common.PropertiesEntity;
 import com.repoachiever.model.ClusterInfoUnit;
 import com.repoachiever.model.VersionExternalApiInfoResult;
 import com.repoachiever.model.VersionInfoResult;
@@ -21,7 +21,7 @@ public class InfoResource implements InfoResourceApi {
     /**
      * Implementation for declared in OpenAPI configuration v1InfoVersionGet method.
      *
-     * @return Version information result.
+     * @return version information result.
      */
     @Override
     public VersionInfoResult v1InfoVersionGet() {
@@ -33,7 +33,7 @@ public class InfoResource implements InfoResourceApi {
     /**
      * Implementation for declared in OpenAPI configuration v1InfoClusterGet method.
      *
-     * @return Cluster information result.
+     * @return cluster information result.
      */
     @Override
     public List<ClusterInfoUnit> v1InfoClusterGet() {
@@ -45,7 +45,7 @@ public class InfoResource implements InfoResourceApi {
     /**
      * Implementation for declared in OpenAPI configuration v1InfoTelemetryGet method.
      *
-     * @return Telemetry information result.
+     * @return telemetry information result.
      */
     @Override
     public String v1InfoTelemetryGet() {

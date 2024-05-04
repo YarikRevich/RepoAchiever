@@ -1,7 +1,7 @@
 package com.repoachiever.service.integration.diagnostics;
 
 import com.repoachiever.dto.CommandExecutorOutputDto;
-import com.repoachiever.entity.PropertiesEntity;
+import com.repoachiever.entity.common.PropertiesEntity;
 import com.repoachiever.exception.CommandExecutorException;
 import com.repoachiever.exception.DockerIsNotAvailableException;
 import com.repoachiever.exception.DockerNetworkCreateFailureException;

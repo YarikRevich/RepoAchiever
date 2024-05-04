@@ -1,5 +1,5 @@
-# Represents section used to declare affected resources.
-filter:
+# Represents section used to declare desired content.
+content:
   # Represents locations of VCS provider repositories, which are intended to be used for requested operations.
   # If all the repositories in previously defined scoped are needed to be affected, then place "*" as the value.
   locations: ["*"]

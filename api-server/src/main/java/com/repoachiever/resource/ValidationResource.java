@@ -1,7 +1,6 @@
 package com.repoachiever.resource;
 
 import com.repoachiever.api.ValidationResourceApi;
-import com.repoachiever.entity.PropertiesEntity;
 import com.repoachiever.exception.CredentialsFieldIsNotValidException;
 import com.repoachiever.model.ValidationSecretsApplication;
 import com.repoachiever.model.ValidationSecretsApplicationResult;
@@ -10,8 +9,6 @@ import com.repoachiever.service.vendor.VendorFacade;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.SneakyThrows;
-
-import java.util.Objects;
 
 /**
  * Contains implementation of ValidationResource.
@@ -25,7 +22,7 @@ public class ValidationResource implements ValidationResourceApi {
      * Implementation for declared in OpenAPI configuration v1SecretsAcquirePost method.
      *
      * @param validationSecretsApplication application used for secrets validation.
-     * @return Secrets validation result.
+     * @return secrets validation result.
      */
     @Override
     @SneakyThrows

@@ -1,7 +1,7 @@
 package com.repoachiever.resource;
 
 import com.repoachiever.api.HealthResourceApi;
-import com.repoachiever.entity.PropertiesEntity;
+import com.repoachiever.entity.common.PropertiesEntity;
 import com.repoachiever.model.HealthCheckResult;
 import com.repoachiever.model.ReadinessCheckApplication;
 import com.repoachiever.model.ReadinessCheckResult;
@@ -11,7 +11,6 @@ import com.repoachiever.service.workspace.facade.WorkspaceFacade;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
-import lombok.SneakyThrows;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 /**
@@ -35,7 +34,7 @@ public class HealthResource implements HealthResourceApi {
     /**
      * Implementation for declared in OpenAPI configuration v1HealthGet method.
      *
-     * @return Health check result.
+     * @return health check result.
      */
     @Override
     public HealthCheckResult v1HealthGet() {
@@ -50,7 +49,7 @@ public class HealthResource implements HealthResourceApi {
      * Implementation for declared in OpenAPI configuration v1ReadinessPost method.
      *
      * @param readinessCheckApplication application used to perform application readiness check.
-     * @return Readiness check result.
+     * @return readiness check result.
      */
     @Override
     public ReadinessCheckResult v1ReadinessPost(ReadinessCheckApplication readinessCheckApplication) {

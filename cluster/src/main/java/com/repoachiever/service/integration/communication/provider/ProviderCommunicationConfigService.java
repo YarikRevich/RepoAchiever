@@ -1,8 +1,13 @@
 package com.repoachiever.service.integration.communication.provider;
 
 import com.repoachiever.entity.PropertiesEntity;
+import com.repoachiever.exception.CommunicationConfigurationFailureException;
+import com.repoachiever.resource.communication.ClusterCommunicationResource;
 import com.repoachiever.service.config.ConfigService;
+import com.repoachiever.service.integration.communication.common.ProviderCommunicationConfigurationHelper;
 import jakarta.annotation.PostConstruct;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +20,8 @@ import java.rmi.registry.Registry;
  */
 @Component
 public class ProviderCommunicationConfigService {
+    private static final Logger logger = LogManager.getLogger(ProviderCommunicationConfigService.class);
+
     @Autowired
     private ConfigService configService;
 
@@ -36,15 +43,16 @@ public class ProviderCommunicationConfigService {
             return;
         }
 
-        // TODO: add communication provider activity to global API SERVER health check
+        System.out.println(configService.getConfig().getCommunication().getPort());
+        System.out.println(configService.getConfig().getName());
 
         Thread.ofPlatform().start(() -> {
             try {
                 registry.rebind(
                         ProviderCommunicationConfigurationHelper.getBindName(
                                 configService.getConfig().getCommunication().getPort(),
-                                properties.getCommunicationProviderName()),
-                        new CommunicationProviderResource(properties));
+                                configService.getConfig().getName()),
+                        new ClusterCommunicationResource(properties));
             } catch (RemoteException e) {
                 logger.fatal(e.getMessage());
             }

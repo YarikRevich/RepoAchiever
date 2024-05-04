@@ -12,6 +12,8 @@
   </parent>
 
   <properties>
+    <java.rmi.server.useCodebaseOnly>true</java.rmi.server.useCodebaseOnly>
+    <java.security.manager>allow</java.security.manager>
     <start-class>
       com.repoachiever.Cluster
     </start-class>
@@ -45,6 +47,14 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-log4j2</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.springframework.integration</groupId>
+      <artifactId>spring-integration-rmi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-remoting</artifactId>
+    </dependency>
 
     <!-- THIRD PARTY -->
     <dependency>
@@ -63,7 +73,6 @@
       <groupId>jakarta.ws.rs</groupId>
       <artifactId>jakarta.ws.rs-api</artifactId>
     </dependency>
-
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
@@ -83,6 +92,10 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
     </dependency>
 
     <!-- LOGGING -->

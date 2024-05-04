@@ -76,6 +76,16 @@
         <artifactId>spring-boot-starter-log4j2</artifactId>
         <version>3.2.5</version>
       </dependency>
+      <dependency>
+        <groupId>org.springframework.integration</groupId>
+        <artifactId>spring-integration-rmi</artifactId>
+        <version>5.5.20</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-remoting</artifactId>
+        <version>2.0.8</version>
+      </dependency>
 
       <!-- OPENAPI -->
       <dependency>
@@ -152,6 +162,26 @@
         <groupId>io.quarkus</groupId>
         <artifactId>quarkus-hibernate-validator</artifactId>
         <version>3.4.3</version>
+      </dependency>
+      <dependency>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-liquibase</artifactId>
+        <version>3.4.3</version>
+      </dependency>
+      <dependency>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-hibernate-orm-panache</artifactId>
+        <version>3.4.3</version>
+      </dependency>
+      <dependency>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-agroal</artifactId>
+        <version>3.4.3</version>
+      </dependency>
+      <dependency>
+        <groupId>io.quarkiverse.jdbc</groupId>
+        <artifactId>quarkus-jdbc-sqlite</artifactId>
+        <version>3.0.7</version>
       </dependency>
 
       <!-- PICOCLI -->
@@ -283,6 +313,11 @@
         <groupId>io.github.kostaskougios</groupId>
         <artifactId>cloning</artifactId>
         <version>1.10.3</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>3.14.0</version>
       </dependency>
 
       <!-- SPOTLESS -->

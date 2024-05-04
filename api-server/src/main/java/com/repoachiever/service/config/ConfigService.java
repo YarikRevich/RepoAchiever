@@ -6,8 +6,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.repoachiever.entity.ConfigEntity;
-import com.repoachiever.entity.PropertiesEntity;
+import com.repoachiever.entity.common.ConfigEntity;
+import com.repoachiever.entity.common.PropertiesEntity;
 import com.repoachiever.exception.ConfigValidationException;
 import io.quarkus.runtime.Startup;
 import jakarta.annotation.PostConstruct;
@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import lombok.Getter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -38,18 +39,19 @@ public class ConfigService {
     @Inject
     PropertiesEntity properties;
 
-    private ConfigEntity parsedConfigFile;
+    @Getter
+    private ConfigEntity config;
 
     /**
      * Reads configuration from the opened configuration file using mapping with a configuration entity.
      */
     @PostConstruct
     private void configure() {
-        InputStream configFile = null;
+        InputStream file = null;
 
         try {
             try {
-                configFile = new FileInputStream(
+                file = new FileInputStream(
                         Paths.get(properties.getConfigDirectory(), properties.getConfigName()).toString());
             } catch (FileNotFoundException e) {
                 logger.fatal(e.getMessage());
@@ -66,12 +68,12 @@ public class ConfigService {
             });
 
             try {
-                List<ConfigEntity> values = reader.<ConfigEntity>readValues(configFile).readAll();
+                List<ConfigEntity> values = reader.<ConfigEntity>readValues(file).readAll();
                 if (values.isEmpty()) {
                     return;
                 }
 
-                parsedConfigFile = values.getFirst();
+                config = values.getFirst();
             } catch (IOException e) {
                 logger.fatal(e.getMessage());
                 return;
@@ -81,7 +83,7 @@ public class ConfigService {
                 Validator validator = validatorFactory.getValidator();
 
                 Set<ConstraintViolation<ConfigEntity>> validationResult =
-                        validator.validate(parsedConfigFile);
+                        validator.validate(config);
 
                 if (!validationResult.isEmpty()) {
                     logger.fatal(new ConfigValidationException(
@@ -92,19 +94,10 @@ public class ConfigService {
             }
         } finally {
             try {
-                configFile.close();
+                file.close();
             } catch (IOException e) {
                 logger.fatal(e.getMessage());
             }
         }
-    }
-
-    /**
-     * Retrieves parsed configuration file entity.
-     *
-     * @return retrieved parsed configuration file entity.
-     */
-    public ConfigEntity getConfig() {
-        return parsedConfigFile;
     }
 }

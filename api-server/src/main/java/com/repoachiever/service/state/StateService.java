@@ -1,0 +1,64 @@
+package com.repoachiever.service.state;
+
+import com.repoachiever.dto.ClusterAllocationDto;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Service used to operate as a collection of application state properties.
+ */
+public class StateService {
+    /**
+     * Represents exit state used to indicate requested application shutdown.
+     */
+    @Getter
+    private final static List<ClusterAllocationDto> clusterAllocations = new ArrayList<>();
+
+    /**
+     * Adds new RepoAchiever Cluster allocation.
+     *
+     * @param allocation given RepoAchiever Cluster allocation.
+     */
+    public static void addClusterAllocation(ClusterAllocationDto allocation) {
+        clusterAllocations.add(allocation);
+    }
+
+    /**
+     * Checks if RepoAchiever Cluster allocations with the given name exists.
+     *
+     * @param name given RepoAchiever Cluster allocation.
+     * @return result of the check.
+     */
+    public static Boolean isClusterAllocationPresentByName(String name) {
+        return clusterAllocations
+                .stream()
+                .anyMatch(element -> Objects.equals(element.getName(), name));
+    }
+
+    /**
+     * Retrieves RepoAchiever Cluster allocation with the given name.
+     *
+     * @param name given RepoAchiever Cluster allocation name.
+     * @return retrieved RepoAchiever Cluster allocation.
+     */
+    public static ClusterAllocationDto getClusterAllocationByName(String name) {
+        return clusterAllocations
+                .stream()
+                .filter(element -> Objects.equals(element.getName(), name))
+                .findFirst()
+                .get();
+    }
+
+    /**
+     * Removes RepoAchiever Cluster allocation with the given name.
+     *
+     * @param name given RepoAchiever Cluster allocation name.
+     */
+    public static void removeClusterAllocationByName(String name) {
+        clusterAllocations.removeIf(element -> Objects.equals(element.getName(), name));
+    }
+}

@@ -1,6 +1,6 @@
 package com.repoachiever.service.healthcheck.readiness;
 
-import com.repoachiever.entity.PropertiesEntity;
+import com.repoachiever.entity.common.PropertiesEntity;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.eclipse.microprofile.health.HealthCheckResponseBuilder;

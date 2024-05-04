@@ -1,7 +1,6 @@
 package com.repoachiever.service.workspace.facade;
 
-import com.repoachiever.entity.PropertiesEntity;
-import com.repoachiever.exception.*;
+import com.repoachiever.entity.common.PropertiesEntity;
 import com.repoachiever.model.CredentialsFieldsFull;
 import com.repoachiever.model.Provider;
 import com.repoachiever.service.workspace.WorkspaceService;
@@ -9,7 +8,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import java.io.InputStream;
-import java.util.Objects;
 
 /**
  * Provides high-level access to workspace operations.
