@@ -68,9 +68,10 @@ public class ClusterService {
      * Performs deployment of RepoAchiever Cluster allocation.
      *
      * @param clusterContext given RepoAchiever Cluster context.
+     * @return process identificator of the deployed RepoAchiever Cluster instance.
      * @throws ClusterDeploymentFailureException if deployment operation failed.
      */
-    public void deploy(String clusterContext) throws ClusterDeploymentFailureException {
+    public Integer deploy(String clusterContext) throws ClusterDeploymentFailureException {
         DeployCommandService deployCommandService =
                 new DeployCommandService(
                         clusterContext,
@@ -92,8 +93,10 @@ public class ClusterService {
             throw new ClusterDeploymentFailureException();
         }
 
-        System.out.println(deployCommandErrorOutput);
-        System.out.println(deployCommandOutput.getNormalOutput());
+        return Integer.parseInt(
+                deployCommandOutput.
+                        getNormalOutput().
+                        replaceAll("\n", ""));
     }
 
     /**

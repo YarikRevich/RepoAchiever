@@ -2,6 +2,7 @@ package com.repoachiever.service.cluster.resource;
 
 import com.repoachiever.exception.ClusterOperationFailureException;
 import com.repoachiever.exception.CommunicationConfigurationFailureException;
+import com.repoachiever.service.communication.common.CommunicationProviderConfigurationHelper;
 import com.repoachiever.service.config.ConfigService;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -47,16 +48,12 @@ public class ClusterClientResource {
         IClusterCommunicationService allocation;
 
         try {
-            allocation = (IClusterCommunicationService) registry.lookup(name);
+            allocation = (IClusterCommunicationService) registry.lookup(
+                    CommunicationProviderConfigurationHelper.getBindName(
+                            configService.getConfig().getCommunication().getPort(),
+                            name));
         } catch (RemoteException | NotBoundException e) {
             throw new ClusterOperationFailureException(e.getMessage());
-        }
-
-        System.out.println(name);
-        try {
-            System.out.println(allocation.retrieveWorkerAmount());
-        } catch (RemoteException e) {
-            throw new RuntimeException(e);
         }
 
         try {

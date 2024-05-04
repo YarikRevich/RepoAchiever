@@ -21,7 +21,7 @@ public class DeployCommandService extends SProcess {
         this.command = switch (osType) {
             case WINDOWS -> null;
             case UNIX, MAC, ANY -> String.format(
-                    "%s java -jar %s &",
+                    "%s java -jar %s & echo $!",
                     ClusterConfigurationHelper.getEnvironmentVariables(clusterContext),
                     Path.of(binDirectory, binClusterLocation));
         };

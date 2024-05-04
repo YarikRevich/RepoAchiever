@@ -3,7 +3,6 @@ package com.repoachiever.service.cluster.facade;
 import com.repoachiever.converter.ClusterContextToJsonConverter;
 import com.repoachiever.dto.ClusterAllocationDto;
 import com.repoachiever.entity.common.ClusterContextEntity;
-import com.repoachiever.entity.common.ConfigEntity;
 import com.repoachiever.entity.common.PropertiesEntity;
 import com.repoachiever.exception.*;
 import com.repoachiever.model.ContentApplication;
@@ -15,8 +14,10 @@ import com.repoachiever.service.state.StateService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import java.util.ArrayList;
 import java.util.List;
 
+/** Provides high-level access to RepoAchiever Cluster related operations. */
 @ApplicationScoped
 public class ClusterFacade {
     @Inject
@@ -38,27 +39,22 @@ public class ClusterFacade {
      * @throws ClusterApplicationFailureException if RepoAchiever Cluster application failed.
      */
     public void apply(ContentApplication contentApplication) throws ClusterApplicationFailureException {
+        List<String> removable = new ArrayList<>();
+
         for (ClusterAllocationDto clusterAllocation : StateService.getClusterAllocations()) {
             try {
-                if (clusterClientResource.retrieveHealthCheck(clusterAllocation.getName())) {
-                    try {
-                        clusterService.destroy(clusterAllocation.getPid());
-                    } catch (ClusterDestructionFailureException e) {
-                        throw new ClusterApplicationFailureException(e.getMessage());
-                    }
-                }
-            } catch (ClusterOperationFailureException ignored) {
+                clusterService.destroy(clusterAllocation.getPid());
+            } catch (ClusterDestructionFailureException ignored) {
             }
 
-            StateService.removeClusterAllocationByName(clusterAllocation.getName());
+            removable.add(clusterAllocation.getName());
         }
+
+        StateService.removeClusterAllocationByNames(removable);
 
         List<List<String>> segregation = clusterService.performContentLocationsSegregation(
                 contentApplication.getLocations(),
                 configService.getConfig().getResource().getCluster().getMaxWorkers());
-
-        System.out.println(contentApplication.getLocations());
-        System.out.println(configService.getConfig().getResource().getCluster().getMaxWorkers());
 
         for (List<String> locations : segregation) {
             String name = ClusterConfigurationHelper.getName(properties.getCommunicationClusterBase());
@@ -76,8 +72,11 @@ public class ClusterFacade {
                                             configService.getConfig().getResource().getCluster().getMaxWorkers()),
                                     ClusterContextEntity.Resource.Worker.of(
                                             configService.getConfig().getResource().getWorker().getFrequency())));
+
+            Integer pid;
+
             try {
-                clusterService.deploy(
+                pid = clusterService.deploy(
                         ClusterContextToJsonConverter.convert(clusterContext));
             } catch (ClusterDeploymentFailureException e) {
                 throw new ClusterApplicationFailureException(e.getMessage());
@@ -89,7 +88,6 @@ public class ClusterFacade {
                                 return true;
                             }
                         } catch (ClusterOperationFailureException e) {
-                            System.out.println(e.getMessage());
                             return false;
                         }
 
@@ -99,6 +97,9 @@ public class ClusterFacade {
                     properties.getCommunicationClusterStartupTimeout())) {
                 throw new ClusterApplicationFailureException(new ClusterApplicationTimeoutException().getMessage());
             }
+
+            StateService.addClusterAllocation(
+                    ClusterAllocationDto.of(name, pid));
         }
     }
 }

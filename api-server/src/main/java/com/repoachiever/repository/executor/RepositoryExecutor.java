@@ -94,6 +94,12 @@ public class RepositoryExecutor {
             throw new QueryExecutionFailureException(e.getMessage());
         }
 
+        try {
+            statement.close();
+        } catch (SQLException e) {
+            throw new QueryExecutionFailureException(e.getMessage());
+        }
+
         return resultSet;
     }
 

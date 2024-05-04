@@ -54,11 +54,12 @@ public class StateService {
     }
 
     /**
-     * Removes RepoAchiever Cluster allocation with the given name.
+     * Removes RepoAchiever Cluster allocations with the given names.
      *
-     * @param name given RepoAchiever Cluster allocation name.
+     * @param names given RepoAchiever Cluster allocation names.
      */
-    public static void removeClusterAllocationByName(String name) {
-        clusterAllocations.removeIf(element -> Objects.equals(element.getName(), name));
+    public static void removeClusterAllocationByNames(List<String> names) {
+        names.forEach(
+                element1 -> clusterAllocations.removeIf(element2 -> Objects.equals(element2.getName(), element1)));
     }
 }
