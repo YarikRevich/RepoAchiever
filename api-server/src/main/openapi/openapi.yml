@@ -165,8 +165,7 @@ components:
     CredentialsFieldsInternal:
       properties:
         id:
-          type: string
-          format: uuid
+          type: integer
     CredentialsFieldsExternal:
       anyOf:
         - $ref: "#/components/schemas/GitGitHubCredentials"

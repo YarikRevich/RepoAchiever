@@ -101,8 +101,12 @@ public class RepositoryFacade {
             throw new RepositoryApplicationFailureException(e.getMessage());
         }
 
-        contentApplication.getLocations().forEach(element -> {
-            contentRepository.insert(element, provider.getId(), secret.getId());
-        });
+        for (String location : contentApplication.getLocations()) {
+            try {
+                contentRepository.insert(location, provider.getId(), secret.getId());
+            } catch (RepositoryOperationFailureException e) {
+                throw new RepositoryApplicationFailureException(e.getMessage());
+            }
+        }
     }
 }

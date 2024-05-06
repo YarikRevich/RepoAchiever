@@ -3,6 +3,7 @@ package com.repoachiever.resource.communication;
 import com.repoachiever.entity.common.PropertiesEntity;
 import com.repoachiever.service.communication.apiserver.IApiServerCommunicationService;
 
+import java.io.InputStream;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
@@ -14,6 +15,22 @@ public class ApiServerCommunicationResource extends UnicastRemoteObject implemen
 
     public ApiServerCommunicationResource(PropertiesEntity properties) throws RemoteException {
         this.properties = properties;
+    }
+
+    /**
+     * @see IApiServerCommunicationService
+     */
+    @Override
+    public void performRawContentUpload(String workspaceUnitKey, InputStream content) throws RemoteException {
+
+    }
+
+    /**
+     * @see IApiServerCommunicationService
+     */
+    @Override
+    public void performAdditionalContentUpload(String workspaceUnitKey, String content) throws RemoteException {
+
     }
 
     /**

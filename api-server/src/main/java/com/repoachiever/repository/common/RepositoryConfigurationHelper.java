@@ -20,7 +20,7 @@ public class RepositoryConfigurationHelper {
             Provider provider, CredentialsFieldsExternal credentialsFieldExternal) {
         return switch (provider) {
             case LOCAL -> Optional.empty();
-            case GITHUB -> Objects.nonNull(credentialsFieldExternal.getToken());
+            case GITHUB -> Optional.ofNullable(credentialsFieldExternal.getToken());
         };
     }
 }

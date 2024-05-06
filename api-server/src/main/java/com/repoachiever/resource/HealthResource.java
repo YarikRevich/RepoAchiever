@@ -10,8 +10,11 @@ import com.repoachiever.service.workspace.WorkspaceService;
 import com.repoachiever.service.workspace.facade.WorkspaceFacade;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.WebApplicationException;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
+
+import java.util.Objects;
 
 /**
  * Contains implementation of HealthResource.
@@ -53,6 +56,10 @@ public class HealthResource implements HealthResourceApi {
      */
     @Override
     public ReadinessCheckResult v1ReadinessPost(ReadinessCheckApplication readinessCheckApplication) {
+        if (Objects.isNull(readinessCheckApplication)) {
+            throw new BadRequestException();
+        }
+
         return null;
     }
 }

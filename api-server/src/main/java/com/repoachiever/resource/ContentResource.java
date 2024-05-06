@@ -12,9 +12,12 @@ import com.repoachiever.service.cluster.facade.ClusterFacade;
 import com.repoachiever.service.vendor.VendorFacade;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.BadRequestException;
 import lombok.SneakyThrows;
 
 import java.io.File;
+import java.util.Objects;
 
 /** Contains implementation of ContentResource. */
 @ApplicationScoped
@@ -36,6 +39,10 @@ public class ContentResource implements ContentResourceApi {
      */
     @Override
     public ContentRetrievalResult v1ContentPost(ContentRetrievalApplication contentRetrievalApplication) {
+        if (Objects.isNull(contentRetrievalApplication)) {
+            throw new BadRequestException();
+        }
+
         return ContentRetrievalResult.of(
                 repositoryFacade.retrieveLocations(contentRetrievalApplication));
     }
@@ -47,7 +54,12 @@ public class ContentResource implements ContentResourceApi {
      */
     @Override
     @SneakyThrows
+    @Transactional
     public void v1ContentApplyPost(ContentApplication contentApplication) {
+        if (Objects.isNull(contentApplication)) {
+            throw new BadRequestException();
+        }
+
         if (!ResourceConfigurationHelper.isExternalCredentialsFieldValid(
                 contentApplication.getProvider(), contentApplication.getCredentials().getExternal())) {
             throw new CredentialsFieldIsNotValidException();
@@ -71,6 +83,7 @@ public class ContentResource implements ContentResourceApi {
      */
     @Override
     public File v1ContentDownloadGet(String location) {
+
         return null;
     }
 }

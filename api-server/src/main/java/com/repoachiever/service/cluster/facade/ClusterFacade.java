@@ -1,6 +1,8 @@
 package com.repoachiever.service.cluster.facade;
 
 import com.repoachiever.converter.ClusterContextToJsonConverter;
+import com.repoachiever.converter.ContentCredentialsToClusterContextCredentialsConverter;
+import com.repoachiever.converter.ContentProviderToClusterContextProviderConverter;
 import com.repoachiever.dto.ClusterAllocationDto;
 import com.repoachiever.entity.common.ClusterContextEntity;
 import com.repoachiever.entity.common.PropertiesEntity;
@@ -11,17 +13,23 @@ import com.repoachiever.service.cluster.common.ClusterConfigurationHelper;
 import com.repoachiever.service.cluster.resource.ClusterClientResource;
 import com.repoachiever.service.config.ConfigService;
 import com.repoachiever.service.state.StateService;
+import com.repoachiever.service.workspace.facade.WorkspaceFacade;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/** Provides high-level access to RepoAchiever Cluster related operations. */
+/**
+ * Provides high-level access to RepoAchiever Cluster related operations.
+ */
 @ApplicationScoped
 public class ClusterFacade {
     @Inject
     PropertiesEntity properties;
+
+    @Inject
+    WorkspaceFacade workspaceFacade;
 
     @Inject
     ConfigService configService;
@@ -39,6 +47,13 @@ public class ClusterFacade {
      * @throws ClusterApplicationFailureException if RepoAchiever Cluster application failed.
      */
     public void apply(ContentApplication contentApplication) throws ClusterApplicationFailureException {
+        // TODO: place all clusters for the given user to suspended state.
+        // TODO: try to create new ones for the given user.
+
+        String workspaceUnitKey =
+                workspaceFacade.createUnitKey(
+                        contentApplication.getProvider(), contentApplication.getCredentials());
+
         List<String> removable = new ArrayList<>();
 
         for (ClusterAllocationDto clusterAllocation : StateService.getClusterAllocations()) {
@@ -61,8 +76,14 @@ public class ClusterFacade {
 
             ClusterContextEntity contextRaw =
                     ClusterContextEntity.of(
-                            name,
-                            locations,
+                            ClusterContextEntity.Metadata.of(name),
+                            ClusterContextEntity.Filter.of(locations),
+                            ClusterContextEntity.Service.of(
+                                    ContentProviderToClusterContextProviderConverter.convert(
+                                            contentApplication.getProvider()),
+                                    ContentCredentialsToClusterContextCredentialsConverter.convert(
+                                            contentApplication.getProvider(),
+                                            contentApplication.getCredentials().getExternal())),
                             ClusterContextEntity.Communication.of(
                                     configService.getConfig().getCommunication().getPort()),
                             ClusterContextEntity.Content.of(
@@ -100,12 +121,11 @@ public class ClusterFacade {
             }
 
             StateService.addClusterAllocation(
-                    ClusterAllocationDto.of(name, pid, context));
+                    ClusterAllocationDto.of(name, pid, context, workspaceUnitKey));
         }
     }
 
     // TODO: halt cluster during instance update operations, to exclude concurrency related issues.
-
 
 
     /**
@@ -128,13 +148,13 @@ public class ClusterFacade {
             try {
                 pid = clusterService.deploy(clusterAllocation.getContext());
             } catch (ClusterDeploymentFailureException e) {
-                throw new ClusterApplicationFailureException(e.getMessage());
+                throw new ClusterUnhealthyReapplicationFailureException(e.getMessage());
             }
 
             removable.add(clusterAllocation.getName());
-
-            updates.add(ClusterAllocationDto.of(
-                    clusterAllocation.getName(), pid, clusterAllocation.getContext()));
+//
+//            updates.add(ClusterAllocationDto.of(
+//                    clusterAllocation.getName(), pid, clusterAllocation.getContext()));
         }
 
         StateService.removeClusterAllocationByNames(removable);

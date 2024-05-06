@@ -191,7 +191,7 @@ components:
     CredentialsFieldsFull:
       example:
         internal:
-          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          id: 0
         external: null
       properties:
         internal:
@@ -202,11 +202,10 @@ components:
       - internal
     CredentialsFieldsInternal:
       example:
-        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        id: 0
       properties:
         id:
-          format: uuid
-          type: string
+          type: integer
     CredentialsFieldsExternal:
       anyOf:
       - $ref: '#/components/schemas/GitGitHubCredentials'
@@ -221,7 +220,7 @@ components:
         provider: null
         credentials:
           internal:
-            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            id: 0
           external: null
       properties:
         provider:
@@ -248,7 +247,7 @@ components:
         provider: null
         credentials:
           internal:
-            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            id: 0
           external: null
         locations:
         - locations
@@ -271,7 +270,7 @@ components:
         provider: null
         credentials:
           internal:
-            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            id: 0
           external: null
       properties:
         provider:

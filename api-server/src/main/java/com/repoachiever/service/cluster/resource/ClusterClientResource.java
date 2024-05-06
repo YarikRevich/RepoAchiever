@@ -39,22 +39,65 @@ public class ClusterClientResource {
     }
 
     /**
-     * Retrieves health check status of the RepoAchiever Cluster with the given name.
+     * Retrieves remote RepoAchiever Cluster allocation with the given name.
      *
-     * @param name given name of RepoAchiever Cluster.
-     * @return result of the check.
+     * @param name given RepoAchiever Cluster allocation name.
+     * @return retrieved RepoAchiever Cluster allocation.
+     * @throws ClusterOperationFailureException if RepoAchiever Cluster operation fails.
      */
-    public Boolean retrieveHealthCheck(String name) throws ClusterOperationFailureException {
-        IClusterCommunicationService allocation;
-
+    private IClusterCommunicationService retrieveAllocation(String name) throws ClusterOperationFailureException {
         try {
-            allocation = (IClusterCommunicationService) registry.lookup(
+            return (IClusterCommunicationService) registry.lookup(
                     CommunicationProviderConfigurationHelper.getBindName(
                             configService.getConfig().getCommunication().getPort(),
                             name));
         } catch (RemoteException | NotBoundException e) {
             throw new ClusterOperationFailureException(e.getMessage());
         }
+    }
+
+    /**
+     * Performs RepoAchiever Cluster suspend operation. Has no effect if RepoAchiever Cluster was already suspended
+     * previously.
+     *
+     * @param name given name of RepoAchiever Cluster.
+     * @throws ClusterOperationFailureException if RepoAchiever Cluster operation fails.
+     */
+    public void performSuspend(String name) throws ClusterOperationFailureException {
+        IClusterCommunicationService allocation = retrieveAllocation(name);
+
+        try {
+            allocation.performSuspend();
+        } catch (RemoteException e) {
+            throw new ClusterOperationFailureException(e.getMessage());
+        }
+    }
+
+    /**
+     * Performs RepoAchiever Cluster serve operation. Has no effect if RepoAchiever Cluster was not suspended previously.
+     *
+     * @param name given name of RepoAchiever Cluster.
+     * @throws ClusterOperationFailureException if RepoAchiever Cluster operation fails.
+     */
+    public void performServe(String name) throws ClusterOperationFailureException {
+        IClusterCommunicationService allocation = retrieveAllocation(name);
+
+        try {
+            allocation.performServe();
+        } catch (RemoteException e) {
+            throw new ClusterOperationFailureException(e.getMessage());
+        }
+    }
+
+    /**
+     * Retrieves health check status of the RepoAchiever Cluster with the given name.
+     *
+     * @param name given name of RepoAchiever Cluster.
+     * @return result of the check.
+     * @throws ClusterOperationFailureException if RepoAchiever Cluster operation fails.
+     */
+    public Boolean retrieveHealthCheck(String name) throws ClusterOperationFailureException {
+        IClusterCommunicationService allocation = retrieveAllocation(name);
 
         try {
             return allocation.retrieveHealthCheck();
@@ -68,15 +111,10 @@ public class ClusterClientResource {
      *
      * @param name given name of RepoAchiever Cluster.
      * @return retrieved version of RepoAchiever Cluster.
+     * @throws ClusterOperationFailureException if RepoAchiever Cluster operation fails.
      */
     public String retrieveVersion(String name) throws ClusterOperationFailureException {
-        IClusterCommunicationService allocation;
-
-        try {
-            allocation = (IClusterCommunicationService) registry.lookup(name);
-        } catch (RemoteException | NotBoundException e) {
-            throw new ClusterOperationFailureException(e.getMessage());
-        }
+        IClusterCommunicationService allocation = retrieveAllocation(name);
 
         try {
             return allocation.retrieveVersion();
@@ -90,15 +128,10 @@ public class ClusterClientResource {
      *
      * @param name given name of RepoAchiever Cluster.
      * @return retrieved amount of RepoAchiever Worker owned by RepoAchiever Cluster allocation.
+     * @throws ClusterOperationFailureException if RepoAchiever Cluster operation fails.
      */
     public Integer retrieveWorkerAmount(String name) throws ClusterOperationFailureException {
-        IClusterCommunicationService allocation;
-
-        try {
-            allocation = (IClusterCommunicationService) registry.lookup(name);
-        } catch (RemoteException | NotBoundException e) {
-            throw new ClusterOperationFailureException(e.getMessage());
-        }
+        IClusterCommunicationService allocation = retrieveAllocation(name);
 
         try {
             return allocation.retrieveWorkerAmount();

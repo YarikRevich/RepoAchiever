@@ -23,15 +23,14 @@ public class WorkspaceFacade {
     /**
      * Creates unit key with the help of the given readiness check application.
      *
-     * @param id                given session identificator.
      * @param provider          given provider.
      * @param credentialsFields given credentials.
      * @return result of the readiness check for the given configuration.
      */
-    public String createUnitKey(String id, Provider provider, CredentialsFieldsFull credentialsFields) {
+    public String createUnitKey(Provider provider, CredentialsFieldsFull credentialsFields) {
         return switch (provider) {
-            case LOCAL -> workspaceService.createUnitKey(id);
-            case GITHUB -> workspaceService.createUnitKey(id, credentialsFields.getExternal().getToken());
+            case LOCAL -> workspaceService.createUnitKey(String.valueOf(credentialsFields.getInternal().getId()));
+            case GITHUB -> workspaceService.createUnitKey(String.valueOf(credentialsFields.getInternal().getId()), credentialsFields.getExternal().getToken());
         };
     }
 

@@ -1,6 +1,5 @@
 package com.repoachiever.model;
 
-import java.util.UUID;
 import java.io.Serializable;
 import jakarta.validation.constraints.*;
 import jakarta.validation.Valid;
@@ -14,26 +13,26 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 
 @JsonTypeName("CredentialsFieldsInternal")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", date = "2024-05-06T02:24:19.773818+02:00[Europe/Warsaw]")@lombok.Data @lombok.NoArgsConstructor @lombok.AllArgsConstructor(staticName = "of")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", date = "2024-05-06T14:15:31.318435+02:00[Europe/Warsaw]")@lombok.Data @lombok.NoArgsConstructor @lombok.AllArgsConstructor(staticName = "of")
 
 public class CredentialsFieldsInternal  implements Serializable {
-  private @Valid UUID id;
+  private @Valid Integer id;
 
   /**
    **/
-  public CredentialsFieldsInternal id(UUID id) {
+  public CredentialsFieldsInternal id(Integer id) {
     this.id = id;
     return this;
   }
 
   
   @JsonProperty("id")
-  public UUID getId() {
+  public Integer getId() {
     return id;
   }
 
   @JsonProperty("id")
-  public void setId(UUID id) {
+  public void setId(Integer id) {
     this.id = id;
   }
 

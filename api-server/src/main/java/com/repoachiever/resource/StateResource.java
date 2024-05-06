@@ -4,6 +4,9 @@ import com.repoachiever.api.StateResourceApi;
 import com.repoachiever.model.ContentStateApplication;
 import com.repoachiever.model.ContentStateApplicationResult;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.BadRequestException;
+
+import java.util.Objects;
 
 /** Contains implementation of StateResource. */
 @ApplicationScoped
@@ -16,6 +19,10 @@ public class StateResource implements StateResourceApi {
      */
     @Override
     public ContentStateApplicationResult v1StateContentPost(ContentStateApplication contentStateApplication) {
+        if (Objects.isNull(contentStateApplication)) {
+            throw new BadRequestException();
+        }
+
         return null;
     }
 }

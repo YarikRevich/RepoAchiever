@@ -7,11 +7,14 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Service used to operate as a collection of application state properties.
  */
 public class StateService {
+    private final static ReentrantLock clusterAllocationsMutex = new ReentrantLock();
+
     /**
      * Represents exit state used to indicate requested application shutdown.
      */
@@ -24,7 +27,11 @@ public class StateService {
      * @param allocation given RepoAchiever Cluster allocation.
      */
     public static void addClusterAllocation(ClusterAllocationDto allocation) {
+        clusterAllocationsMutex.lock();
+
         clusterAllocations.add(allocation);
+
+        clusterAllocationsMutex.unlock();
     }
 
     /**
@@ -59,7 +66,11 @@ public class StateService {
      * @param names given RepoAchiever Cluster allocation names.
      */
     public static void removeClusterAllocationByNames(List<String> names) {
+        clusterAllocationsMutex.lock();
+
         names.forEach(
                 element1 -> clusterAllocations.removeIf(element2 -> Objects.equals(element2.getName(), element1)));
+
+        clusterAllocationsMutex.unlock();
     }
 }
