@@ -127,4 +127,23 @@ public class ContentRepository {
 
         return result;
     }
+
+    /**
+     * Deletes all entities with the given secret from content table.
+     *
+     * @param secret   given secret, which allows content retrieval.
+     * @throws RepositoryOperationFailureException if operation execution fails.
+     */
+    public void deleteBySecret(Integer secret) throws RepositoryOperationFailureException {
+        try {
+            repositoryExecutor.performQuery(
+                    String.format(
+                            "DELETE FROM %s as t WHERE t.secret = %d",
+                            properties.getDatabaseContentTableName(),
+                            secret));
+
+        } catch (QueryExecutionFailureException | QueryEmptyResultException e) {
+            throw new RepositoryOperationFailureException(e.getMessage());
+        }
+    }
 }

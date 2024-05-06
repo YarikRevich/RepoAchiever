@@ -6,6 +6,22 @@ import java.rmi.RemoteException;
 /** Represents client for RepoAchiever Cluster remote API. */
 public interface IClusterCommunicationService extends Remote {
     /**
+     * Performs RepoAchiever Cluster suspend operation. Has no effect if RepoAchiever Cluster was
+     * already suspended previously.
+     *
+     * @throws RemoteException if remote request fails.
+     */
+    void performSuspend() throws RemoteException;
+
+    /**
+     * Performs RepoAchiever Cluster serve operation. Has no effect if RepoAchiever Cluster was not
+     * suspended previously.
+     *
+     * @throws RemoteException if remote request fails.
+     */
+    void performServe() throws RemoteException;
+
+    /**
      * Retrieves latest RepoAchiever Cluster health check states.
      *
      * @return RepoAchiever Cluster health check status.

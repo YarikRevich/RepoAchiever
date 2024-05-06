@@ -1,11 +1,15 @@
 package com.repoachiever.resource;
 
 import com.repoachiever.api.ContentResourceApi;
+import com.repoachiever.exception.CredentialsAreNotValidException;
+import com.repoachiever.exception.CredentialsFieldIsNotValidException;
 import com.repoachiever.model.ContentApplication;
 import com.repoachiever.model.ContentRetrievalApplication;
 import com.repoachiever.model.ContentRetrievalResult;
 import com.repoachiever.repository.facade.RepositoryFacade;
+import com.repoachiever.resource.common.ResourceConfigurationHelper;
 import com.repoachiever.service.cluster.facade.ClusterFacade;
+import com.repoachiever.service.vendor.VendorFacade;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.SneakyThrows;
@@ -20,6 +24,9 @@ public class ContentResource implements ContentResourceApi {
 
     @Inject
     ClusterFacade clusterFacade;
+
+    @Inject
+    VendorFacade vendorFacade;
 
     /**
      * Implementation for declared in OpenAPI configuration v1ContentPost method.
@@ -41,9 +48,19 @@ public class ContentResource implements ContentResourceApi {
     @Override
     @SneakyThrows
     public void v1ContentApplyPost(ContentApplication contentApplication) {
-        repositoryFacade.apply(contentApplication);
+        if (!ResourceConfigurationHelper.isExternalCredentialsFieldValid(
+                contentApplication.getProvider(), contentApplication.getCredentials().getExternal())) {
+            throw new CredentialsFieldIsNotValidException();
+        }
+
+        if (!vendorFacade.isExternalCredentialsValid(
+                contentApplication.getProvider(), contentApplication.getCredentials().getExternal())) {
+            throw new CredentialsAreNotValidException();
+        }
 
         clusterFacade.apply(contentApplication);
+
+        repositoryFacade.apply(contentApplication);
     }
 
     /**

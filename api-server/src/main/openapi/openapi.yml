@@ -9,8 +9,6 @@ tags:
     description: Contains all endpoints related to operations on processed content.
   - name: StateResource
     description: Contains all endpoints related to state processing.
-  - name: ValidationResource
-    description: Contains all endpoints related to both data validation and its further retrieval.
   - name: InfoResource
     description: Contains all endpoints related to general info of API Server.
   - name: HealthResource
@@ -87,26 +85,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ContentStateApplicationResult"
-  /v1/validation/secrets:
-    post:
-      tags:
-        - ValidationResource
-      requestBody:
-        required: true
-        description: Checks if the given secrets are valid
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ValidationSecretsApplication"
-      responses:
-        201:
-          description: Given secrets to be validated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ValidationSecretsApplicationResult"
-        400:
-          description: Given secrets application contains incorrect data
   /v1/info/version:
     get:
       tags:
@@ -177,6 +155,8 @@ components:
         - git-local
         - git-github
     CredentialsFieldsFull:
+      required:
+        - internal
       properties:
         internal:
           $ref: "#/components/schemas/CredentialsFieldsInternal"
@@ -242,20 +222,6 @@ components:
       properties:
         hash:
           type: string
-    ValidationSecretsApplication:
-      required:
-        - provider
-      properties:
-        provider:
-          $ref: "#/components/schemas/Provider"
-        credentials:
-          $ref: "#/components/schemas/CredentialsFieldsExternal"
-    ValidationSecretsApplicationResult:
-      required:
-        - valid
-      properties:
-        valid:
-          type: boolean
     VersionInfoResult:
       properties:
         externalApi:

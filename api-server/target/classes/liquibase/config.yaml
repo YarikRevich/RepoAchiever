@@ -40,7 +40,7 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: token
+                  name: credentials
                   type: VARCHAR
                   constraints:
                     nullable: true

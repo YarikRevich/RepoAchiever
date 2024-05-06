@@ -25,10 +25,10 @@ public class ApiServerCommunicationConfigService {
     private static final Logger logger = LogManager.getLogger(ApiServerCommunicationConfigService.class);
 
     @Inject
-    ConfigService configService;
+    PropertiesEntity properties;
 
     @Inject
-    PropertiesEntity properties;
+    ConfigService configService;
 
     /**
      * Performs setup of RepoAchiever API Server communication provider.
@@ -44,8 +44,6 @@ public class ApiServerCommunicationConfigService {
             logger.fatal(new CommunicationConfigurationFailureException(e.getMessage()).getMessage());
             return;
         }
-
-        // TODO: add communication provider activity to global API SERVER health check
 
         Thread.ofPlatform().start(() -> {
             try {

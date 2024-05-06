@@ -9,7 +9,6 @@ src/main/java/com/repoachiever/api/ContentResourceApi.java
 src/main/java/com/repoachiever/api/HealthResourceApi.java
 src/main/java/com/repoachiever/api/InfoResourceApi.java
 src/main/java/com/repoachiever/api/StateResourceApi.java
-src/main/java/com/repoachiever/api/ValidationResourceApi.java
 src/main/java/com/repoachiever/model/ClusterInfoUnit.java
 src/main/java/com/repoachiever/model/ContentApplication.java
 src/main/java/com/repoachiever/model/ContentRetrievalApplication.java
@@ -28,8 +27,6 @@ src/main/java/com/repoachiever/model/ReadinessCheckApplication.java
 src/main/java/com/repoachiever/model/ReadinessCheckResult.java
 src/main/java/com/repoachiever/model/ReadinessCheckStatus.java
 src/main/java/com/repoachiever/model/ReadinessCheckUnit.java
-src/main/java/com/repoachiever/model/ValidationSecretsApplication.java
-src/main/java/com/repoachiever/model/ValidationSecretsApplicationResult.java
 src/main/java/com/repoachiever/model/VersionExternalApiInfoResult.java
 src/main/java/com/repoachiever/model/VersionInfoResult.java
 src/main/resources/META-INF/openapi.yaml

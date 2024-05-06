@@ -12,4 +12,6 @@ public class ClusterAllocationDto {
     private String name;
 
     private Integer pid;
+
+    private String context;
 }

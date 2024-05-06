@@ -7,6 +7,8 @@ import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Optional;
+
 /**
  * Represents entity used to describe registered secrets.
  */
@@ -17,5 +19,5 @@ public class SecretEntity {
 
     private Integer session;
 
-    private String token;
+    private Optional<String> credentials;
 }

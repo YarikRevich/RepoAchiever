@@ -23,7 +23,3 @@ public interface IApiServerCommunicationService {
      */
     String retrieveVersion() throws RemoteException;
 }
-
-
-// FIRST: API SERVER --> CLUSTER : VERSION
-// SECOND: CLUSTER --> API SERVER: VERSION

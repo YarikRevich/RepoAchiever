@@ -10,7 +10,7 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 
 /**
- * Represents
+ * Represents health check response to readiness result converter.
  */
 public class HealthCheckResponseToReadinessCheckResult {
   private static final Logger logger =

@@ -59,7 +59,7 @@ public class ClusterFacade {
         for (List<String> locations : segregation) {
             String name = ClusterConfigurationHelper.getName(properties.getCommunicationClusterBase());
 
-            ClusterContextEntity clusterContext =
+            ClusterContextEntity contextRaw =
                     ClusterContextEntity.of(
                             name,
                             locations,
@@ -73,11 +73,12 @@ public class ClusterFacade {
                                     ClusterContextEntity.Resource.Worker.of(
                                             configService.getConfig().getResource().getWorker().getFrequency())));
 
+            String context = ClusterContextToJsonConverter.convert(contextRaw);
+
             Integer pid;
 
             try {
-                pid = clusterService.deploy(
-                        ClusterContextToJsonConverter.convert(clusterContext));
+                pid = clusterService.deploy(context);
             } catch (ClusterDeploymentFailureException e) {
                 throw new ClusterApplicationFailureException(e.getMessage());
             }
@@ -99,7 +100,48 @@ public class ClusterFacade {
             }
 
             StateService.addClusterAllocation(
-                    ClusterAllocationDto.of(name, pid));
+                    ClusterAllocationDto.of(name, pid, context));
         }
     }
+
+    // TODO: halt cluster during instance update operations, to exclude concurrency related issues.
+
+
+
+    /**
+     * Reapplies all unhealthy RepoAchiever Cluster allocations, which healthcheck operation failed for, recreating them.
+     *
+     * @throws ClusterUnhealthyReapplicationFailureException if RepoAchiever Cluster unhealthy allocation reapplication fails.
+     */
+    public void reapplyUnhealthy() throws ClusterUnhealthyReapplicationFailureException {
+        List<ClusterAllocationDto> updates = new ArrayList<>();
+        List<String> removable = new ArrayList<>();
+
+        for (ClusterAllocationDto clusterAllocation : StateService.getClusterAllocations()) {
+            try {
+                clusterService.destroy(clusterAllocation.getPid());
+            } catch (ClusterDestructionFailureException ignored) {
+            }
+
+            Integer pid;
+
+            try {
+                pid = clusterService.deploy(clusterAllocation.getContext());
+            } catch (ClusterDeploymentFailureException e) {
+                throw new ClusterApplicationFailureException(e.getMessage());
+            }
+
+            removable.add(clusterAllocation.getName());
+
+            updates.add(ClusterAllocationDto.of(
+                    clusterAllocation.getName(), pid, clusterAllocation.getContext()));
+        }
+
+        StateService.removeClusterAllocationByNames(removable);
+
+        updates.forEach(StateService::addClusterAllocation);
+    }
 }
+
+// TODO: if cluster stops existing --> recreate it
+// TODO: if api server stops existing --> selfdestruct all clusters

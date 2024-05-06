@@ -1,7 +1,7 @@
 package com.repoachiever.service.vendor;
 
-import com.repoachiever.model.ValidationSecretsApplication;
-import com.repoachiever.model.ValidationSecretsApplicationResult;
+import com.repoachiever.model.CredentialsFieldsExternal;
+import com.repoachiever.model.Provider;
 import com.repoachiever.service.vendor.git.github.GitGitHubVendorService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -13,16 +13,16 @@ public class VendorFacade {
     GitGitHubVendorService gitGitHubVendorService;
 
     /**
-     * Checks if the given token is valid.
+     * Checks if the given external credentials are valid, according to the given provider name.
      *
-     * @param validationSecretsApplication given secrets validation application.
+     * @param provider given external provider name.
+     * @param credentialsFieldExternal given external credentials.
      * @return result of the check.
      */
-    public ValidationSecretsApplicationResult isTokenValid(ValidationSecretsApplication validationSecretsApplication) {
-        return switch (validationSecretsApplication.getProvider()) {
-            case LOCAL -> ValidationSecretsApplicationResult.of(true);
-            case GITHUB -> ValidationSecretsApplicationResult.of(
-                    gitGitHubVendorService.isTokenValid(validationSecretsApplication.getCredentials().getToken()));
+    public Boolean isExternalCredentialsValid(Provider provider, CredentialsFieldsExternal credentialsFieldExternal) {
+        return switch (provider) {
+            case LOCAL -> true;
+            case GITHUB -> gitGitHubVendorService.isTokenValid(credentialsFieldExternal.getToken());
         };
     }
 }

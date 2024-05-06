@@ -2,6 +2,7 @@ package com.repoachiever.resource.communication;
 
 import com.repoachiever.entity.PropertiesEntity;
 import com.repoachiever.service.communication.cluster.IClusterCommunicationService;
+import com.repoachiever.service.state.StateService;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -14,6 +15,22 @@ public class ClusterCommunicationResource extends UnicastRemoteObject implements
 
     public ClusterCommunicationResource(PropertiesEntity properties) throws RemoteException {
         this.properties = properties;
+    }
+
+    /**
+     * @see IClusterCommunicationService
+     */
+    @Override
+    public void performSuspend() throws RemoteException {
+        StateService.setSuspended(true);
+    }
+
+    /**
+     * @see IClusterCommunicationService
+     */
+    @Override
+    public void performServe() throws RemoteException {
+        StateService.setSuspended(false);
     }
 
     /**

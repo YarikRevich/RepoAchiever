@@ -13,12 +13,12 @@
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/command/cluster/deploy/DeployCommandService.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/command/docker/network/create/CreateCommandService.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/entity/repository/ConfigEntity.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/integration/communication/cluster/healthcheck/ClusterHealthCheckCommunicationService.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/RepositoryOperationFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/ContentApplication.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/api/ContentResourceApi.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/HealthCheckUnit.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/entity/repository/ProviderEntity.java
-/Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/ValidationSecretsApplicationResult.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/repository/ContentRepository.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/executor/CommandExecutorService.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/integration/properties/general/GeneralPropertiesConfigService.java
@@ -36,7 +36,6 @@
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/integration/properties/git/GitPropertiesConfigService.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/repository/executor/RepositoryExecutor.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/integration/diagnostics/DiagnosticsConfigService.java
-/Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/api/ValidationResourceApi.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/api/InfoResourceApi.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/resource/communication/ApiServerCommunicationResource.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/entity/common/ConfigEntity.java
@@ -59,8 +58,8 @@
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/WorkspaceUnitDirectoryRemovalFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/entity/common/PropertiesEntity.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/telemetry/TelemetryService.java
-/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/resource/ValidationResource.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ConfigValidationException.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ClusterUnhealthyReapplicationFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/command/prometheus/DeployCommandService.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/resource/common/ResourceConfigurationHelper.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/mapping/RepositoryApplicationFailureExceptionMapper.java
@@ -70,7 +69,9 @@
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ClusterDestructionFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/vendor/common/VendorConfigurationHelper.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/MetadataFileWriteFailureException.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/integration/communication/cluster/topology/ClusterTopologyCommunicationConfigService.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/WorkspaceUnitDirectoryPresentException.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/repository/common/RepositoryConfigurationHelper.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/repository/facade/RepositoryFacade.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/integration/http/HttpServerConfigService.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/client/grafana/IGrafanaClientService.java
@@ -84,7 +85,6 @@
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/repository/SecretRepository.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/communication/common/CommunicationProviderConfigurationHelper.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/VersionInfoResult.java
-/Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/ValidationSecretsApplication.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/resource/StateResource.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ContentFileRemovalFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/cluster/resource/ClusterClientResource.java
@@ -117,9 +117,10 @@
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/logging/FatalAppender.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/api/StateResourceApi.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/command/grafana/common/GrafanaConfigurationHelper.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/CredentialsAreNotValidException.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/ReadinessCheckResult.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/ContentStateApplicationResult.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ClusterApplicationFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/resource/ContentResource.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/HealthCheckResult.java
-/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/integration/topology/TopologyConfigService.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/mapping/CredentialsAreNotValidExceptionMapper.java

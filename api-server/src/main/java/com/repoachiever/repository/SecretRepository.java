@@ -30,71 +30,113 @@ public class SecretRepository {
     /**
      * Inserts given values into the provider table.
      *
-     * @param name given provider name.
+     * @param name    given provider name.
      * @param session given internal secret.
-     * @param token given optional external secret.
+     * @param credentials   given optional external credentials.
      * @throws RepositoryOperationFailureException if operation execution fails.
      */
-    public void insert(String name, Integer session, Optional<String> token) throws RepositoryOperationFailureException {
+    public void insert(String name, Integer session, Optional<String> credentials) throws RepositoryOperationFailureException {
+        String query;
+
+        if (credentials.isPresent()) {
+            query = String.format(
+                    "INSERT INTO %s (name, session, credentials) VALUES ('%s', %d, '%s')",
+                    properties.getDatabaseSecretTableName(),
+                    name,
+                    session,
+                    credentials.get());
+        } else {
+            query = String.format(
+                    "INSERT INTO %s (name, session) VALUES ('%s', %d)",
+                    properties.getDatabaseSecretTableName(),
+                    name,
+                    session);
+        }
+
         try {
-            String query;
-
-            if (token.isPresent()) {
-                query = String.format(
-                        "INSERT INTO %s (name, session, token) VALUES ('%s', %d, '%s')",
-                        properties.getDatabaseSecretTableName(),
-                        name,
-                        session,
-                        token.get());
-            } else {
-                query = String.format(
-                        "INSERT INTO %s (name, session) VALUES ('%s', %d)",
-                        properties.getDatabaseSecretTableName(),
-                        name,
-                        session);
-            }
-
             repositoryExecutor.performQuery(query);
-
         } catch (QueryExecutionFailureException | QueryEmptyResultException e) {
             throw new RepositoryOperationFailureException(e.getMessage());
         }
     }
 
     /**
-     * Attempts to retrieve secret entity by the given id.
+     * Checks if secret entity with the given session and credentials is present.
      *
-     * @param id given identification of the secrets set.
+     * @param session given session of the secrets set.
+     * @param credentials   given optional external credentials.
+     * @return result of the check.
+     * @throws RepositoryOperationFailureException if repository operation fails.
+     */
+    public Boolean isPresentBySessionAndCredentials(Integer session, Optional<String> credentials) throws RepositoryOperationFailureException {
+        String query;
+
+        if (credentials.isPresent()) {
+            query = String.format(
+                    "SELECT t.id FROM %s as t WHERE t.session = %d AND t.credentials = '%s'",
+                    properties.getDatabaseSecretTableName(),
+                    session,
+                    credentials.get());
+        } else {
+            query = String.format(
+                    "SELECT t.id FROM %s as t WHERE t.session = %d",
+                    properties.getDatabaseSecretTableName(),
+                    session);
+        }
+
+        try {
+            ResultSet resultSet = repositoryExecutor.performQueryWithResult(query);
+
+            try {
+                resultSet.close();
+            } catch (SQLException e) {
+                throw new RepositoryOperationFailureException(e.getMessage());
+            }
+        } catch (QueryEmptyResultException e) {
+            return false;
+        } catch (QueryExecutionFailureException e) {
+            throw new RepositoryOperationFailureException(e.getMessage());
+        }
+
+        return true;
+    }
+
+    /**
+     * Attempts to retrieve secret entity by the given session and credentials.
+     *
+     * @param session given session of the secrets set.
+     * @param credentials   given optional external credentials.
      * @return retrieved secret entity.
      * @throws RepositoryOperationFailureException if repository operation fails.
      */
-    public SecretEntity findById(Integer id) throws RepositoryOperationFailureException {
+    public SecretEntity findBySessionAndCredentials(Integer session, Optional<String> credentials) throws RepositoryOperationFailureException {
+        String query;
+
+        if (credentials.isPresent()) {
+            query = String.format(
+                    "SELECT t.id FROM %s as t WHERE t.session = %d AND t.credentials = '%s'",
+                    properties.getDatabaseSecretTableName(),
+                    session,
+                    credentials.get());
+        } else {
+            query = String.format(
+                    "SELECT t.id FROM %s as t WHERE t.session = %d",
+                    properties.getDatabaseSecretTableName(),
+                    session);
+        }
+
         ResultSet resultSet;
 
         try {
-            resultSet =
-                    repositoryExecutor.performQueryWithResult(
-                            String.format(
-                                    "SELECT t.session, t.token FROM %s as t WHERE t.id = %s",
-                                    properties.getDatabaseProviderTableName(),
-                                    id));
-
+            resultSet = repositoryExecutor.performQueryWithResult(query);
         } catch (QueryExecutionFailureException | QueryEmptyResultException e) {
             throw new RepositoryOperationFailureException(e.getMessage());
         }
 
-        Integer session;
+        Integer id;
 
         try {
-            session = resultSet.getInt("session");
-        } catch (SQLException e) {
-            throw new RepositoryOperationFailureException(e.getMessage());
-        }
-
-        String token;
-
-        try {
-            token = resultSet.getString("token");
+            id = resultSet.getInt("id");
         } catch (SQLException e) {
             throw new RepositoryOperationFailureException(e.getMessage());
         }
@@ -105,6 +147,6 @@ public class SecretRepository {
             throw new RepositoryOperationFailureException(e.getMessage());
         }
 
-        return SecretEntity.of(id, session, token);
+        return SecretEntity.of(id, session, credentials);
     }
 }

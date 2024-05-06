@@ -1,6 +1,7 @@
 package com.repoachiever.repository.facade;
 
 import com.repoachiever.entity.repository.ProviderEntity;
+import com.repoachiever.entity.repository.SecretEntity;
 import com.repoachiever.exception.RepositoryApplicationFailureException;
 import com.repoachiever.exception.RepositoryOperationFailureException;
 import com.repoachiever.model.ContentApplication;
@@ -10,10 +11,12 @@ import com.repoachiever.repository.ConfigRepository;
 import com.repoachiever.repository.ContentRepository;
 import com.repoachiever.repository.ProviderRepository;
 import com.repoachiever.repository.SecretRepository;
+import com.repoachiever.repository.common.RepositoryConfigurationHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Represents facade for repository implementations used to handle tables.
@@ -67,7 +70,39 @@ public class RepositoryFacade {
             throw new RepositoryApplicationFailureException(e.getMessage());
         }
 
-        System.out.println(provider.getId());
-        System.out.println(provider.getName());
+        Optional<String> credentials = RepositoryConfigurationHelper.getExternalCredentials(
+                contentApplication.getProvider(), contentApplication.getCredentials().getExternal());
+
+        try {
+            if (!secretRepository.isPresentBySessionAndCredentials(
+                    contentApplication.getCredentials().getInternal().getId(), credentials)) {
+                secretRepository.insert(
+                        contentApplication.getProvider().toString(),
+                        contentApplication.getCredentials().getInternal().getId(),
+                        credentials);
+            }
+        } catch (RepositoryOperationFailureException e) {
+            throw new RepositoryApplicationFailureException(e.getMessage());
+        }
+
+        SecretEntity secret;
+
+        try {
+            secret = secretRepository.findBySessionAndCredentials(
+                    contentApplication.getCredentials().getInternal().getId(),
+                    credentials);
+        } catch (RepositoryOperationFailureException e) {
+            throw new RepositoryApplicationFailureException(e.getMessage());
+        }
+
+        try {
+            contentRepository.deleteBySecret(secret.getId());
+        } catch (RepositoryOperationFailureException e) {
+            throw new RepositoryApplicationFailureException(e.getMessage());
+        }
+
+        contentApplication.getLocations().forEach(element -> {
+            contentRepository.insert(element, provider.getId(), secret.getId());
+        });
     }
 }

@@ -10,9 +10,6 @@ tags:
   name: ContentResource
 - description: Contains all endpoints related to state processing.
   name: StateResource
-- description: Contains all endpoints related to both data validation and its further
-    retrieval.
-  name: ValidationResource
 - description: Contains all endpoints related to general info of API Server.
   name: InfoResource
 - description: Contains all endpoints related to general API Server health information.
@@ -106,30 +103,6 @@ paths:
       x-accepts: application/json
       x-tags:
       - tag: StateResource
-  /v1/validation/secrets:
-    post:
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ValidationSecretsApplication'
-        description: Checks if the given secrets are valid
-        required: true
-      responses:
-        "201":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationSecretsApplicationResult'
-          description: Given secrets to be validated
-        "400":
-          description: Given secrets application contains incorrect data
-      tags:
-      - ValidationResource
-      x-content-type: application/json
-      x-accepts: application/json
-      x-tags:
-      - tag: ValidationResource
   /v1/info/version:
     get:
       responses:
@@ -225,6 +198,8 @@ components:
           $ref: '#/components/schemas/CredentialsFieldsInternal'
         external:
           $ref: '#/components/schemas/CredentialsFieldsExternal'
+      required:
+      - internal
     CredentialsFieldsInternal:
       example:
         id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -314,25 +289,6 @@ components:
           type: string
       required:
       - hash
-    ValidationSecretsApplication:
-      example:
-        provider: null
-        credentials: null
-      properties:
-        provider:
-          $ref: '#/components/schemas/Provider'
-        credentials:
-          $ref: '#/components/schemas/CredentialsFieldsExternal'
-      required:
-      - provider
-    ValidationSecretsApplicationResult:
-      example:
-        valid: true
-      properties:
-        valid:
-          type: boolean
-      required:
-      - valid
     VersionInfoResult:
       example:
         externalApi:

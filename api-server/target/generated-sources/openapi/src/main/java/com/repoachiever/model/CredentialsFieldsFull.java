@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 
 @JsonTypeName("CredentialsFieldsFull")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", date = "2024-05-04T11:27:26.561544+02:00[Europe/Warsaw]")@lombok.Data @lombok.NoArgsConstructor @lombok.AllArgsConstructor(staticName = "of")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", date = "2024-05-06T02:24:19.773818+02:00[Europe/Warsaw]")@lombok.Data @lombok.NoArgsConstructor @lombok.AllArgsConstructor(staticName = "of")
 
 public class CredentialsFieldsFull  implements Serializable {
   private @Valid CredentialsFieldsInternal internal;
@@ -30,6 +30,7 @@ public class CredentialsFieldsFull  implements Serializable {
 
   
   @JsonProperty("internal")
+  @NotNull
   public CredentialsFieldsInternal getInternal() {
     return internal;
   }
