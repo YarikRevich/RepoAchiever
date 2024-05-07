@@ -70,6 +70,7 @@
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ClusterDestructionFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/vendor/common/VendorConfigurationHelper.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/MetadataFileWriteFailureException.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/cluster/resource/ClusterCommunicationResource.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/integration/communication/cluster/topology/ClusterTopologyCommunicationConfigService.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/WorkspaceUnitDirectoryPresentException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/repository/common/RepositoryConfigurationHelper.java
@@ -84,11 +85,12 @@
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ClusterApplicationTimeoutException.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/ContentStateApplication.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/repository/SecretRepository.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/integration/diagnostics/template/TemplateConfigService.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/communication/common/CommunicationProviderConfigurationHelper.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/VersionInfoResult.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/resource/StateResource.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ContentFileRemovalFailureException.java
-/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/cluster/resource/ClusterClientResource.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/command/nodeexporter/common/NodeExporterConfigurationHelper.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/mapping/ClusterApplicationFailureExceptionMapper.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/dto/ClusterAllocationDto.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/client/smallrye/ISmallRyeHealthCheckClientService.java
@@ -106,6 +108,7 @@
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ContentFileWriteFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/command/cluster/common/ClusterConfigurationHelper.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/mapping/WorkspaceUnitDirectoryNotFoundExceptionMapper.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/command/nodeexporter/DeployCommandService.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/entity/common/ClusterContextEntity.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/config/ConfigService.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/command/docker/network/remove/RemoveCommandService.java

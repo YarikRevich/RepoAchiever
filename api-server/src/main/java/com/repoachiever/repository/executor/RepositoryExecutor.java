@@ -3,7 +3,7 @@ package com.repoachiever.repository.executor;
 import com.repoachiever.entity.common.PropertiesEntity;
 import com.repoachiever.exception.QueryEmptyResultException;
 import com.repoachiever.exception.QueryExecutionFailureException;
-import com.repoachiever.service.cluster.resource.ClusterClientResource;
+import com.repoachiever.service.cluster.resource.ClusterCommunicationResource;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -12,7 +12,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.sql.DataSource;
-import javax.xml.transform.Result;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  */
 @ApplicationScoped
 public class RepositoryExecutor {
-    private static final Logger logger = LogManager.getLogger(ClusterClientResource.class);
+    private static final Logger logger = LogManager.getLogger(ClusterCommunicationResource.class);
 
     @Inject
     PropertiesEntity properties;

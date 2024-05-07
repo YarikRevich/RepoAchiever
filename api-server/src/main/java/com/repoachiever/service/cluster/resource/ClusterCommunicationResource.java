@@ -20,8 +20,8 @@ import java.rmi.registry.Registry;
  * Represents implementation for RepoAchiever Cluster remote API.
  */
 @ApplicationScoped
-public class ClusterClientResource {
-    private static final Logger logger = LogManager.getLogger(ClusterClientResource.class);
+public class ClusterCommunicationResource {
+    private static final Logger logger = LogManager.getLogger(ClusterCommunicationResource.class);
 
     @Inject
     ConfigService configService;

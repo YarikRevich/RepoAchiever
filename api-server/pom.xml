@@ -157,6 +157,12 @@
             <artifactId>opencsv</artifactId>
         </dependency>
 
+        <!-- TEMPLATES -->
+        <dependency>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
+        </dependency>
+
         <!-- LOGGING -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>

@@ -10,7 +10,7 @@ import com.repoachiever.exception.*;
 import com.repoachiever.model.ContentApplication;
 import com.repoachiever.service.cluster.ClusterService;
 import com.repoachiever.service.cluster.common.ClusterConfigurationHelper;
-import com.repoachiever.service.cluster.resource.ClusterClientResource;
+import com.repoachiever.service.cluster.resource.ClusterCommunicationResource;
 import com.repoachiever.service.config.ConfigService;
 import com.repoachiever.service.state.StateService;
 import com.repoachiever.service.workspace.facade.WorkspaceFacade;
@@ -38,7 +38,7 @@ public class ClusterFacade {
     ClusterService clusterService;
 
     @Inject
-    ClusterClientResource clusterClientResource;
+    ClusterCommunicationResource clusterCommunicationResource;
 
     /**
      * Applies given content application, removing previous topology and deploying new one with up-to-date configuration.
@@ -47,6 +47,8 @@ public class ClusterFacade {
      * @throws ClusterApplicationFailureException if RepoAchiever Cluster application failed.
      */
     public void apply(ContentApplication contentApplication) throws ClusterApplicationFailureException {
+        // TODO: try to check if health check if ok, if no, try to recreate, if no, then fail.
+
         // TODO: place all clusters for the given user to suspended state.
         // TODO: try to create new ones for the given user.
 
@@ -54,18 +56,29 @@ public class ClusterFacade {
                 workspaceFacade.createUnitKey(
                         contentApplication.getProvider(), contentApplication.getCredentials());
 
-        List<String> removable = new ArrayList<>();
+        List<String> suspended = new ArrayList<>();
 
-        for (ClusterAllocationDto clusterAllocation : StateService.getClusterAllocations()) {
+        for (ClusterAllocationDto clusterAllocation : StateService.
+                getClusterAllocationsByWorkspaceUnitKey(workspaceUnitKey)) {
             try {
-                clusterService.destroy(clusterAllocation.getPid());
-            } catch (ClusterDestructionFailureException ignored) {
+                clusterCommunicationResource.performSuspend(clusterAllocation.getName());
+
+            } catch (ClusterOperationFailureException ignored) {
+
             }
 
-            removable.add(clusterAllocation.getName());
+            suspended.add(clusterAllocation.getName());
         }
 
-        StateService.removeClusterAllocationByNames(removable);
+
+
+
+
+
+
+
+
+//        StateService.removeClusterAllocationByNames(removable);
 
         List<List<String>> segregation = clusterService.performContentLocationsSegregation(
                 contentApplication.getLocations(),
@@ -74,9 +87,9 @@ public class ClusterFacade {
         for (List<String> locations : segregation) {
             String name = ClusterConfigurationHelper.getName(properties.getCommunicationClusterBase());
 
-            ClusterContextEntity contextRaw =
+            String context = ClusterContextToJsonConverter.convert(
                     ClusterContextEntity.of(
-                            ClusterContextEntity.Metadata.of(name),
+                            ClusterContextEntity.Metadata.of(name, workspaceUnitKey),
                             ClusterContextEntity.Filter.of(locations),
                             ClusterContextEntity.Service.of(
                                     ContentProviderToClusterContextProviderConverter.convert(
@@ -92,9 +105,7 @@ public class ClusterFacade {
                                     ClusterContextEntity.Resource.Cluster.of(
                                             configService.getConfig().getResource().getCluster().getMaxWorkers()),
                                     ClusterContextEntity.Resource.Worker.of(
-                                            configService.getConfig().getResource().getWorker().getFrequency())));
-
-            String context = ClusterContextToJsonConverter.convert(contextRaw);
+                                            configService.getConfig().getResource().getWorker().getFrequency()))));
 
             Integer pid;
 
@@ -106,7 +117,7 @@ public class ClusterFacade {
 
             if (!ClusterConfigurationHelper.waitForStart(() -> {
                         try {
-                            if (clusterClientResource.retrieveHealthCheck(name)) {
+                            if (clusterCommunicationResource.retrieveHealthCheck(name)) {
                                 return true;
                             }
                         } catch (ClusterOperationFailureException e) {

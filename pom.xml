@@ -320,6 +320,13 @@
         <version>3.14.0</version>
       </dependency>
 
+      <!-- TEMPLATES -->
+      <dependency>
+        <groupId>org.freemarker</groupId>
+        <artifactId>freemarker</artifactId>
+        <version>2.3.32</version>
+      </dependency>
+
       <!-- SPOTLESS -->
       <dependency>
         <groupId>com.google.googlejavaformat</groupId>

@@ -8,18 +8,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 /**
  * Service used to operate as a collection of application state properties.
  */
 public class StateService {
-    private final static ReentrantLock clusterAllocationsMutex = new ReentrantLock();
-
     /**
-     * Represents exit state used to indicate requested application shutdown.
+     * Represents a set of all available RepoAchiever Cluster allocations.
      */
     @Getter
     private final static List<ClusterAllocationDto> clusterAllocations = new ArrayList<>();
+
+    /**
+     * Retrieves RepoAchiever allocations with the given workspace unit key.
+     *
+     * @param workspaceUnitKey given workspace unit key.
+     * @return filtered RepoAchiever allocations according to the given workspace unit key.
+     */
+    public static List<ClusterAllocationDto> getClusterAllocationsByWorkspaceUnitKey(String workspaceUnitKey) {
+        return clusterAllocations.
+                stream().
+                filter(element -> Objects.equals(element.getWorkspaceUnitKey(), workspaceUnitKey)).
+                collect(Collectors.toList());
+    }
 
     /**
      * Adds new RepoAchiever Cluster allocation.
@@ -27,11 +39,7 @@ public class StateService {
      * @param allocation given RepoAchiever Cluster allocation.
      */
     public static void addClusterAllocation(ClusterAllocationDto allocation) {
-        clusterAllocationsMutex.lock();
-
         clusterAllocations.add(allocation);
-
-        clusterAllocationsMutex.unlock();
     }
 
     /**
@@ -66,11 +74,7 @@ public class StateService {
      * @param names given RepoAchiever Cluster allocation names.
      */
     public static void removeClusterAllocationByNames(List<String> names) {
-        clusterAllocationsMutex.lock();
-
         names.forEach(
                 element1 -> clusterAllocations.removeIf(element2 -> Objects.equals(element2.getName(), element1)));
-
-        clusterAllocationsMutex.unlock();
     }
 }

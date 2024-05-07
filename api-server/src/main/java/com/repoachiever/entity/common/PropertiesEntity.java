@@ -92,11 +92,29 @@ public class PropertiesEntity {
     @ConfigProperty(name = "diagnostics.grafana.docker.name")
     String diagnosticsGrafanaDockerName;
 
+    @ConfigProperty(name = "diagnostics.prometheus.config.location")
+    String diagnosticsPrometheusConfigLocation;
+
+    @ConfigProperty(name = "diagnostics.prometheus.config.template")
+    String diagnosticsPrometheusConfigTemplate;
+
+    @ConfigProperty(name = "diagnostics.prometheus.config.output")
+    String diagnosticsPrometheusConfigOutput;
+
+    @ConfigProperty(name = "diagnostics.prometheus.internal.location")
+    String diagnosticsPrometheusInternalLocation;
+
     @ConfigProperty(name = "diagnostics.prometheus.docker.name")
     String diagnosticsPrometheusDockerName;
 
+    @ConfigProperty(name = "diagnostics.prometheus.docker.image")
+    String diagnosticsPrometheusDockerImage;
+
     @ConfigProperty(name = "diagnostics.prometheus.node-exporter.docker.name")
     String diagnosticsPrometheusNodeExporterDockerName;
+
+    @ConfigProperty(name = "diagnostics.prometheus.node-exporter.docker.image")
+    String diagnosticsPrometheusNodeExporterDockerImage;
 
     @ConfigProperty(name = "git.commit.id.abbrev")
     String gitCommitId;

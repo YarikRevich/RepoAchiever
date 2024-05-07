@@ -19,6 +19,9 @@ public class ClusterContextEntity {
     public static class Metadata {
         @JsonProperty("name")
         public String name;
+
+        @JsonProperty("workspace_unit_key")
+        public String workspaceUnitKey;
     }
 
     @JsonProperty("metadata")

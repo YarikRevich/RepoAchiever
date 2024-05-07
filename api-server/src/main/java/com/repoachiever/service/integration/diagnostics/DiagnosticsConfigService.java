@@ -9,6 +9,7 @@ import com.repoachiever.exception.DockerNetworkRemoveFailureException;
 import com.repoachiever.service.command.docker.availability.AvailabilityCheckCommandService;
 import com.repoachiever.service.command.docker.network.create.CreateCommandService;
 import com.repoachiever.service.command.docker.network.remove.RemoveCommandService;
+import com.repoachiever.service.command.nodeexporter.DeployCommandService;
 import com.repoachiever.service.config.ConfigService;
 import com.repoachiever.service.executor.CommandExecutorService;
 import io.quarkus.runtime.Startup;
@@ -42,8 +43,7 @@ public class DiagnosticsConfigService {
     AvailabilityCheckCommandService dockerAvailabilityCheckCommandService;
 
     /**
-     * Creates diagnostics Docker network and starts Prometheus and Grafana instances and exports pre-defined Grafana
-     * dashboard configurations to Grafana instance using external API.
+     * Creates Docker diagnostics network and deploys diagnostics infrastructure instances with pre-defined configurations.
      */
     @PostConstruct
     private void process() {
@@ -86,6 +86,29 @@ public class DiagnosticsConfigService {
                     !networkCreateCommandErrorOutput.isEmpty()) {
                 logger.fatal(new DockerNetworkCreateFailureException(networkCreateCommandErrorOutput).getMessage());
             }
+
+            DeployCommandService nodeExporterDeployCommandService =
+                    new DeployCommandService(
+                            properties.getDiagnosticsPrometheusNodeExporterDockerName(),
+                            properties.getDiagnosticsPrometheusNodeExporterDockerImage(),
+                            configService.getConfig().getDiagnostics().getNodeExporter().getPort());
+
+            CommandExecutorOutputDto nodeExporterDeployCommandOutput;
+
+            try {
+                nodeExporterDeployCommandOutput =
+                        commandExecutorService.executeCommand(nodeExporterDeployCommandService);
+            } catch (CommandExecutorException e) {
+                logger.fatal(e.getMessage());
+                return;
+            }
+
+            String nodeExporterDeployCommandErrorOutput = nodeExporterDeployCommandOutput.getErrorOutput();
+
+            if (Objects.nonNull(nodeExporterDeployCommandErrorOutput) &&
+                    !nodeExporterDeployCommandErrorOutput.isEmpty()) {
+                logger.fatal("fail");
+            }
         }
     }
 
@@ -95,6 +118,23 @@ public class DiagnosticsConfigService {
     @PreDestroy
     private void close() {
         if (configService.getConfig().getDiagnostics().getEnabled()) {
+            CommandExecutorOutputDto dockerAvailabilityCommandOutput;
+
+            try {
+                dockerAvailabilityCommandOutput =
+                        commandExecutorService.executeCommand(dockerAvailabilityCheckCommandService);
+            } catch (CommandExecutorException e) {
+                return;
+            }
+
+            String dockerAvailabilityCommandErrorOutput = dockerAvailabilityCommandOutput.getErrorOutput();
+
+            if ((Objects.nonNull(dockerAvailabilityCommandErrorOutput) &&
+                    !dockerAvailabilityCommandErrorOutput.isEmpty()) ||
+                    dockerAvailabilityCommandOutput.getNormalOutput().isEmpty()) {
+                return;
+            }
+
             RemoveCommandService networkRemoveCommandService =
                     new RemoveCommandService(properties.getDiagnosticsCommonDockerNetworkName());
 
