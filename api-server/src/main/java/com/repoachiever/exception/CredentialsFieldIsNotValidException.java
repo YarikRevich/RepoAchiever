@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Formatter;
 
+/**
+ * Represents exception used when credentials field is not valid.
+ */
 public class CredentialsFieldIsNotValidException extends IOException {
     public CredentialsFieldIsNotValidException() {
         this("");

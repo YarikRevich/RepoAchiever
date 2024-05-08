@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Formatter;
 
+/**
+ * Represents exception used when repository operation fails.
+ */
 public class RepositoryOperationFailureException extends IOException {
     public RepositoryOperationFailureException() {
         this("");

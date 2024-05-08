@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Formatter;
 
+/**
+ * Represents exception used when Docker availability check fails.
+ */
 public class DockerIsNotAvailableException extends IOException {
     public DockerIsNotAvailableException() {
         this("");

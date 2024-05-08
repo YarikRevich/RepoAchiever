@@ -16,7 +16,7 @@ import jakarta.validation.constraints.*;
 import jakarta.validation.Valid;
 
 @Path("/v1")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", date = "2024-05-08T10:07:21.928545+02:00[Europe/Warsaw]")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", date = "2024-05-08T15:46:46.860991+02:00[Europe/Warsaw]")
 public interface HealthResourceApi {
 
     @GET

@@ -7,6 +7,7 @@ import com.repoachiever.service.command.docker.availability.DockerAvailabilityCh
 import com.repoachiever.service.command.docker.inspect.remove.DockerInspectRemoveCommandService;
 import com.repoachiever.service.command.docker.network.create.DockerNetworkCreateCommandService;
 import com.repoachiever.service.command.docker.network.remove.DockerNetworkRemoveCommandService;
+import com.repoachiever.service.command.grafana.GrafanaDeployCommandService;
 import com.repoachiever.service.command.nodeexporter.NodeExporterDeployCommandService;
 import com.repoachiever.service.command.prometheus.PrometheusDeployCommandService;
 import com.repoachiever.service.config.ConfigService;
@@ -107,6 +108,25 @@ public class DiagnosticsConfigService {
                         dockerInspectRemoveCommandErrorOutput).getMessage());
             }
 
+            dockerInspectRemoveCommandService =
+                    new DockerInspectRemoveCommandService(properties.getDiagnosticsGrafanaDockerName());
+
+            try {
+                dockerInspectRemoveCommandOutput =
+                        commandExecutorService.executeCommand(dockerInspectRemoveCommandService);
+            } catch (CommandExecutorException e) {
+                logger.fatal(new DockerInspectRemovalFailureException(e.getMessage()).getMessage());
+                return;
+            }
+
+            dockerInspectRemoveCommandErrorOutput = dockerInspectRemoveCommandOutput.getErrorOutput();
+
+            if (Objects.nonNull(dockerInspectRemoveCommandErrorOutput) &&
+                    !dockerInspectRemoveCommandErrorOutput.isEmpty()) {
+                logger.fatal(new DockerInspectRemovalFailureException(
+                        dockerInspectRemoveCommandErrorOutput).getMessage());
+            }
+
             DockerNetworkCreateCommandService dockerNetworkCreateCommandService =
                     new DockerNetworkCreateCommandService(properties.getDiagnosticsCommonDockerNetworkName());
 
@@ -177,6 +197,32 @@ public class DiagnosticsConfigService {
                 logger.fatal(new PrometheusDeploymentFailureException(
                         prometheusDeployCommandErrorOutput).getMessage());
             }
+
+            GrafanaDeployCommandService grafanaDeployCommandService =
+                    new GrafanaDeployCommandService(
+                            properties.getDiagnosticsGrafanaDockerName(),
+                            properties.getDiagnosticsGrafanaDockerImage(),
+                            configService.getConfig().getDiagnostics().getGrafana().getPort(),
+                            properties.getDiagnosticsGrafanaConfigLocation(),
+                            properties.getDiagnosticsGrafanaInternalLocation());
+
+            CommandExecutorOutputDto grafanaDeployCommandOutput;
+
+            try {
+                grafanaDeployCommandOutput =
+                        commandExecutorService.executeCommand(grafanaDeployCommandService);
+            } catch (CommandExecutorException e) {
+                logger.fatal(new PrometheusDeploymentFailureException(e.getMessage()).getMessage());
+                return;
+            }
+
+            String grafanaDeployCommandErrorOutput = grafanaDeployCommandOutput.getErrorOutput();
+
+            if (Objects.nonNull(grafanaDeployCommandErrorOutput) &&
+                    !grafanaDeployCommandErrorOutput.isEmpty()) {
+                logger.fatal(new PrometheusDeploymentFailureException(
+                        grafanaDeployCommandErrorOutput).getMessage());
+            }
         }
     }
 
@@ -244,9 +290,27 @@ public class DiagnosticsConfigService {
                         dockerInspectRemoveCommandErrorOutput).getMessage());
             }
 
-
             dockerInspectRemoveCommandService =
                     new DockerInspectRemoveCommandService(properties.getDiagnosticsPrometheusNodeExporterDockerName());
+
+            try {
+                dockerInspectRemoveCommandOutput =
+                        commandExecutorService.executeCommand(dockerInspectRemoveCommandService);
+            } catch (CommandExecutorException e) {
+                logger.fatal(new DockerInspectRemovalFailureException(e.getMessage()).getMessage());
+                return;
+            }
+
+            dockerInspectRemoveCommandErrorOutput = dockerInspectRemoveCommandOutput.getErrorOutput();
+
+            if (Objects.nonNull(dockerInspectRemoveCommandErrorOutput) &&
+                    !dockerInspectRemoveCommandErrorOutput.isEmpty()) {
+                logger.fatal(new DockerInspectRemovalFailureException(
+                        dockerInspectRemoveCommandErrorOutput).getMessage());
+            }
+
+            dockerInspectRemoveCommandService =
+                    new DockerInspectRemoveCommandService(properties.getDiagnosticsGrafanaDockerName());
 
             try {
                 dockerInspectRemoveCommandOutput =

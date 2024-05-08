@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Formatter;
 
+/**
+ * Represents exception used when Docker network removal fails.
+ */
 public class DockerNetworkRemoveFailureException extends IOException {
     public DockerNetworkRemoveFailureException() {
         this("");

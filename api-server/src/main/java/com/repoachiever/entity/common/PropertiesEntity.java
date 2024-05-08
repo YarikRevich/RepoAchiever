@@ -101,11 +101,23 @@ public class PropertiesEntity {
     @ConfigProperty(name = "diagnostics.grafana.datasources.output")
     String diagnosticsGrafanaDatasourcesOutput;
 
+    @ConfigProperty(name = "diagnostics.grafana.dashboards.location")
+    String diagnosticsGrafanaDashboardsLocation;
+
+    @ConfigProperty(name = "diagnostics.grafana.dashboards.diagnostics.template")
+    String diagnosticsGrafanaDashboardsDiagnosticsTemplate;
+
+    @ConfigProperty(name = "diagnostics.grafana.dashboards.diagnostics.output")
+    String diagnosticsGrafanaDashboardsDiagnosticsOutput;
+
     @ConfigProperty(name = "diagnostics.grafana.internal.location")
     String diagnosticsGrafanaInternalLocation;
 
     @ConfigProperty(name = "diagnostics.grafana.docker.name")
     String diagnosticsGrafanaDockerName;
+
+    @ConfigProperty(name = "diagnostics.grafana.docker.image")
+    String diagnosticsGrafanaDockerImage;
 
     @ConfigProperty(name = "diagnostics.prometheus.config.location")
     String diagnosticsPrometheusConfigLocation;

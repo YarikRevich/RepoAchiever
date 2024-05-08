@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Formatter;
 
+/**
+ * Represents exception used when workspace unit directory removal operation fails.
+ */
 public class WorkspaceUnitDirectoryRemovalFailureException extends IOException {
     public WorkspaceUnitDirectoryRemovalFailureException() {
         this("");

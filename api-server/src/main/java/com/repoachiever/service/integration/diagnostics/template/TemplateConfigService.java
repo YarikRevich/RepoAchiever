@@ -19,8 +19,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static freemarker.template.Configuration.VERSION_2_3_32;
 
@@ -44,65 +46,169 @@ public class TemplateConfigService {
      */
     @PostConstruct
     private void process() {
-        Configuration cfg = new Configuration(VERSION_2_3_32);
-        try {
-            cfg.setTemplateLoader(new FileTemplateLoader(new File(properties.getDiagnosticsPrometheusConfigLocation())));
-        } catch (IOException e) {
-            logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
-            return;
-        }
-        cfg.setDefaultEncoding("UTF-8");
-
-        Template template;
-        try {
-            template = cfg.getTemplate(properties.getDiagnosticsPrometheusConfigTemplate());
-        } catch (IOException e) {
-            logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
-            return;
-        }
-
-        Writer fileWriter;
-
-        try {
-            fileWriter = new FileWriter(
-                    Paths.get(
-                                    properties.getDiagnosticsPrometheusConfigLocation(),
-                                    properties.getDiagnosticsPrometheusConfigOutput()).
-                            toFile());
-        } catch (IOException e) {
-            logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
-            return;
-        }
-
-        // TODO: replace this with metrics endpoint point
-        Map<String, Object> input = new HashMap<>() {
-            {
-                put("metrics", new HashMap<String, Object>() {
-                    {
-                        put("host", "host.docker.internal");
-                        put("port", String.valueOf(configService.getConfig().getDiagnostics().getMetrics().getPort()));
-                    }
-                });
-                put("nodeexporter", new HashMap<String, Object>() {
-                    {
-                        put("host", properties.getDiagnosticsPrometheusNodeExporterDockerName());
-                        put("port", String.valueOf(configService.getConfig().getDiagnostics().getNodeExporter().getPort()));
-                    }
-                });
-            }
-        };
-
-        try {
-            template.process(input, fileWriter);
-        } catch (TemplateException | IOException e) {
-            logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
-        } finally {
+        if (configService.getConfig().getDiagnostics().getEnabled()) {
+            Configuration cfg = new Configuration(VERSION_2_3_32);
             try {
-                fileWriter.close();
+                cfg.setTemplateLoader(new FileTemplateLoader(new File(properties.getDiagnosticsPrometheusConfigLocation())));
             } catch (IOException e) {
                 logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
+                return;
+            }
+            cfg.setDefaultEncoding("UTF-8");
+
+            Template template;
+
+            try {
+                template = cfg.getTemplate(properties.getDiagnosticsPrometheusConfigTemplate());
+            } catch (IOException e) {
+                logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
+                return;
+            }
+
+            Writer fileWriter;
+
+            try {
+                fileWriter = new FileWriter(
+                        Paths.get(
+                                        properties.getDiagnosticsPrometheusConfigLocation(),
+                                        properties.getDiagnosticsPrometheusConfigOutput()).
+                                toFile());
+            } catch (IOException e) {
+                logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
+                return;
+            }
+
+            Map<String, Object> input = new HashMap<>() {
+                {
+                    put("metrics", new HashMap<String, Object>() {
+                        {
+                            put("host", "host.docker.internal");
+                            put("port", String.valueOf(configService.getConfig().getDiagnostics().getMetrics().getPort()));
+                        }
+                    });
+                    put("nodeexporter", new HashMap<String, Object>() {
+                        {
+                            put("host", properties.getDiagnosticsPrometheusNodeExporterDockerName());
+                            put("port", String.valueOf(configService.getConfig().getDiagnostics().getNodeExporter().getPort()));
+                        }
+                    });
+                }
+            };
+
+            try {
+                template.process(input, fileWriter);
+            } catch (TemplateException | IOException e) {
+                logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
+            } finally {
+                try {
+                    fileWriter.close();
+                } catch (IOException e) {
+                    logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
+                }
+            }
+
+            try {
+                cfg.setTemplateLoader(new FileTemplateLoader(
+                        new File(properties.getDiagnosticsGrafanaDatasourcesLocation())));
+            } catch (IOException e) {
+                logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
+                return;
+            }
+
+            try {
+                template = cfg.getTemplate(properties.getDiagnosticsGrafanaDatasourcesTemplate());
+            } catch (IOException e) {
+                logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
+                return;
+            }
+
+            try {
+                fileWriter = new FileWriter(
+                        Paths.get(
+                                        properties.getDiagnosticsGrafanaDatasourcesLocation(),
+                                        properties.getDiagnosticsGrafanaDatasourcesOutput()).
+                                toFile());
+            } catch (IOException e) {
+                logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
+                return;
+            }
+
+            input = new HashMap<>() {
+                {
+                    put("prometheus", new HashMap<String, Object>() {
+                        {
+                            put("host", properties.getDiagnosticsPrometheusDockerName());
+                            put("port", String.valueOf(configService.getConfig().getDiagnostics().getPrometheus().getPort()));
+                        }
+                    });
+                }
+            };
+
+            try {
+                template.process(input, fileWriter);
+            } catch (TemplateException | IOException e) {
+                logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
+            } finally {
+                try {
+                    fileWriter.close();
+                } catch (IOException e) {
+                    logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
+                }
+            }
+
+            try {
+                cfg.setTemplateLoader(new FileTemplateLoader(
+                        new File(properties.getDiagnosticsGrafanaDashboardsLocation())));
+            } catch (IOException e) {
+                logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
+                return;
+            }
+
+            try {
+                template = cfg.getTemplate(properties.getDiagnosticsGrafanaDashboardsDiagnosticsTemplate());
+            } catch (IOException e) {
+                logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
+                return;
+            }
+
+            try {
+                fileWriter = new FileWriter(
+                        Paths.get(
+                                        properties.getDiagnosticsGrafanaDashboardsLocation(),
+                                        properties.getDiagnosticsGrafanaDashboardsDiagnosticsOutput()).
+                                toFile());
+            } catch (IOException e) {
+                logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
+                return;
+            }
+
+            input = new HashMap<>() {
+                {
+                    put("info", new HashMap<String, Object>() {
+                        {
+                            put("version", properties.getGitCommitId());
+                        }
+                    });
+                    put("nodeexporter", new HashMap<String, Object>() {
+                        {
+                            put("port", String.valueOf(
+                                    configService.getConfig().getDiagnostics().getNodeExporter().getPort()));
+                        }
+                    });
+                }
+            };
+
+            try {
+                template.process(input, fileWriter);
+            } catch (TemplateException | IOException e) {
+                logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
+            } finally {
+                try {
+                    fileWriter.close();
+                } catch (IOException e) {
+                    logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
+                }
             }
         }
-
     }
 }

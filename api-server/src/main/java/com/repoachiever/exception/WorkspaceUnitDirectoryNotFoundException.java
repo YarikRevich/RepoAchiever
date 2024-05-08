@@ -4,6 +4,9 @@ import java.nio.file.NoSuchFileException;
 import java.util.Arrays;
 import java.util.Formatter;
 
+/**
+ * Represents exception used when workspace unit directory was not found.
+ */
 public class WorkspaceUnitDirectoryNotFoundException extends NoSuchFileException {
   public WorkspaceUnitDirectoryNotFoundException() {
     this("");

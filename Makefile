@@ -48,7 +48,9 @@ clone-client-config: ## Clone configuration files to local directory
 
 .PHONY: clone-api-server-config
 clone-api-server-config: ## Clone RepoAchiever API Server configuration files to local directory
-	@cp -r ./config/grafana/datasource.tmpl $(HOME)/.repoachiever/diagnostics/grafana/config/datasources
+	@cp -r ./config/grafana/dashboards/dashboard.yml $(HOME)/.repoachiever/diagnostics/grafana/config/dashboards
+	@cp -r ./config/grafana/dashboards/diagnostics.tmpl $(HOME)/.repoachiever/diagnostics/grafana/config/dashboards
+	@cp -r ./config/grafana/datasources/datasource.tmpl $(HOME)/.repoachiever/diagnostics/grafana/config/datasources
 	@cp -r ./config/prometheus/prometheus.tmpl $(HOME)/.repoachiever/diagnostics/prometheus/config
 	@cp -r ./samples/config/api-server/api-server.yaml $(HOME)/.repoachiever/config
 

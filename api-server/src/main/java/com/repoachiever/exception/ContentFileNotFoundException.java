@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Formatter;
 
+/**
+ * Represents exception used when configuration file content was not found.
+ */
 public class ContentFileNotFoundException extends IOException {
     public ContentFileNotFoundException() {
         this("");

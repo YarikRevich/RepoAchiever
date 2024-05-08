@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Formatter;
 
+/**
+ * Represents exception used when workspace content directory creation operation fails.
+ */
 public class WorkspaceContentDirectoryCreationFailureException extends IOException {
     public WorkspaceContentDirectoryCreationFailureException() {
         this("");

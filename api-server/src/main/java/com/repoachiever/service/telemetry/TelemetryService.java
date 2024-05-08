@@ -1,6 +1,9 @@
 package com.repoachiever.service.telemetry;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.prometheus.PrometheusConfig;
+import io.micrometer.prometheus.PrometheusMeterRegistry;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -23,6 +26,13 @@ public class TelemetryService {
      */
     @PostConstruct
     public void configure() {
+        PrometheusMeterRegistry prometheusRegistry =
+                new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
+
+        Metrics.globalRegistry.add(prometheusRegistry);
+
+        prometheusRegistry.scrape();
+
 //        new Socket()
     }
 
