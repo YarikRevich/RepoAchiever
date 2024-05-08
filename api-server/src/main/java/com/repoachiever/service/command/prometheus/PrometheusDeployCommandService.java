@@ -7,18 +7,19 @@ import process.SProcessExecutor;
 /**
  * Represents Prometheus deployment command.
  */
-public class DeployCommandService extends SProcess {
+public class PrometheusDeployCommandService extends SProcess {
     private final String command;
     private final SProcessExecutor.OS osType;
 
-    public DeployCommandService(
+    public PrometheusDeployCommandService(
             String name, String image, Integer port, String configLocation, String internalLocation) {
         this.osType = SProcessExecutor.getCommandExecutor().getOSType();
 
         this.command = switch (osType) {
             case WINDOWS -> null;
             case UNIX, MAC, ANY -> String.format(
-                    "docker run -d %s %s --name %s %s %s %s",
+                    "docker run -d %s %s %s --name %s %s %s %s",
+                    PrometheusConfigurationHelper.getDockerParameters(),
                     PrometheusConfigurationHelper.getDockerVolumes(configLocation, internalLocation),
                     PrometheusConfigurationHelper.getDockerPorts(port),
                     name,
@@ -26,8 +27,6 @@ public class DeployCommandService extends SProcess {
                     PrometheusConfigurationHelper.getDockerCommandArguments(),
                     PrometheusConfigurationHelper.getDockerCommandOptions());
         };
-
-        System.out.println(command);
     }
 
     @Override

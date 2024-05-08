@@ -7,11 +7,15 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 
-/** Represents configuration model used for RepoAchiever API Server operations. */
+/**
+ * Represents configuration model used for RepoAchiever API Server operations.
+ */
 @Getter
 @ApplicationScoped
 public class ConfigEntity {
-    /** Represents RepoAchiever API Server configuration used for RepoAchiever API Server instance setup. */
+    /**
+     * Represents RepoAchiever API Server configuration used for RepoAchiever API Server instance setup.
+     */
     @Getter
     public static class Connection {
         @NotNull
@@ -24,7 +28,9 @@ public class ConfigEntity {
     @JsonProperty("connection")
     public Connection connection;
 
-    /** Represents RepoAchiever API Server configuration used for internal communication infrastructure setup. */
+    /**
+     * Represents RepoAchiever API Server configuration used for internal communication infrastructure setup.
+     */
     @Getter
     public static class Communication {
         @NotNull
@@ -37,7 +43,9 @@ public class ConfigEntity {
     @JsonProperty("communication")
     public Communication communication;
 
-    /** Represents RepoAchiever API Server configuration used for content management. */
+    /**
+     * Represents RepoAchiever API Server configuration used for content management.
+     */
     @Getter
     public static class Content {
         @NotNull
@@ -51,7 +59,9 @@ public class ConfigEntity {
     @JsonProperty("content")
     public Content content;
 
-    /** Represents RepoAchiever API Server configuration used for database setup. */
+    /**
+     * Represents RepoAchiever API Server configuration used for database setup.
+     */
     @Getter
     public static class Database {
         @NotNull
@@ -64,14 +74,33 @@ public class ConfigEntity {
     @JsonProperty("database")
     public Database database;
 
-    /** Represents RepoAchiever API Server configuration used for diagnostics. */
+    /**
+     * Represents RepoAchiever API Server configuration used for diagnostics.
+     */
     @Getter
     public static class Diagnostics {
         @NotNull
         @JsonProperty("enabled")
         public Boolean enabled;
 
-        /** Represents RepoAchiever API Server configuration used for Grafana instance setup. */
+        /**
+         * Represents RepoAchiever API Server metrics configuration setup.
+         */
+        @Getter
+        public static class Metrics {
+            @NotNull
+            @JsonProperty("port")
+            public Integer port;
+        }
+
+        @Valid
+        @NotNull
+        @JsonProperty("metrics")
+        public Metrics metrics;
+
+        /**
+         * Represents RepoAchiever API Server configuration used for Grafana instance setup.
+         */
         @Getter
         public static class Grafana {
             @NotNull
@@ -84,7 +113,9 @@ public class ConfigEntity {
         @JsonProperty("grafana")
         public Grafana grafana;
 
-        /** Represents RepoAchiever API Server configuration used for Prometheus instance setup. */
+        /**
+         * Represents RepoAchiever API Server configuration used for Prometheus instance setup.
+         */
         @Getter
         public static class Prometheus {
             @NotNull
@@ -97,7 +128,9 @@ public class ConfigEntity {
         @JsonProperty("prometheus")
         public Prometheus prometheus;
 
-        /** Represents RepoAchiever API Server configuration used for Prometheus Node Exporter instance setup. */
+        /**
+         * Represents RepoAchiever API Server configuration used for Prometheus Node Exporter instance setup.
+         */
         @Getter
         public static class NodeExporter {
             @NotNull
@@ -116,10 +149,14 @@ public class ConfigEntity {
     @JsonProperty("diagnostics")
     public Diagnostics diagnostics;
 
-    /** Represents RepoAchiever API Server resources configuration section. */
+    /**
+     * Represents RepoAchiever API Server resources configuration section.
+     */
     @Getter
     public static class Resource {
-        /** Represents RepoAchiever API Server configuration used for RepoAchiever Cluster. */
+        /**
+         * Represents RepoAchiever API Server configuration used for RepoAchiever Cluster.
+         */
         @Getter
         public static class Cluster {
             @NotNull
@@ -132,7 +169,9 @@ public class ConfigEntity {
         @JsonProperty("cluster")
         public Cluster cluster;
 
-        /** Represents RepoAchiever API Server configuration used for RepoAchiever Worker. */
+        /**
+         * Represents RepoAchiever API Server configuration used for RepoAchiever Worker.
+         */
         @Getter
         public static class Worker {
             @NotNull

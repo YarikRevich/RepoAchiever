@@ -89,6 +89,21 @@ public class PropertiesEntity {
     @ConfigProperty(name = "diagnostics.common.docker.network.name")
     String diagnosticsCommonDockerNetworkName;
 
+    @ConfigProperty(name = "diagnostics.grafana.config.location")
+    String diagnosticsGrafanaConfigLocation;
+
+    @ConfigProperty(name = "diagnostics.grafana.datasources.location")
+    String diagnosticsGrafanaDatasourcesLocation;
+
+    @ConfigProperty(name = "diagnostics.grafana.datasources.template")
+    String diagnosticsGrafanaDatasourcesTemplate;
+
+    @ConfigProperty(name = "diagnostics.grafana.datasources.output")
+    String diagnosticsGrafanaDatasourcesOutput;
+
+    @ConfigProperty(name = "diagnostics.grafana.internal.location")
+    String diagnosticsGrafanaInternalLocation;
+
     @ConfigProperty(name = "diagnostics.grafana.docker.name")
     String diagnosticsGrafanaDockerName;
 

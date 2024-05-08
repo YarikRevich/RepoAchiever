@@ -13,6 +13,15 @@ import java.util.UUID;
  */
 public class PrometheusConfigurationHelper {
     /**
+     * Composes Prometheus Docker additional parameters.
+     *
+     * @return composed Docker additional parameters.
+     */
+    public static String getDockerParameters() {
+        return "--add-host=host.docker.internal:host-gateway";
+    }
+
+    /**
      * Composes Prometheus Docker volumes declaration.
      *
      * @param configLocation given Prometheus local config directory location.

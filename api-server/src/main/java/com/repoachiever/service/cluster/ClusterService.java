@@ -1,16 +1,12 @@
 package com.repoachiever.service.cluster;
 
-import com.repoachiever.converter.ClusterContextToJsonConverter;
 import com.repoachiever.dto.CommandExecutorOutputDto;
-import com.repoachiever.entity.common.ClusterContextEntity;
-import com.repoachiever.entity.common.ConfigEntity;
 import com.repoachiever.entity.common.PropertiesEntity;
 import com.repoachiever.exception.ClusterDeploymentFailureException;
 import com.repoachiever.exception.ClusterDestructionFailureException;
 import com.repoachiever.exception.CommandExecutorException;
-import com.repoachiever.service.command.cluster.deploy.DeployCommandService;
-import com.repoachiever.service.command.cluster.destroy.DestroyCommandService;
-import com.repoachiever.service.config.ConfigService;
+import com.repoachiever.service.command.cluster.deploy.ClusterDeployCommandService;
+import com.repoachiever.service.command.cluster.destroy.ClusterDestroyCommandService;
 import com.repoachiever.service.executor.CommandExecutorService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -18,7 +14,6 @@ import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * Service used for cluster deployment management, including distribution process.
@@ -72,29 +67,29 @@ public class ClusterService {
      * @throws ClusterDeploymentFailureException if deployment operation failed.
      */
     public Integer deploy(String clusterContext) throws ClusterDeploymentFailureException {
-        DeployCommandService deployCommandService =
-                new DeployCommandService(
+        ClusterDeployCommandService clusterDeployCommandService =
+                new ClusterDeployCommandService(
                         clusterContext,
                         properties.getBinDirectory(),
                         properties.getBinClusterLocation());
 
-        CommandExecutorOutputDto deployCommandOutput;
+        CommandExecutorOutputDto clusterDeployCommandOutput;
 
         try {
-            deployCommandOutput =
-                    commandExecutorService.executeCommand(deployCommandService);
+            clusterDeployCommandOutput =
+                    commandExecutorService.executeCommand(clusterDeployCommandService);
         } catch (CommandExecutorException e) {
             throw new ClusterDeploymentFailureException(e.getMessage());
         }
 
-        String deployCommandErrorOutput = deployCommandOutput.getErrorOutput();
+        String clusterDeployCommandErrorOutput = clusterDeployCommandOutput.getErrorOutput();
 
-        if (Objects.nonNull(deployCommandErrorOutput) && !deployCommandErrorOutput.isEmpty()) {
+        if (Objects.nonNull(clusterDeployCommandErrorOutput) && !clusterDeployCommandErrorOutput.isEmpty()) {
             throw new ClusterDeploymentFailureException();
         }
 
         return Integer.parseInt(
-                deployCommandOutput.
+                clusterDeployCommandOutput.
                         getNormalOutput().
                         replaceAll("\n", ""));
     }
@@ -106,20 +101,20 @@ public class ClusterService {
      * @throws ClusterDestructionFailureException if destruction operation failed.
      */
     public void destroy(Integer pid) throws ClusterDestructionFailureException {
-        DestroyCommandService destroyCommandService = new DestroyCommandService(pid);
+        ClusterDestroyCommandService clusterDestroyCommandService = new ClusterDestroyCommandService(pid);
 
-        CommandExecutorOutputDto destroyCommandOutput;
+        CommandExecutorOutputDto clusterDestroyCommandOutput;
 
         try {
-            destroyCommandOutput =
-                    commandExecutorService.executeCommand(destroyCommandService);
+            clusterDestroyCommandOutput =
+                    commandExecutorService.executeCommand(clusterDestroyCommandService);
         } catch (CommandExecutorException e) {
             throw new ClusterDestructionFailureException(e.getMessage());
         }
 
-        String destroyCommandErrorOutput = destroyCommandOutput.getErrorOutput();
+        String clusterDestroyCommandErrorOutput = clusterDestroyCommandOutput.getErrorOutput();
 
-        if (Objects.nonNull(destroyCommandErrorOutput) && !destroyCommandErrorOutput.isEmpty()) {
+        if (Objects.nonNull(clusterDestroyCommandErrorOutput) && !clusterDestroyCommandErrorOutput.isEmpty()) {
             throw new ClusterDestructionFailureException();
         }
     }

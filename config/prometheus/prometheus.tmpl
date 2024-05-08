@@ -8,11 +8,11 @@ scrape_configs:
     scrape_interval: 15s
 
     static_configs:
-      - targets: ['${repoachiever-diagnostics-prometheus.host}']
+      - targets: ['${(metrics.host)}:${(metrics.port)}']
 
   - job_name: 'node-exporter'
 
     scrape_interval: 15s
 
     static_configs:
-      - targets: ['${repoachiever-diagnostics-prometheus-node-exporter.host}']
+      - targets: ['${(nodeexporter.host)}:${(nodeexporter.port)}']

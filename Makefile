@@ -37,7 +37,8 @@ create-local-api-server: ## Create ResourceTracker local directory for API Serve
 	@mkdir -p $(HOME)/.repoachiever/diagnostics/prometheus/internal
 	@mkdir -p $(HOME)/.repoachiever/diagnostics/prometheus/config
 	@mkdir -p $(HOME)/.repoachiever/diagnostics/grafana/internal
-	@mkdir -p $(HOME)/.repoachiever/diagnostics/grafana/config
+	@mkdir -p $(HOME)/.repoachiever/diagnostics/grafana/config/dashboards
+	@mkdir -p $(HOME)/.repoachiever/diagnostics/grafana/config/datasources
 	@mkdir -p $(HOME)/.repoachiever/workspace
 	@mkdir -p $(HOME)/.repoachiever/internal
 
@@ -47,6 +48,8 @@ clone-client-config: ## Clone configuration files to local directory
 
 .PHONY: clone-api-server-config
 clone-api-server-config: ## Clone RepoAchiever API Server configuration files to local directory
+	@cp -r ./config/grafana/datasource.tmpl $(HOME)/.repoachiever/diagnostics/grafana/config/datasources
+	@cp -r ./config/prometheus/prometheus.tmpl $(HOME)/.repoachiever/diagnostics/prometheus/config
 	@cp -r ./samples/config/api-server/api-server.yaml $(HOME)/.repoachiever/config
 
 .PHONY: clone-diagnostics-prometheus-config

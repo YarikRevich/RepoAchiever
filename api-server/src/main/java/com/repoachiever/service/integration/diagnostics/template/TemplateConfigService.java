@@ -3,7 +3,6 @@ package com.repoachiever.service.integration.diagnostics.template;
 import com.repoachiever.entity.common.PropertiesEntity;
 import com.repoachiever.exception.DiagnosticsTemplateProcessingFailureException;
 import com.repoachiever.service.config.ConfigService;
-import com.repoachiever.service.integration.diagnostics.DiagnosticsConfigService;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.template.*;
 import io.quarkus.runtime.Startup;
@@ -19,8 +18,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 import static freemarker.template.Configuration.VERSION_2_3_32;
@@ -36,6 +35,9 @@ public class TemplateConfigService {
 
     @Inject
     PropertiesEntity properties;
+
+    @Inject
+    ConfigService configService;
 
     /**
      * Performs diagnostics infrastructure configuration templates parsing operations.
@@ -60,16 +62,33 @@ public class TemplateConfigService {
         }
 
         Writer fileWriter;
+
         try {
-            fileWriter = new FileWriter(properties.getDiagnosticsPrometheusConfigOutput());
+            fileWriter = new FileWriter(
+                    Paths.get(
+                                    properties.getDiagnosticsPrometheusConfigLocation(),
+                                    properties.getDiagnosticsPrometheusConfigOutput()).
+                            toFile());
         } catch (IOException e) {
             logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
             return;
         }
 
+        // TODO: replace this with metrics endpoint point
         Map<String, Object> input = new HashMap<>() {
             {
-                put("", "");
+                put("metrics", new HashMap<String, Object>() {
+                    {
+                        put("host", "host.docker.internal");
+                        put("port", String.valueOf(configService.getConfig().getDiagnostics().getMetrics().getPort()));
+                    }
+                });
+                put("nodeexporter", new HashMap<String, Object>() {
+                    {
+                        put("host", properties.getDiagnosticsPrometheusNodeExporterDockerName());
+                        put("port", String.valueOf(configService.getConfig().getDiagnostics().getNodeExporter().getPort()));
+                    }
+                });
             }
         };
 

@@ -1,24 +1,21 @@
-package com.repoachiever.service.command.docker.network.create;
+package com.repoachiever.service.command.cluster.destroy;
 
 import process.SProcess;
 import process.SProcessExecutor;
 
 /**
- * Represents Docker network creation command.
+ * Represents RepoAchiever Cluster destruction command.
  */
-public class CreateCommandService extends SProcess {
+public class ClusterDestroyCommandService extends SProcess {
     private final String command;
     private final SProcessExecutor.OS osType;
 
-    public CreateCommandService(String networkName) {
+    public ClusterDestroyCommandService(Integer pid) {
         this.osType = SProcessExecutor.getCommandExecutor().getOSType();
 
         this.command = switch (osType) {
             case WINDOWS -> null;
-            case UNIX, MAC, ANY -> String.format(
-                    "docker network inspect %s >/dev/null 2>&1 || docker network create -d bridge %s",
-                    networkName,
-                    networkName);
+            case UNIX, MAC, ANY -> String.format("kill -15 %d", pid);
         };
     }
 

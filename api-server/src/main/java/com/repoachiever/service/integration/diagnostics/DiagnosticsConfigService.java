@@ -2,14 +2,13 @@ package com.repoachiever.service.integration.diagnostics;
 
 import com.repoachiever.dto.CommandExecutorOutputDto;
 import com.repoachiever.entity.common.PropertiesEntity;
-import com.repoachiever.exception.CommandExecutorException;
-import com.repoachiever.exception.DockerIsNotAvailableException;
-import com.repoachiever.exception.DockerNetworkCreateFailureException;
-import com.repoachiever.exception.DockerNetworkRemoveFailureException;
-import com.repoachiever.service.command.docker.availability.AvailabilityCheckCommandService;
-import com.repoachiever.service.command.docker.network.create.CreateCommandService;
-import com.repoachiever.service.command.docker.network.remove.RemoveCommandService;
-import com.repoachiever.service.command.nodeexporter.DeployCommandService;
+import com.repoachiever.exception.*;
+import com.repoachiever.service.command.docker.availability.DockerAvailabilityCheckCommandService;
+import com.repoachiever.service.command.docker.inspect.remove.DockerInspectRemoveCommandService;
+import com.repoachiever.service.command.docker.network.create.DockerNetworkCreateCommandService;
+import com.repoachiever.service.command.docker.network.remove.DockerNetworkRemoveCommandService;
+import com.repoachiever.service.command.nodeexporter.NodeExporterDeployCommandService;
+import com.repoachiever.service.command.prometheus.PrometheusDeployCommandService;
 import com.repoachiever.service.config.ConfigService;
 import com.repoachiever.service.executor.CommandExecutorService;
 import io.quarkus.runtime.Startup;
@@ -40,7 +39,7 @@ public class DiagnosticsConfigService {
     CommandExecutorService commandExecutorService;
 
     @Inject
-    AvailabilityCheckCommandService dockerAvailabilityCheckCommandService;
+    DockerAvailabilityCheckCommandService dockerAvailabilityCheckCommandService;
 
     /**
      * Creates Docker diagnostics network and deploys diagnostics infrastructure instances with pre-defined configurations.
@@ -67,28 +66,70 @@ public class DiagnosticsConfigService {
                 return;
             }
 
-            CreateCommandService networkCreateCommandService =
-                    new CreateCommandService(properties.getDiagnosticsCommonDockerNetworkName());
+            DockerInspectRemoveCommandService dockerInspectRemoveCommandService =
+                    new DockerInspectRemoveCommandService(properties.getDiagnosticsPrometheusDockerName());
 
-            CommandExecutorOutputDto networkCreateCommandOutput;
+            CommandExecutorOutputDto dockerInspectRemoveCommandOutput;
 
             try {
-                networkCreateCommandOutput =
-                        commandExecutorService.executeCommand(networkCreateCommandService);
+                dockerInspectRemoveCommandOutput =
+                        commandExecutorService.executeCommand(dockerInspectRemoveCommandService);
+            } catch (CommandExecutorException e) {
+                logger.fatal(new DockerInspectRemovalFailureException(e.getMessage()).getMessage());
+                return;
+            }
+
+            String dockerInspectRemoveCommandErrorOutput = dockerInspectRemoveCommandOutput.getErrorOutput();
+
+            if (Objects.nonNull(dockerInspectRemoveCommandErrorOutput) &&
+                    !dockerInspectRemoveCommandErrorOutput.isEmpty()) {
+                logger.fatal(new DockerInspectRemovalFailureException(
+                        dockerInspectRemoveCommandErrorOutput).getMessage());
+            }
+
+
+            dockerInspectRemoveCommandService =
+                    new DockerInspectRemoveCommandService(properties.getDiagnosticsPrometheusNodeExporterDockerName());
+
+            try {
+                dockerInspectRemoveCommandOutput =
+                        commandExecutorService.executeCommand(dockerInspectRemoveCommandService);
+            } catch (CommandExecutorException e) {
+                logger.fatal(new DockerInspectRemovalFailureException(e.getMessage()).getMessage());
+                return;
+            }
+
+            dockerInspectRemoveCommandErrorOutput = dockerInspectRemoveCommandOutput.getErrorOutput();
+
+            if (Objects.nonNull(dockerInspectRemoveCommandErrorOutput) &&
+                    !dockerInspectRemoveCommandErrorOutput.isEmpty()) {
+                logger.fatal(new DockerInspectRemovalFailureException(
+                        dockerInspectRemoveCommandErrorOutput).getMessage());
+            }
+
+            DockerNetworkCreateCommandService dockerNetworkCreateCommandService =
+                    new DockerNetworkCreateCommandService(properties.getDiagnosticsCommonDockerNetworkName());
+
+            CommandExecutorOutputDto dockerNetworkCreateCommandOutput;
+
+            try {
+                dockerNetworkCreateCommandOutput =
+                        commandExecutorService.executeCommand(dockerNetworkCreateCommandService);
             } catch (CommandExecutorException e) {
                 logger.fatal(new DockerNetworkCreateFailureException(e.getMessage()).getMessage());
                 return;
             }
 
-            String networkCreateCommandErrorOutput = networkCreateCommandOutput.getErrorOutput();
+            String dockerNetworkCreateCommandErrorOutput = dockerNetworkCreateCommandOutput.getErrorOutput();
 
-            if (Objects.nonNull(networkCreateCommandErrorOutput) &&
-                    !networkCreateCommandErrorOutput.isEmpty()) {
-                logger.fatal(new DockerNetworkCreateFailureException(networkCreateCommandErrorOutput).getMessage());
+            if (Objects.nonNull(dockerNetworkCreateCommandErrorOutput) &&
+                    !dockerNetworkCreateCommandErrorOutput.isEmpty()) {
+                logger.fatal(new DockerNetworkCreateFailureException(
+                        dockerNetworkCreateCommandErrorOutput).getMessage());
             }
 
-            DeployCommandService nodeExporterDeployCommandService =
-                    new DeployCommandService(
+            NodeExporterDeployCommandService nodeExporterDeployCommandService =
+                    new NodeExporterDeployCommandService(
                             properties.getDiagnosticsPrometheusNodeExporterDockerName(),
                             properties.getDiagnosticsPrometheusNodeExporterDockerImage(),
                             configService.getConfig().getDiagnostics().getNodeExporter().getPort());
@@ -99,7 +140,7 @@ public class DiagnosticsConfigService {
                 nodeExporterDeployCommandOutput =
                         commandExecutorService.executeCommand(nodeExporterDeployCommandService);
             } catch (CommandExecutorException e) {
-                logger.fatal(e.getMessage());
+                logger.fatal(new NodeExporterDeploymentFailureException(e.getMessage()).getMessage());
                 return;
             }
 
@@ -107,7 +148,34 @@ public class DiagnosticsConfigService {
 
             if (Objects.nonNull(nodeExporterDeployCommandErrorOutput) &&
                     !nodeExporterDeployCommandErrorOutput.isEmpty()) {
-                logger.fatal("fail");
+                logger.fatal(new NodeExporterDeploymentFailureException(
+                        nodeExporterDeployCommandErrorOutput).getMessage());
+            }
+
+            PrometheusDeployCommandService prometheusDeployCommandService =
+                    new PrometheusDeployCommandService(
+                            properties.getDiagnosticsPrometheusDockerName(),
+                            properties.getDiagnosticsPrometheusDockerImage(),
+                            configService.getConfig().getDiagnostics().getPrometheus().getPort(),
+                            properties.getDiagnosticsPrometheusConfigLocation(),
+                            properties.getDiagnosticsPrometheusInternalLocation());
+
+            CommandExecutorOutputDto prometheusDeployCommandOutput;
+
+            try {
+                prometheusDeployCommandOutput =
+                        commandExecutorService.executeCommand(prometheusDeployCommandService);
+            } catch (CommandExecutorException e) {
+                logger.fatal(new PrometheusDeploymentFailureException(e.getMessage()).getMessage());
+                return;
+            }
+
+            String prometheusDeployCommandErrorOutput = prometheusDeployCommandOutput.getErrorOutput();
+
+            if (Objects.nonNull(prometheusDeployCommandErrorOutput) &&
+                    !prometheusDeployCommandErrorOutput.isEmpty()) {
+                logger.fatal(new PrometheusDeploymentFailureException(
+                        prometheusDeployCommandErrorOutput).getMessage());
             }
         }
     }
@@ -135,24 +203,65 @@ public class DiagnosticsConfigService {
                 return;
             }
 
-            RemoveCommandService networkRemoveCommandService =
-                    new RemoveCommandService(properties.getDiagnosticsCommonDockerNetworkName());
+            DockerNetworkRemoveCommandService dockerNetworkRemoveCommandService =
+                    new DockerNetworkRemoveCommandService(properties.getDiagnosticsCommonDockerNetworkName());
 
-            CommandExecutorOutputDto networkRemoveCommandOutput;
+            CommandExecutorOutputDto dockerNetworkRemoveCommandOutput;
 
             try {
-                networkRemoveCommandOutput =
-                        commandExecutorService.executeCommand(networkRemoveCommandService);
+                dockerNetworkRemoveCommandOutput =
+                        commandExecutorService.executeCommand(dockerNetworkRemoveCommandService);
             } catch (CommandExecutorException e) {
                 logger.fatal(new DockerNetworkRemoveFailureException(e.getMessage()).getMessage());
                 return;
             }
 
-            String networkRemoveCommandErrorOutput = networkRemoveCommandOutput.getErrorOutput();
+            String dockerNetworkRemoveCommandErrorOutput = dockerNetworkRemoveCommandOutput.getErrorOutput();
 
-            if (Objects.nonNull(networkRemoveCommandErrorOutput) &&
-                    !networkRemoveCommandErrorOutput.isEmpty()) {
-                logger.fatal(new DockerNetworkRemoveFailureException(networkRemoveCommandErrorOutput).getMessage());
+            if (Objects.nonNull(dockerNetworkRemoveCommandErrorOutput) &&
+                    !dockerNetworkRemoveCommandErrorOutput.isEmpty()) {
+                logger.fatal(new DockerNetworkRemoveFailureException(dockerNetworkRemoveCommandErrorOutput).getMessage());
+            }
+
+            DockerInspectRemoveCommandService dockerInspectRemoveCommandService =
+                    new DockerInspectRemoveCommandService(properties.getDiagnosticsPrometheusDockerName());
+
+            CommandExecutorOutputDto dockerInspectRemoveCommandOutput;
+
+            try {
+                dockerInspectRemoveCommandOutput =
+                        commandExecutorService.executeCommand(dockerInspectRemoveCommandService);
+            } catch (CommandExecutorException e) {
+                logger.fatal(new DockerInspectRemovalFailureException(e.getMessage()).getMessage());
+                return;
+            }
+
+            String dockerInspectRemoveCommandErrorOutput = dockerInspectRemoveCommandOutput.getErrorOutput();
+
+            if (Objects.nonNull(dockerInspectRemoveCommandErrorOutput) &&
+                    !dockerInspectRemoveCommandErrorOutput.isEmpty()) {
+                logger.fatal(new DockerInspectRemovalFailureException(
+                        dockerInspectRemoveCommandErrorOutput).getMessage());
+            }
+
+
+            dockerInspectRemoveCommandService =
+                    new DockerInspectRemoveCommandService(properties.getDiagnosticsPrometheusNodeExporterDockerName());
+
+            try {
+                dockerInspectRemoveCommandOutput =
+                        commandExecutorService.executeCommand(dockerInspectRemoveCommandService);
+            } catch (CommandExecutorException e) {
+                logger.fatal(new DockerInspectRemovalFailureException(e.getMessage()).getMessage());
+                return;
+            }
+
+            dockerInspectRemoveCommandErrorOutput = dockerInspectRemoveCommandOutput.getErrorOutput();
+
+            if (Objects.nonNull(dockerInspectRemoveCommandErrorOutput) &&
+                    !dockerInspectRemoveCommandErrorOutput.isEmpty()) {
+                logger.fatal(new DockerInspectRemovalFailureException(
+                        dockerInspectRemoveCommandErrorOutput).getMessage());
             }
         }
     }

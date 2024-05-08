@@ -7,11 +7,11 @@ import process.SProcessExecutor;
 /**
  * Represents Prometheus Node Exporter deployment command.
  */
-public class DeployCommandService extends SProcess {
+public class NodeExporterDeployCommandService extends SProcess {
     private final String command;
     private final SProcessExecutor.OS osType;
 
-    public DeployCommandService(String name, String image, Integer port) {
+    public NodeExporterDeployCommandService(String name, String image, Integer port) {
         this.osType = SProcessExecutor.getCommandExecutor().getOSType();
 
         this.command = switch (osType) {

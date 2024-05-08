@@ -1,24 +1,22 @@
-package com.repoachiever.service.command.docker.availability;
+package com.repoachiever.service.command.docker.network.remove;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import process.SProcess;
 import process.SProcessExecutor;
 
 /**
- * Represents Docker availability check command.
+ * Represents Docker network removal command.
  */
-@ApplicationScoped
-public class AvailabilityCheckCommandService extends SProcess {
+public class DockerNetworkRemoveCommandService extends SProcess {
     private final String command;
     private final SProcessExecutor.OS osType;
 
-    public AvailabilityCheckCommandService() {
+    public DockerNetworkRemoveCommandService(String networkName) {
         this.osType = SProcessExecutor.getCommandExecutor().getOSType();
 
         this.command = switch (osType) {
-                    case WINDOWS -> null;
-                    case UNIX, MAC, ANY -> "docker ps 2>/dev/null";
-                };
+            case WINDOWS -> null;
+            case UNIX, MAC, ANY -> String.format("docker network rm %s 2> /dev/null", networkName);
+        };
     }
 
     @Override

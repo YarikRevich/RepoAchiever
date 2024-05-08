@@ -23,10 +23,15 @@ diagnostics:
   # Enables diagnostics functionality.
   enabled: false
 
+  # Represents section used for RepoAchiever diagnostics metrics configuration.
+  metrics:
+    # Represents port used for metrics endpoint.
+    port: 8090
+
   # Represents section used for RepoAchiever diagnostics Grafana instance.
   grafana:
     # Represents port used for Grafana instance deployment.
-    port: 8090
+    port: 8091
 
   # Represents section used for RepoAchiever diagnostics Prometheus instance.
   prometheus:

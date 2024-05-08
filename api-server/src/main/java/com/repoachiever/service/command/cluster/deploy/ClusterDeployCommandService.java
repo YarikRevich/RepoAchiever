@@ -1,7 +1,6 @@
 package com.repoachiever.service.command.cluster.deploy;
 
 import com.repoachiever.service.command.cluster.common.ClusterConfigurationHelper;
-import jakarta.enterprise.context.ApplicationScoped;
 import process.SProcess;
 import process.SProcessExecutor;
 
@@ -10,11 +9,11 @@ import java.nio.file.Path;
 /**
  * Represents RepoAchiever Cluster deployment command.
  */
-public class DeployCommandService extends SProcess {
+public class ClusterDeployCommandService extends SProcess {
     private final String command;
     private final SProcessExecutor.OS osType;
 
-    public DeployCommandService(
+    public ClusterDeployCommandService(
             String clusterContext, String binDirectory, String binClusterLocation) {
         this.osType = SProcessExecutor.getCommandExecutor().getOSType();
 
