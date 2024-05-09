@@ -17,7 +17,7 @@ import org.apache.logging.log4j.Logger;
 /**
  * Service used to perform topology configuration.
  */
-@Startup(value = 250)
+@Startup(value = 170)
 @ApplicationScoped
 public class ClusterTopologyCommunicationConfigService {
     private static final Logger logger = LogManager.getLogger(ClusterTopologyCommunicationConfigService.class);

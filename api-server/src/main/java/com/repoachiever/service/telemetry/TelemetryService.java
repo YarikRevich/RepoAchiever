@@ -7,7 +7,16 @@ import io.micrometer.prometheus.PrometheusMeterRegistry;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import lombok.SneakyThrows;
+import org.json.JSONException;
+import org.json.JSONObject;
+import xyz.farhanfarooqui.JRocket.Client;
+import xyz.farhanfarooqui.JRocket.JRocketServer;
+import xyz.farhanfarooqui.JRocket.ServerListeners.OnClientConnectListener;
+import xyz.farhanfarooqui.JRocket.ServerListeners.OnClientDisconnectListener;
+import xyz.farhanfarooqui.JRocket.ServerListeners.OnReceiveListener;
 
+import java.io.IOException;
 import java.net.Socket;
 
 /**
@@ -15,23 +24,19 @@ import java.net.Socket;
  */
 @ApplicationScoped
 public class TelemetryService {
-
-    // TODO: try to send prometheus metrics via socket to encapsulate internals.
-    // 1. cannot be accessed publicly.
-    @Inject
-    MeterRegistry registry;
+    private PrometheusMeterRegistry prometheusRegistry;
 
     /**
      *
      */
     @PostConstruct
     public void configure() {
-        PrometheusMeterRegistry prometheusRegistry =
+        this.prometheusRegistry =
                 new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
 
         Metrics.globalRegistry.add(prometheusRegistry);
 
-        prometheusRegistry.scrape();
+//        prometheusRegistry.scrape();
 
 //        new Socket()
     }

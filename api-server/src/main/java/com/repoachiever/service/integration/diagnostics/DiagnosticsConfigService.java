@@ -12,9 +12,11 @@ import com.repoachiever.service.command.nodeexporter.NodeExporterDeployCommandSe
 import com.repoachiever.service.command.prometheus.PrometheusDeployCommandService;
 import com.repoachiever.service.config.ConfigService;
 import com.repoachiever.service.executor.CommandExecutorService;
+import com.repoachiever.service.telemetry.TelemetryService;
 import io.quarkus.runtime.Startup;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.apache.logging.log4j.LogManager;
@@ -26,6 +28,7 @@ import java.util.Objects;
  * Service used to perform diagnostics infrastructure configuration operations.
  */
 @Startup
+@Priority(value = 190)
 @ApplicationScoped
 public class DiagnosticsConfigService {
     private static final Logger logger = LogManager.getLogger(DiagnosticsConfigService.class);
@@ -40,6 +43,9 @@ public class DiagnosticsConfigService {
     CommandExecutorService commandExecutorService;
 
     @Inject
+    TelemetryService telemetryService;
+
+    @Inject
     DockerAvailabilityCheckCommandService dockerAvailabilityCheckCommandService;
 
     /**
@@ -47,6 +53,8 @@ public class DiagnosticsConfigService {
      */
     @PostConstruct
     private void process() {
+        telemetryService.configure();
+
         if (configService.getConfig().getDiagnostics().getEnabled()) {
             CommandExecutorOutputDto dockerAvailabilityCommandOutput;
 

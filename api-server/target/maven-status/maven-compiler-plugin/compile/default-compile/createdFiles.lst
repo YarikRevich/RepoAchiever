@@ -87,6 +87,7 @@ com/repoachiever/service/command/cluster/destroy/ClusterDestroyCommandService$1.
 com/repoachiever/service/integration/diagnostics/template/TemplateConfigService.class
 com/repoachiever/exception/ClusterUnhealthyReapplicationFailureException.class
 com/repoachiever/service/command/grafana/GrafanaDeployCommandService$1.class
+com/repoachiever/service/telemetry/facade/TelemetryFacade.class
 com/repoachiever/exception/ConfigValidationException.class
 com/repoachiever/exception/CredentialsFieldIsNotValidException.class
 com/repoachiever/service/healthcheck/readiness/ReadinessCheckService.class
@@ -171,12 +172,14 @@ com/repoachiever/model/ContentRetrievalResult.class
 com/repoachiever/service/command/prometheus/PrometheusDeployCommandService.class
 com/repoachiever/resource/common/ResourceConfigurationHelper.class
 com/repoachiever/resource/InfoResource.class
+com/repoachiever/exception/TelemetryOperationFailureException.class
 com/repoachiever/service/communication/cluster/IClusterCommunicationService.class
 com/repoachiever/resource/communication/ApiServerCommunicationResource.class
 com/repoachiever/logging/FatalAppender.class
 com/repoachiever/service/command/docker/network/remove/DockerNetworkRemoveCommandService$1.class
 com/repoachiever/service/communication/common/CommunicationProviderConfigurationHelper.class
 com/repoachiever/repository/ProviderRepository.class
+com/repoachiever/service/integration/diagnostics/telemetry/TelemetryConfigService.class
 com/repoachiever/service/integration/diagnostics/template/TemplateConfigService$1$2.class
 com/repoachiever/exception/ClusterDeploymentFailureException.class
 com/repoachiever/exception/MetadataFileWriteFailureException.class

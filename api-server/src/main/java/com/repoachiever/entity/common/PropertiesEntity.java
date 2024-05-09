@@ -143,6 +143,9 @@ public class PropertiesEntity {
     @ConfigProperty(name = "diagnostics.prometheus.node-exporter.docker.image")
     String diagnosticsPrometheusNodeExporterDockerImage;
 
+    @ConfigProperty(name = "diagnostics.metrics.connection.timeout")
+    Integer diagnosticsMetricsConnectionTimeout;
+
     @ConfigProperty(name = "git.commit.id.abbrev")
     String gitCommitId;
 

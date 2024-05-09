@@ -54,13 +54,6 @@ clone-api-server-config: ## Clone RepoAchiever API Server configuration files to
 	@cp -r ./config/prometheus/prometheus.tmpl $(HOME)/.repoachiever/diagnostics/prometheus/config
 	@cp -r ./samples/config/api-server/api-server.yaml $(HOME)/.repoachiever/config
 
-.PHONY: clone-diagnostics-prometheus-config
-clone-diagnostics-prometheus-config:
-
-
-.PHONY: clone-diagnostics-grafana-config
-clone-diagnostics-grafana-config:
-
 .PHONY: clone-worker
 clone-worker: ## Clone Worker JAR into a RepoAchiever local directory
 ifeq (,$(wildcard $(HOME)/.repoachiever/bin/worker))

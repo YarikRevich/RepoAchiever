@@ -10,6 +10,7 @@
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ClusterDeploymentFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/repository/ConfigRepository.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/HealthCheckStatus.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/integration/diagnostics/telemetry/TelemetryConfigService.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/entity/repository/ConfigEntity.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/integration/communication/cluster/healthcheck/ClusterHealthCheckCommunicationService.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/RepositoryOperationFailureException.java
@@ -73,6 +74,7 @@
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/DiagnosticsTemplateProcessingFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/cluster/resource/ClusterCommunicationResource.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/integration/communication/cluster/topology/ClusterTopologyCommunicationConfigService.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/telemetry/facade/TelemetryFacade.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/WorkspaceUnitDirectoryPresentException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/repository/common/RepositoryConfigurationHelper.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/repository/facade/RepositoryFacade.java
@@ -90,6 +92,7 @@
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/repository/SecretRepository.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/integration/diagnostics/template/TemplateConfigService.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/communication/common/CommunicationProviderConfigurationHelper.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/TelemetryOperationFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/VersionInfoResult.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/resource/StateResource.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ContentFileRemovalFailureException.java

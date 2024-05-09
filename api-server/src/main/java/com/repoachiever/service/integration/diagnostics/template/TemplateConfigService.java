@@ -30,7 +30,7 @@ import static freemarker.template.Configuration.VERSION_2_3_32;
  * Service used to perform diagnostics template configuration operations.
  */
 @Startup
-@Priority(value = 160)
+@Priority(value = 180)
 @ApplicationScoped
 public class TemplateConfigService {
     private static final Logger logger = LogManager.getLogger(TemplateConfigService.class);

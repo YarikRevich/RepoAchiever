@@ -19,7 +19,7 @@ import java.rmi.registry.Registry;
 /**
  * Service used to perform RepoAchiever API Server communication provider configuration.
  */
-@Startup(value = 200)
+@Startup(value = 160)
 @ApplicationScoped
 public class ApiServerCommunicationConfigService {
     private static final Logger logger = LogManager.getLogger(ApiServerCommunicationConfigService.class);
