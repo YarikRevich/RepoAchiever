@@ -1,12 +1,13 @@
 package com.repoachiever.repository.facade;
 
+import com.repoachiever.dto.RepositoryContentUnitDto;
+import com.repoachiever.entity.repository.ContentEntity;
 import com.repoachiever.entity.repository.ProviderEntity;
 import com.repoachiever.entity.repository.SecretEntity;
+import com.repoachiever.exception.ContentApplicationRetrievalFailureException;
 import com.repoachiever.exception.RepositoryApplicationFailureException;
 import com.repoachiever.exception.RepositoryOperationFailureException;
-import com.repoachiever.model.ContentApplication;
-import com.repoachiever.model.ContentRetrievalApplication;
-import com.repoachiever.model.ContentStateApplication;
+import com.repoachiever.model.*;
 import com.repoachiever.repository.ConfigRepository;
 import com.repoachiever.repository.ContentRepository;
 import com.repoachiever.repository.ProviderRepository;
@@ -15,7 +16,9 @@ import com.repoachiever.repository.common.RepositoryConfigurationHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -56,6 +59,69 @@ public class RepositoryFacade {
     }
 
     /**
+     * Retrieves all the data from content repository in a form of content applications.
+     *
+     * @return retrieved set of content applications.
+     * @throws ContentApplicationRetrievalFailureException if content application retrieval fails.
+     */
+    public List<ContentApplication> retrieveContentApplication() throws ContentApplicationRetrievalFailureException {
+        List<RepositoryContentUnitDto> units = new ArrayList<>();
+
+        List<ContentEntity> contents;
+
+        try {
+            contents = contentRepository.findAll();
+        } catch (RepositoryOperationFailureException e) {
+            throw new ContentApplicationRetrievalFailureException(e.getMessage());
+        }
+
+        for (ContentEntity content : contents) {
+            ProviderEntity rawProvider;
+
+            try {
+                rawProvider = providerRepository.findById(content.getProvider());
+            } catch (RepositoryOperationFailureException e) {
+                throw new ContentApplicationRetrievalFailureException(e.getMessage());
+            }
+
+            SecretEntity rawSecret;
+
+            try {
+                rawSecret = secretRepository.findById(content.getSecret());
+            } catch (RepositoryOperationFailureException e) {
+                throw new ContentApplicationRetrievalFailureException(e.getMessage());
+            }
+
+            Provider provider =
+                    RepositoryConfigurationHelper.convertRawProviderToContentProvider(
+                            rawProvider.getName());
+
+            CredentialsFieldsFull credentials =
+                    RepositoryConfigurationHelper.convertRawSecretsToContentCredentials(
+                            provider, rawSecret.getSession(), rawSecret.getCredentials());
+
+            units.add(RepositoryContentUnitDto.of(
+                    content.getLocation(),
+                    provider,
+                    credentials));
+        }
+
+        return units
+                .stream()
+                .map(element1 -> {
+                    List<String> locations = units
+                            .stream()
+                            .filter(
+                                    element2 -> Objects.equals(element1.getCredentials(), element2.getCredentials()))
+                            .map(RepositoryContentUnitDto::getLocation)
+                            .toList();
+
+                    return ContentApplication.of(locations, element1.getProvider(), element1.getCredentials());
+                })
+                .toList();
+    }
+
+    /**
      * Applies given content application, updating previous state.
      *
      * @param contentApplication given content application used for topology configuration.
@@ -77,7 +143,6 @@ public class RepositoryFacade {
             if (!secretRepository.isPresentBySessionAndCredentials(
                     contentApplication.getCredentials().getInternal().getId(), credentials)) {
                 secretRepository.insert(
-                        contentApplication.getProvider().toString(),
                         contentApplication.getCredentials().getInternal().getId(),
                         credentials);
             }

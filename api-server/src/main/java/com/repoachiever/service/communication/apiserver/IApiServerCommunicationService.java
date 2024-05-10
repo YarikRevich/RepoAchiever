@@ -11,7 +11,7 @@ public interface IApiServerCommunicationService {
      * Performs raw content upload operation, initiated by RepoAchiever Cluster.
      *
      * @param workspaceUnitKey given user workspace unit key.
-     * @param content given content to be uploaded.
+     * @param content          given content to be uploaded.
      * @throws RemoteException if remote request fails.
      */
     void performRawContentUpload(String workspaceUnitKey, InputStream content) throws RemoteException;
@@ -20,10 +20,19 @@ public interface IApiServerCommunicationService {
      * Performs additional content(issues, prs, releases) upload operation, initiated by RepoAchiever Cluster.
      *
      * @param workspaceUnitKey given user workspace unit key.
-     * @param content given content to be uploaded.
+     * @param content          given content to be uploaded.
      * @throws RemoteException if remote request fails.
      */
     void performAdditionalContentUpload(String workspaceUnitKey, String content) throws RemoteException;
+
+    /**
+     * Handles incoming log messages related to the given RepoAchiever Cluster allocation.
+     *
+     * @param name    given RepoAchiever Cluster allocation name.
+     * @param message given RepoAchiever Cluster log message.
+     * @throws RemoteException if remote request fails.
+     */
+    void transferLogs(String name, String message) throws RemoteException;
 
     /**
      * Retrieves latest RepoAchiever API Server health check states.

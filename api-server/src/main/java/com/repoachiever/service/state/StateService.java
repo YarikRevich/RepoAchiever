@@ -41,12 +41,12 @@ public class StateService {
     }
 
     /**
-     * Adds new RepoAchiever Cluster allocation.
+     * Adds new RepoAchiever Cluster allocations.
      *
-     * @param allocation given RepoAchiever Cluster allocation.
+     * @param allocations given RepoAchiever Cluster allocations.
      */
-    public static void addClusterAllocation(ClusterAllocationDto allocation) {
-        clusterAllocations.add(allocation);
+    public static void addClusterAllocations(List<ClusterAllocationDto> allocations) {
+        clusterAllocations.addAll(allocations);
     }
 
     /**

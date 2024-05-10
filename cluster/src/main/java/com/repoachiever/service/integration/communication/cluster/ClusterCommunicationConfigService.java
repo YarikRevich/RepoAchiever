@@ -48,7 +48,7 @@ public class ClusterCommunicationConfigService {
                 registry.rebind(
                         CommunicationProviderConfigurationHelper.getBindName(
                                 configService.getConfig().getCommunication().getPort(),
-                                configService.getConfig().getName()),
+                                configService.getConfig().getMetadata().getName()),
                         new ClusterCommunicationResource(properties));
             } catch (RemoteException e) {
                 logger.fatal(e.getMessage());

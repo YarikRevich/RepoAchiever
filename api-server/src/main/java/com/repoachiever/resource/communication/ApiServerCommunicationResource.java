@@ -37,6 +37,14 @@ public class ApiServerCommunicationResource extends UnicastRemoteObject implemen
      * @see IApiServerCommunicationService
      */
     @Override
+    public void transferLogs(String name, String message) throws RemoteException {
+
+    }
+
+    /**
+     * @see IApiServerCommunicationService
+     */
+    @Override
     public Boolean retrieveHealthCheck() throws RemoteException {
         return true;
     }

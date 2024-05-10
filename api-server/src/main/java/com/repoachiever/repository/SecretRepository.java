@@ -30,26 +30,23 @@ public class SecretRepository {
     /**
      * Inserts given values into the provider table.
      *
-     * @param name    given provider name.
      * @param session given internal secret.
      * @param credentials   given optional external credentials.
      * @throws RepositoryOperationFailureException if operation execution fails.
      */
-    public void insert(String name, Integer session, Optional<String> credentials) throws RepositoryOperationFailureException {
+    public void insert(Integer session, Optional<String> credentials) throws RepositoryOperationFailureException {
         String query;
 
         if (credentials.isPresent()) {
             query = String.format(
-                    "INSERT INTO %s (name, session, credentials) VALUES ('%s', %d, '%s')",
+                    "INSERT INTO %s (session, credentials) VALUES (%d, '%s')",
                     properties.getDatabaseSecretTableName(),
-                    name,
                     session,
                     credentials.get());
         } else {
             query = String.format(
-                    "INSERT INTO %s (name, session) VALUES ('%s', %d)",
+                    "INSERT INTO %s (session) VALUES (%d)",
                     properties.getDatabaseSecretTableName(),
-                    name,
                     session);
         }
 
@@ -148,5 +145,50 @@ public class SecretRepository {
         }
 
         return SecretEntity.of(id, session, credentials);
+    }
+
+    /**
+     * Attempts to retrieve secret entity by the given identificator.
+     *
+     * @param id given identificator of the secrets set.
+     * @return retrieved secret entity.
+     * @throws RepositoryOperationFailureException if repository operation fails.
+     */
+    public SecretEntity findById(Integer id) throws RepositoryOperationFailureException {
+        ResultSet resultSet;
+
+        try {
+            resultSet = repositoryExecutor.performQueryWithResult(String.format(
+                    "SELECT t.session, t.credentials FROM %s as t WHERE t.id = %d",
+                    properties.getDatabaseSecretTableName(),
+                    id));
+
+        } catch (QueryExecutionFailureException | QueryEmptyResultException e) {
+            throw new RepositoryOperationFailureException(e.getMessage());
+        }
+
+        Integer session;
+
+        try {
+            session = resultSet.getInt("session");
+        } catch (SQLException e) {
+            throw new RepositoryOperationFailureException(e.getMessage());
+        }
+
+        String credentials;
+
+        try {
+            credentials = resultSet.getString("credentials");
+        } catch (SQLException e) {
+            throw new RepositoryOperationFailureException(e.getMessage());
+        }
+
+        try {
+            resultSet.close();
+        } catch (SQLException e) {
+            throw new RepositoryOperationFailureException(e.getMessage());
+        }
+
+        return SecretEntity.of(id, session, Optional.ofNullable(credentials));
     }
 }

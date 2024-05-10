@@ -92,7 +92,7 @@ public class ContentRepository {
             resultSet =
                     repositoryExecutor.performQueryWithResult(
                             String.format(
-                                    "SELECT t.id, t.location, t.provider, t.secret FROM %s",
+                                    "SELECT t.id, t.location, t.provider, t.secret FROM %s as t",
                                     properties.getDatabaseContentTableName()));
 
         } catch (QueryExecutionFailureException | QueryEmptyResultException e) {

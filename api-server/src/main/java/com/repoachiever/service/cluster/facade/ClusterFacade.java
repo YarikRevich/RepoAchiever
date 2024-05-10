@@ -130,6 +130,24 @@ public class ClusterFacade {
             candidates.add(ClusterAllocationDto.of(name, pid, context, workspaceUnitKey));
         }
 
+        for (ClusterAllocationDto candidate : candidates) {
+            try {
+                clusterCommunicationResource.performServe(candidate.getName());
+            } catch (ClusterOperationFailureException e1) {
+                for (ClusterAllocationDto suspended : suspends) {
+                    try {
+                        clusterCommunicationResource.performServe(suspended.getName());
+                    } catch (ClusterOperationFailureException e2) {
+                        logger.fatal(new ClusterApplicationFailureException(
+                                e1.getMessage(), e2.getMessage()).getMessage());
+                        return;
+                    }
+                }
+
+                throw new ClusterApplicationFailureException(e1.getMessage());
+            }
+        }
+
         for (ClusterAllocationDto suspended : suspends) {
             try {
                 clusterService.destroy(suspended.getPid());
@@ -138,15 +156,29 @@ public class ClusterFacade {
             }
         }
 
-        candidates.forEach(StateService::addClusterAllocation);
+        StateService.addClusterAllocations(candidates);
 
-        StateService.removeClusterAllocationByNames(suspends.stream().map(ClusterAllocationDto::getName).toList());
+        StateService.removeClusterAllocationByNames(
+                suspends.stream().map(ClusterAllocationDto::getName).toList());
 
         StateService.getTopologyStateGuard().unlock();
     }
 
-    // TODO: halt cluster during instance update operations, to exclude concurrency related issues.
+    /**
+     * Destroys cluster.
+     */
+    public void destroy() {
 
+    }
+
+    public void destroyAll() {
+        for (ClusterAllocationDto clusterAllocation : StateService.getClusterAllocations()) {
+            try {
+                clusterService.destroy(clusterAllocation.getPid());
+            } catch (ClusterDestructionFailureException ignored) {
+            }
+        };
+    }
 
     /**
      * Reapplies all unhealthy RepoAchiever Cluster allocations, which healthcheck operation failed for, recreating them.
@@ -182,7 +214,7 @@ public class ClusterFacade {
 
         StateService.removeClusterAllocationByNames(removable);
 
-        updates.forEach(StateService::addClusterAllocation);
+//        updates.forEach(StateService::addClusterAllocation);
 
 
         StateService.getTopologyStateGuard().unlock();
