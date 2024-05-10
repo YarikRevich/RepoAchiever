@@ -12,10 +12,13 @@ import com.repoachiever.service.cluster.ClusterService;
 import com.repoachiever.service.cluster.common.ClusterConfigurationHelper;
 import com.repoachiever.service.cluster.resource.ClusterCommunicationResource;
 import com.repoachiever.service.config.ConfigService;
+import com.repoachiever.service.integration.communication.cluster.topology.ClusterTopologyCommunicationConfigService;
 import com.repoachiever.service.state.StateService;
 import com.repoachiever.service.workspace.facade.WorkspaceFacade;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +28,8 @@ import java.util.List;
  */
 @ApplicationScoped
 public class ClusterFacade {
+    private static final Logger logger = LogManager.getLogger(ClusterFacade.class);
+
     @Inject
     PropertiesEntity properties;
 
@@ -47,42 +52,32 @@ public class ClusterFacade {
      * @throws ClusterApplicationFailureException if RepoAchiever Cluster application failed.
      */
     public void apply(ContentApplication contentApplication) throws ClusterApplicationFailureException {
-        // TODO: try to check if health check if ok, if no, try to recreate, if no, then fail.
-
-        // TODO: place all clusters for the given user to suspended state.
-        // TODO: try to create new ones for the given user.
+        StateService.getTopologyStateGuard().lock();
 
         String workspaceUnitKey =
                 workspaceFacade.createUnitKey(
                         contentApplication.getProvider(), contentApplication.getCredentials());
 
-        List<String> suspended = new ArrayList<>();
+        List<ClusterAllocationDto> suspends = new ArrayList<>();
 
         for (ClusterAllocationDto clusterAllocation : StateService.
                 getClusterAllocationsByWorkspaceUnitKey(workspaceUnitKey)) {
             try {
                 clusterCommunicationResource.performSuspend(clusterAllocation.getName());
 
-            } catch (ClusterOperationFailureException ignored) {
-
+            } catch (ClusterOperationFailureException e) {
+                logger.fatal(new ClusterApplicationFailureException(e.getMessage()).getMessage());
+                return;
             }
 
-            suspended.add(clusterAllocation.getName());
+            suspends.add(clusterAllocation);
         }
-
-
-
-
-
-
-
-
-
-//        StateService.removeClusterAllocationByNames(removable);
 
         List<List<String>> segregation = clusterService.performContentLocationsSegregation(
                 contentApplication.getLocations(),
                 configService.getConfig().getResource().getCluster().getMaxWorkers());
+
+        List<ClusterAllocationDto> candidates = new ArrayList<>();
 
         for (List<String> locations : segregation) {
             String name = ClusterConfigurationHelper.getName(properties.getCommunicationClusterBase());
@@ -110,30 +105,44 @@ public class ClusterFacade {
             Integer pid;
 
             try {
-                pid = clusterService.deploy(context);
-            } catch (ClusterDeploymentFailureException e) {
+                pid = clusterService.deploy(name, context);
+            } catch (ClusterDeploymentFailureException e1) {
+                for (ClusterAllocationDto candidate : candidates) {
+                    try {
+                        clusterService.destroy(candidate.getPid());
+                    } catch (ClusterDestructionFailureException e2) {
+                        throw new ClusterApplicationFailureException(e1.getMessage(), e2.getMessage());
+                    }
+                }
+
+                for (ClusterAllocationDto suspended : suspends) {
+                    try {
+                        clusterCommunicationResource.performServe(suspended.getName());
+                    } catch (ClusterOperationFailureException e2) {
+                        logger.fatal(new ClusterApplicationFailureException(e1.getMessage(), e2.getMessage()).getMessage());
+                        return;
+                    }
+                }
+
+                throw new ClusterApplicationFailureException(e1.getMessage());
+            }
+
+            candidates.add(ClusterAllocationDto.of(name, pid, context, workspaceUnitKey));
+        }
+
+        for (ClusterAllocationDto suspended : suspends) {
+            try {
+                clusterService.destroy(suspended.getPid());
+            } catch (ClusterDestructionFailureException e) {
                 throw new ClusterApplicationFailureException(e.getMessage());
             }
-
-            if (!ClusterConfigurationHelper.waitForStart(() -> {
-                        try {
-                            if (clusterCommunicationResource.retrieveHealthCheck(name)) {
-                                return true;
-                            }
-                        } catch (ClusterOperationFailureException e) {
-                            return false;
-                        }
-
-                        return false;
-                    },
-                    properties.getCommunicationClusterStartupAwaitFrequency(),
-                    properties.getCommunicationClusterStartupTimeout())) {
-                throw new ClusterApplicationFailureException(new ClusterApplicationTimeoutException().getMessage());
-            }
-
-            StateService.addClusterAllocation(
-                    ClusterAllocationDto.of(name, pid, context, workspaceUnitKey));
         }
+
+        candidates.forEach(StateService::addClusterAllocation);
+
+        StateService.removeClusterAllocationByNames(suspends.stream().map(ClusterAllocationDto::getName).toList());
+
+        StateService.getTopologyStateGuard().unlock();
     }
 
     // TODO: halt cluster during instance update operations, to exclude concurrency related issues.
@@ -145,6 +154,9 @@ public class ClusterFacade {
      * @throws ClusterUnhealthyReapplicationFailureException if RepoAchiever Cluster unhealthy allocation reapplication fails.
      */
     public void reapplyUnhealthy() throws ClusterUnhealthyReapplicationFailureException {
+        StateService.getTopologyStateGuard().lock();
+
+
         List<ClusterAllocationDto> updates = new ArrayList<>();
         List<String> removable = new ArrayList<>();
 
@@ -157,7 +169,7 @@ public class ClusterFacade {
             Integer pid;
 
             try {
-                pid = clusterService.deploy(clusterAllocation.getContext());
+                pid = clusterService.deploy(clusterAllocation.getName(), clusterAllocation.getContext());
             } catch (ClusterDeploymentFailureException e) {
                 throw new ClusterUnhealthyReapplicationFailureException(e.getMessage());
             }
@@ -171,6 +183,9 @@ public class ClusterFacade {
         StateService.removeClusterAllocationByNames(removable);
 
         updates.forEach(StateService::addClusterAllocation);
+
+
+        StateService.getTopologyStateGuard().unlock();
     }
 }
 

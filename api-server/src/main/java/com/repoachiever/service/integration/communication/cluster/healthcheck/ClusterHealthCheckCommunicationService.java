@@ -48,11 +48,11 @@ public class ClusterHealthCheckCommunicationService {
     @PostConstruct
     private void process() {
         scheduledExecutorService.schedule(() -> {
-            try {
-                clusterFacade.reapplyUnhealthy();
-            } catch (ClusterUnhealthyReapplicationFailureException e) {
-                logger.fatal(e.getMessage());
-            }
+//            try {
+//                clusterFacade.reapplyUnhealthy();
+//            } catch (ClusterUnhealthyReapplicationFailureException e) {
+//                logger.fatal(e.getMessage());
+//            }
         }, properties.getCommunicationClusterHealthCheckFrequency(), TimeUnit.MILLISECONDS);
     }
 }

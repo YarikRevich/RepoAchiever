@@ -54,7 +54,6 @@ public class ContentResource implements ContentResourceApi {
      */
     @Override
     @SneakyThrows
-    @Transactional
     public void v1ContentApplyPost(ContentApplication contentApplication) {
         if (Objects.isNull(contentApplication)) {
             throw new BadRequestException();

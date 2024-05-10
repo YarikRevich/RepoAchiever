@@ -15,6 +15,13 @@ import java.util.stream.Collectors;
  */
 public class StateService {
     /**
+     * Represents RepoAchiever Cluster topology state guard.
+     */
+    @Getter
+    private final static ReentrantLock topologyStateGuard = new ReentrantLock();
+
+
+    /**
      * Represents a set of all available RepoAchiever Cluster allocations.
      */
     @Getter

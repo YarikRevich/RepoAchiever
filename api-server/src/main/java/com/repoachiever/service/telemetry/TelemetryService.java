@@ -1,57 +1,57 @@
 package com.repoachiever.service.telemetry;
 
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Metrics;
-import io.micrometer.prometheus.PrometheusConfig;
-import io.micrometer.prometheus.PrometheusMeterRegistry;
-import jakarta.annotation.PostConstruct;
+import com.repoachiever.service.telemetry.binding.TelemetryBinding;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import lombok.SneakyThrows;
-import org.json.JSONException;
-import org.json.JSONObject;
-import xyz.farhanfarooqui.JRocket.Client;
-import xyz.farhanfarooqui.JRocket.JRocketServer;
-import xyz.farhanfarooqui.JRocket.ServerListeners.OnClientConnectListener;
-import xyz.farhanfarooqui.JRocket.ServerListeners.OnClientDisconnectListener;
-import xyz.farhanfarooqui.JRocket.ServerListeners.OnReceiveListener;
-
-import java.io.IOException;
-import java.net.Socket;
 
 /**
  * Provides access to gather information and expose it to telemetry representation tool.
  */
 @ApplicationScoped
 public class TelemetryService {
-    private PrometheusMeterRegistry prometheusRegistry;
+    @Inject
+    TelemetryBinding telemetryBinding;
 
     /**
+     * Increases allocated workers amount counter.
      *
+     * @param value given increment value.
      */
-    @PostConstruct
-    public void configure() {
-        this.prometheusRegistry =
-                new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
-
-        Metrics.globalRegistry.add(prometheusRegistry);
-
-//        prometheusRegistry.scrape();
-
-//        new Socket()
+    public void increaseWorkersAmountBy(Integer value) {
+        telemetryBinding.getWorkerAmount().set(telemetryBinding.getWorkerAmount().get() + value);
     }
 
-//
-//
-//
-//    private Socket clientSocket;
-//    private PrintWriter out;
-//    private BufferedReader in;
-//
-//    public void startConnection(String ip, int port) {
-//        clientSocket = new Socket(ip, port);
-//        out = new PrintWriter(clientSocket.getOutputStream(), true);
-//        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-//    }
+    /**
+     * Decreases allocated workers amount counter.
+     *
+     * @param value given increment value.
+     */
+    public void decreaseWorkersAmountBy(Integer value) {
+        telemetryBinding.getWorkerAmount().set(telemetryBinding.getWorkerAmount().get() - value);
+    }
 
+    /**
+     * Increases allocated clusters amount counter.
+     *
+     * @param value given increment value.
+     */
+    public void increaseClustersAmountBy(Integer value) {
+        telemetryBinding.getWorkerAmount().set(telemetryBinding.getWorkerAmount().get() + value);
+    }
+
+    /**
+     * Decreases allocated clusters amount counter.
+     *
+     * @param value given increment value.
+     */
+    public void decreaseClustersAmountBy(Integer value) {
+        telemetryBinding.getWorkerAmount().set(telemetryBinding.getWorkerAmount().get() - value);
+    }
+
+    /**
+     * Records latest cluster allocation health check.
+     */
+    public void recordClusterHealthCheck() {
+
+    }
 }

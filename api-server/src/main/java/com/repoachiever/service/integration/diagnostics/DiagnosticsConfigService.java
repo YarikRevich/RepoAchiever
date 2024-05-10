@@ -43,9 +43,6 @@ public class DiagnosticsConfigService {
     CommandExecutorService commandExecutorService;
 
     @Inject
-    TelemetryService telemetryService;
-
-    @Inject
     DockerAvailabilityCheckCommandService dockerAvailabilityCheckCommandService;
 
     /**
@@ -53,8 +50,6 @@ public class DiagnosticsConfigService {
      */
     @PostConstruct
     private void process() {
-        telemetryService.configure();
-
         if (configService.getConfig().getDiagnostics().getEnabled()) {
             CommandExecutorOutputDto dockerAvailabilityCommandOutput;
 

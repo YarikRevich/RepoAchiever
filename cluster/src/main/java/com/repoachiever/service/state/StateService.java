@@ -17,9 +17,10 @@ public class StateService {
     private static Boolean exit = false;
 
     /**
-     * Represents suspended state used to temporary halt execution of RepoAchiever Cluster allocation.
+     * Represents suspended state used to temporary halt execution of RepoAchiever Cluster allocation. By default
+     * RepoAchiever Cluster is considered to be suspended.
      */
     @Getter
     @Setter
-    private static Boolean suspended = false;
+    private static Boolean suspended = true;
 }

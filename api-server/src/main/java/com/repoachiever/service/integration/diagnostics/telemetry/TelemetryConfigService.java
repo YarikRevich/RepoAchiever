@@ -3,8 +3,7 @@ package com.repoachiever.service.integration.diagnostics.telemetry;
 import com.repoachiever.entity.common.PropertiesEntity;
 import com.repoachiever.exception.TelemetryOperationFailureException;
 import com.repoachiever.service.config.ConfigService;
-import io.micrometer.core.instrument.Metrics;
-import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics;
+import com.repoachiever.service.telemetry.binding.TelemetryBinding;
 import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
 import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics;
 import io.micrometer.core.instrument.binder.system.DiskSpaceMetrics;
@@ -44,12 +43,15 @@ public class TelemetryConfigService {
     @Inject
     ConfigService configService;
 
+    @Inject
+    TelemetryBinding telemetryBinding;
+
     private ServerSocket connector;
 
     private final ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
 
     /**
-     *
+     * Performs telemetry metrics server configuration, registering bindings provided by external provider.
      */
     @PostConstruct
     private void configure() {
@@ -69,7 +71,7 @@ public class TelemetryConfigService {
         new ProcessorMetrics().bindTo(prometheusRegistry);
         new UptimeMetrics().bindTo(prometheusRegistry);
 
-        Metrics.globalRegistry.add(prometheusRegistry);
+        telemetryBinding.bindTo(prometheusRegistry);
 
         Thread.ofPlatform().start(() -> {
             while (!connector.isClosed()) {
