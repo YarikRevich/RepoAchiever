@@ -30,7 +30,8 @@ public class WorkspaceFacade {
     public String createUnitKey(Provider provider, CredentialsFieldsFull credentialsFields) {
         return switch (provider) {
             case LOCAL -> workspaceService.createUnitKey(String.valueOf(credentialsFields.getInternal().getId()));
-            case GITHUB -> workspaceService.createUnitKey(String.valueOf(credentialsFields.getInternal().getId()), credentialsFields.getExternal().getToken());
+            case GITHUB -> workspaceService.createUnitKey(
+                    String.valueOf(credentialsFields.getInternal().getId()), credentialsFields.getExternal().getToken());
         };
     }
 

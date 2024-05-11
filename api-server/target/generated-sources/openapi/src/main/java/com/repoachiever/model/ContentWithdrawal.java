@@ -1,6 +1,7 @@
 package com.repoachiever.model;
 
-import com.repoachiever.model.HealthCheckStatus;
+import com.repoachiever.model.CredentialsFieldsFull;
+import com.repoachiever.model.Provider;
 import java.io.Serializable;
 import jakarta.validation.constraints.*;
 import jakarta.validation.Valid;
@@ -13,49 +14,49 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 
 
-@JsonTypeName("HealthCheckUnit")
+@JsonTypeName("ContentWithdrawal")
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", date = "2024-05-11T13:02:36.726062+02:00[Europe/Warsaw]")@lombok.Data @lombok.NoArgsConstructor @lombok.AllArgsConstructor(staticName = "of")
 
-public class HealthCheckUnit  implements Serializable {
-  private @Valid String name;
-  private @Valid HealthCheckStatus status;
+public class ContentWithdrawal  implements Serializable {
+  private @Valid Provider provider;
+  private @Valid CredentialsFieldsFull credentials;
 
   /**
    **/
-  public HealthCheckUnit name(String name) {
-    this.name = name;
+  public ContentWithdrawal provider(Provider provider) {
+    this.provider = provider;
     return this;
   }
 
   
-  @JsonProperty("name")
+  @JsonProperty("provider")
   @NotNull
-  public String getName() {
-    return name;
+  public Provider getProvider() {
+    return provider;
   }
 
-  @JsonProperty("name")
-  public void setName(String name) {
-    this.name = name;
+  @JsonProperty("provider")
+  public void setProvider(Provider provider) {
+    this.provider = provider;
   }
 
   /**
    **/
-  public HealthCheckUnit status(HealthCheckStatus status) {
-    this.status = status;
+  public ContentWithdrawal credentials(CredentialsFieldsFull credentials) {
+    this.credentials = credentials;
     return this;
   }
 
   
-  @JsonProperty("status")
+  @JsonProperty("credentials")
   @NotNull
-  public HealthCheckStatus getStatus() {
-    return status;
+  public CredentialsFieldsFull getCredentials() {
+    return credentials;
   }
 
-  @JsonProperty("status")
-  public void setStatus(HealthCheckStatus status) {
-    this.status = status;
+  @JsonProperty("credentials")
+  public void setCredentials(CredentialsFieldsFull credentials) {
+    this.credentials = credentials;
   }
 
 
@@ -67,23 +68,23 @@ public class HealthCheckUnit  implements Serializable {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    HealthCheckUnit healthCheckUnit = (HealthCheckUnit) o;
-    return Objects.equals(this.name, healthCheckUnit.name) &&
-        Objects.equals(this.status, healthCheckUnit.status);
+    ContentWithdrawal contentWithdrawal = (ContentWithdrawal) o;
+    return Objects.equals(this.provider, contentWithdrawal.provider) &&
+        Objects.equals(this.credentials, contentWithdrawal.credentials);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, status);
+    return Objects.hash(provider, credentials);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class HealthCheckUnit {\n");
+    sb.append("class ContentWithdrawal {\n");
     
-    sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    status: ").append(toIndentedString(status)).append("\n");
+    sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
+    sb.append("    credentials: ").append(toIndentedString(credentials)).append("\n");
     sb.append("}");
     return sb.toString();
   }

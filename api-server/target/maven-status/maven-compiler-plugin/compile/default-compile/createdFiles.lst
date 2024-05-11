@@ -1,6 +1,7 @@
 com/repoachiever/model/GitGitHubCredentials.class
 com/repoachiever/service/command/cluster/deploy/ClusterDeployCommandService.class
 com/repoachiever/repository/facade/RepositoryFacade.class
+com/repoachiever/model/ContentCleanup.class
 com/repoachiever/exception/ContentFileNotFoundException.class
 com/repoachiever/dto/RepositoryContentUnitDto.class
 com/repoachiever/entity/common/ClusterContextEntity$Metadata.class
@@ -103,6 +104,7 @@ com/repoachiever/service/workspace/facade/WorkspaceFacade$1.class
 com/repoachiever/entity/common/ConfigEntity$Resource$Worker.class
 com/repoachiever/service/vendor/common/VendorConfigurationHelper.class
 com/repoachiever/service/integration/http/HttpServerConfigService.class
+com/repoachiever/exception/ClusterWithdrawalFailureException.class
 com/repoachiever/service/integration/properties/git/GitPropertiesConfigService.class
 com/repoachiever/converter/HealthCheckResponseToReadinessCheckResult$1.class
 com/repoachiever/repository/common/RepositoryConfigurationHelper$1.class
@@ -111,6 +113,7 @@ com/repoachiever/entity/common/ClusterContextEntity$Service$Credentials.class
 com/repoachiever/service/client/smallrye/ISmallRyeHealthCheckClientService.class
 com/repoachiever/exception/DiagnosticsTemplateProcessingFailureException.class
 com/repoachiever/service/command/common/CommandConfigurationHelper.class
+com/repoachiever/mapping/ClusterWithdrawalFailureExceptionMapper.class
 com/repoachiever/service/command/docker/inspect/remove/DockerInspectRemoveCommandService$1.class
 com/repoachiever/resource/common/ResourceConfigurationHelper$1.class
 META-INF/panache-archive.marker
@@ -139,6 +142,7 @@ com/repoachiever/entity/repository/ContentEntity.class
 com/repoachiever/service/command/grafana/common/GrafanaConfigurationHelper$2.class
 com/repoachiever/service/command/grafana/GrafanaDeployCommandService.class
 com/repoachiever/entity/common/PropertiesEntity.class
+com/repoachiever/model/ContentWithdrawal.class
 com/repoachiever/service/command/prometheus/common/PrometheusConfigurationHelper$1.class
 com/repoachiever/exception/WorkspaceUnitDirectoryPresentException.class
 com/repoachiever/service/integration/diagnostics/DiagnosticsConfigService.class
@@ -188,6 +192,7 @@ com/repoachiever/exception/MetadataFileWriteFailureException.class
 com/repoachiever/exception/CredentialsConversionException.class
 com/repoachiever/service/cluster/ClusterService.class
 com/repoachiever/service/command/cluster/deploy/ClusterDeployCommandService$1.class
+com/repoachiever/exception/ClusterFullDestructionFailureException.class
 com/repoachiever/entity/common/ConfigEntity$Diagnostics$NodeExporter.class
 com/repoachiever/service/communication/apiserver/IApiServerCommunicationService.class
 com/repoachiever/service/client/github/IGitHubClientService.class

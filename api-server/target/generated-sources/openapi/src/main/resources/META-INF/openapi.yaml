@@ -25,7 +25,7 @@ paths:
         description: Content retrieval application
         required: true
       responses:
-        "201":
+        "204":
           content:
             application/json:
               schema:
@@ -47,10 +47,30 @@ paths:
         description: Content configuration application
         required: true
       responses:
-        "201":
+        "204":
           description: Given content configuration was successfully applied
         "400":
           description: Given content configuration was not applied
+      tags:
+      - ContentResource
+      x-content-type: application/json
+      x-accepts: application/json
+      x-tags:
+      - tag: ContentResource
+  /v1/content/withdraw:
+    delete:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentWithdrawal'
+        description: Content withdraw application. Does not remove persisted content.
+        required: true
+      responses:
+        "204":
+          description: Given content configuration was successfully withdrawn
+        "400":
+          description: Given content configuration was not withdrawn
       tags:
       - ContentResource
       x-content-type: application/json
@@ -79,6 +99,26 @@ paths:
       tags:
       - ContentResource
       x-accepts: application/octet-stream
+      x-tags:
+      - tag: ContentResource
+  /v1/content/clean:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentCleanup'
+        description: Content configuration application
+        required: true
+      responses:
+        "201":
+          description: Content with the given configuration was successfully deleted
+        "400":
+          description: Content with the given configuration was not deleted
+      tags:
+      - ContentResource
+      x-content-type: application/json
+      x-accepts: application/json
       x-tags:
       - tag: ContentResource
   /v1/state/content:
@@ -265,6 +305,32 @@ components:
       - credentials
       - locations
       - provider
+    ContentWithdrawal:
+      example:
+        provider: null
+        credentials:
+          internal:
+            id: 0
+          external: null
+      properties:
+        provider:
+          $ref: '#/components/schemas/Provider'
+        credentials:
+          $ref: '#/components/schemas/CredentialsFieldsFull'
+      required:
+      - credentials
+      - provider
+    ContentCleanup:
+      example:
+        credentials:
+          internal:
+            id: 0
+          external: null
+      properties:
+        credentials:
+          $ref: '#/components/schemas/CredentialsFieldsFull'
+      required:
+      - credentials
     ContentStateApplication:
       example:
         provider: null

@@ -2,6 +2,7 @@
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/DockerInspectRemovalFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/communication/apiserver/IApiServerCommunicationService.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/CredentialsFieldsExternal.java
+/Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/ContentWithdrawal.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/entity/repository/SecretEntity.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/command/prometheus/PrometheusDeployCommandService.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/CredentialsConversionException.java
@@ -13,6 +14,7 @@
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/integration/diagnostics/telemetry/TelemetryConfigService.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/entity/repository/ConfigEntity.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/integration/communication/cluster/healthcheck/ClusterHealthCheckCommunicationService.java
+/Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/ContentCleanup.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/RepositoryOperationFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/ContentApplication.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/api/ContentResourceApi.java
@@ -85,6 +87,7 @@
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/communication/cluster/IClusterCommunicationService.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/healthcheck/readiness/ReadinessCheckService.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/command/docker/inspect/remove/DockerInspectRemoveCommandService.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/mapping/ClusterWithdrawalFailureExceptionMapper.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ClusterApplicationTimeoutException.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/ContentStateApplication.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/repository/SecretRepository.java
@@ -93,6 +96,7 @@
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/TelemetryOperationFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ClusterRecreationFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/VersionInfoResult.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ClusterWithdrawalFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/resource/StateResource.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ContentFileRemovalFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/command/nodeexporter/common/NodeExporterConfigurationHelper.java
@@ -121,6 +125,7 @@
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/entity/common/ClusterContextEntity.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/config/ConfigService.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/telemetry/binding/TelemetryBinding.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ClusterFullDestructionFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/CredentialsFieldsInternal.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ClusterOperationFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/DockerNetworkRemoveFailureException.java

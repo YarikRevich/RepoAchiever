@@ -3,9 +3,7 @@ package com.repoachiever.resource;
 import com.repoachiever.api.ContentResourceApi;
 import com.repoachiever.exception.CredentialsAreNotValidException;
 import com.repoachiever.exception.CredentialsFieldIsNotValidException;
-import com.repoachiever.model.ContentApplication;
-import com.repoachiever.model.ContentRetrievalApplication;
-import com.repoachiever.model.ContentRetrievalResult;
+import com.repoachiever.model.*;
 import com.repoachiever.repository.facade.RepositoryFacade;
 import com.repoachiever.resource.common.ResourceConfigurationHelper;
 import com.repoachiever.service.cluster.facade.ClusterFacade;
@@ -75,6 +73,16 @@ public class ContentResource implements ContentResourceApi {
     }
 
     /**
+     * Implementation for declared in OpenAPI configuration v1ContentWithdrawDelete method.
+     *
+     * @param contentWithdrawal content withdrawal application.
+     */
+    @Override
+    public void v1ContentWithdrawDelete(ContentWithdrawal contentWithdrawal) {
+
+    }
+
+    /**
      * Implementation for declared in OpenAPI configuration v1ContentDownloadGet method.
      *
      * @param location name of content location to be downloaded.
@@ -84,5 +92,15 @@ public class ContentResource implements ContentResourceApi {
     public File v1ContentDownloadGet(String location) {
 
         return null;
+    }
+
+    /**
+     * Implementation for declared in OpenAPI configuration v1ContentCleanPost method.
+     *
+     * @param contentCleanup content cleanup application.
+     */
+    @Override
+    public void v1ContentCleanPost(ContentCleanup contentCleanup) {
+
     }
 }

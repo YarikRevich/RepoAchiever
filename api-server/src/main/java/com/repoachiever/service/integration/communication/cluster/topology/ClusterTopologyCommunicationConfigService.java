@@ -1,22 +1,9 @@
 package com.repoachiever.service.integration.communication.cluster.topology;
 
-import com.repoachiever.dto.ClusterAllocationDto;
-import com.repoachiever.entity.repository.ContentEntity;
-import com.repoachiever.entity.repository.ProviderEntity;
-import com.repoachiever.entity.repository.SecretEntity;
-import com.repoachiever.exception.ClusterApplicationFailureException;
-import com.repoachiever.exception.ClusterDestructionFailureException;
-import com.repoachiever.exception.ContentApplicationRetrievalFailureException;
-import com.repoachiever.exception.RepositoryOperationFailureException;
+import com.repoachiever.exception.*;
 import com.repoachiever.model.ContentApplication;
-import com.repoachiever.repository.ConfigRepository;
-import com.repoachiever.repository.ContentRepository;
-import com.repoachiever.repository.ProviderRepository;
-import com.repoachiever.repository.SecretRepository;
 import com.repoachiever.repository.facade.RepositoryFacade;
-import com.repoachiever.service.cluster.ClusterService;
 import com.repoachiever.service.cluster.facade.ClusterFacade;
-import com.repoachiever.service.state.StateService;
 import io.quarkus.runtime.Startup;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -41,9 +28,6 @@ public class ClusterTopologyCommunicationConfigService {
 
     @Inject
     ClusterFacade clusterFacade;
-
-    @Inject
-    ClusterService clusterService;
 
     /**
      * Recreates previously created topology infrastructure if such existed before.
@@ -73,11 +57,10 @@ public class ClusterTopologyCommunicationConfigService {
      * Gracefully stops all the created topology infrastructure.
      */
     public void close(@Observes Shutdown event) {
-        for (ClusterAllocationDto clusterAllocation : StateService.getClusterAllocations()) {
-            try {
-                clusterService.destroy(clusterAllocation.getPid());
-            } catch (ClusterDestructionFailureException ignored) {
-            }
+        try {
+            clusterFacade.destroyAll();
+        } catch (ClusterFullDestructionFailureException e) {
+            logger.error(e.getMessage());
         }
     }
 }

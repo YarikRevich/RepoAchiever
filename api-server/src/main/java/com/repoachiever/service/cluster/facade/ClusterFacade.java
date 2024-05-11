@@ -8,6 +8,7 @@ import com.repoachiever.entity.common.ClusterContextEntity;
 import com.repoachiever.entity.common.PropertiesEntity;
 import com.repoachiever.exception.*;
 import com.repoachiever.model.ContentApplication;
+import com.repoachiever.model.ContentWithdrawal;
 import com.repoachiever.service.cluster.ClusterService;
 import com.repoachiever.service.cluster.common.ClusterConfigurationHelper;
 import com.repoachiever.service.cluster.resource.ClusterCommunicationResource;
@@ -22,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Provides high-level access to RepoAchiever Cluster related operations.
@@ -165,19 +167,51 @@ public class ClusterFacade {
     }
 
     /**
-     * Destroys cluster.
+     * Applies given content withdrawal, removing existing content configuration with the given properties.
+     *
+     * @param contentWithdrawal given content application used for topology configuration.
+     * @throws ClusterWithdrawalFailureException if RepoAchiever Cluster withdrawal failed.
      */
-    public void destroy() {
+    public void destroy(ContentWithdrawal contentWithdrawal) throws ClusterWithdrawalFailureException {
+        StateService.getTopologyStateGuard().lock();
 
+        String workspaceUnitKey =
+                workspaceFacade.createUnitKey(
+                        contentWithdrawal.getProvider(), contentWithdrawal.getCredentials());
+
+        List<ClusterAllocationDto> candidates = StateService.getClusterAllocations()
+                .stream()
+                .filter(element -> Objects.equals(element.getWorkspaceUnitKey(), workspaceUnitKey))
+                .toList();
+
+        for (ClusterAllocationDto candidate : candidates) {
+            try {
+                clusterService.destroy(candidate.getPid());
+            } catch (ClusterDestructionFailureException e) {
+                throw new ClusterWithdrawalFailureException(e.getMessage());
+            }
+        }
+
+        StateService.getTopologyStateGuard().unlock();
     }
 
-    public void destroyAll() {
+    /**
+     * Destroys all the created RepoAchiever Cluster allocations.
+     *
+     * @throws ClusterFullDestructionFailureException if RepoAchiever Cluster full destruction failed.
+     */
+    public void destroyAll() throws ClusterFullDestructionFailureException {
+        StateService.getTopologyStateGuard().lock();
+
         for (ClusterAllocationDto clusterAllocation : StateService.getClusterAllocations()) {
             try {
                 clusterService.destroy(clusterAllocation.getPid());
-            } catch (ClusterDestructionFailureException ignored) {
+            } catch (ClusterDestructionFailureException e) {
+                throw new ClusterFullDestructionFailureException(e.getMessage());
             }
-        };
+        }
+
+        StateService.getTopologyStateGuard().unlock();
     }
 
     /**

@@ -1,6 +1,6 @@
 package com.repoachiever.model;
 
-import com.repoachiever.model.GitGitHubCredentials;
+import com.repoachiever.model.CredentialsFieldsFull;
 import java.io.Serializable;
 import jakarta.validation.constraints.*;
 import jakarta.validation.Valid;
@@ -13,29 +13,29 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 
 
-@JsonTypeName("CredentialsFieldsExternal")
+@JsonTypeName("ContentCleanup")
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", date = "2024-05-11T13:02:36.726062+02:00[Europe/Warsaw]")@lombok.Data @lombok.NoArgsConstructor @lombok.AllArgsConstructor(staticName = "of")
 
-public class CredentialsFieldsExternal  implements Serializable {
-  private @Valid String token;
+public class ContentCleanup  implements Serializable {
+  private @Valid CredentialsFieldsFull credentials;
 
   /**
    **/
-  public CredentialsFieldsExternal token(String token) {
-    this.token = token;
+  public ContentCleanup credentials(CredentialsFieldsFull credentials) {
+    this.credentials = credentials;
     return this;
   }
 
   
-  @JsonProperty("token")
+  @JsonProperty("credentials")
   @NotNull
-  public String getToken() {
-    return token;
+  public CredentialsFieldsFull getCredentials() {
+    return credentials;
   }
 
-  @JsonProperty("token")
-  public void setToken(String token) {
-    this.token = token;
+  @JsonProperty("credentials")
+  public void setCredentials(CredentialsFieldsFull credentials) {
+    this.credentials = credentials;
   }
 
 
@@ -47,21 +47,21 @@ public class CredentialsFieldsExternal  implements Serializable {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    CredentialsFieldsExternal credentialsFieldsExternal = (CredentialsFieldsExternal) o;
-    return Objects.equals(this.token, credentialsFieldsExternal.token);
+    ContentCleanup contentCleanup = (ContentCleanup) o;
+    return Objects.equals(this.credentials, contentCleanup.credentials);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(token);
+    return Objects.hash(credentials);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class CredentialsFieldsExternal {\n");
+    sb.append("class ContentCleanup {\n");
     
-    sb.append("    token: ").append(toIndentedString(token)).append("\n");
+    sb.append("    credentials: ").append(toIndentedString(credentials)).append("\n");
     sb.append("}");
     return sb.toString();
   }

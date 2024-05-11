@@ -27,7 +27,7 @@ paths:
             schema:
               $ref: "#/components/schemas/ContentRetrievalApplication"
       responses:
-        201:
+        204:
           description: A list of all available content
           content:
             application/json:
@@ -45,10 +45,26 @@ paths:
             schema:
               $ref: "#/components/schemas/ContentApplication"
       responses:
-        201:
+        204:
           description: Given content configuration was successfully applied
         400:
           description: Given content configuration was not applied
+  /v1/content/withdraw:
+    delete:
+      tags:
+        - ContentResource
+      requestBody:
+        required: true
+        description: Content withdraw application. Does not remove persisted content.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContentWithdrawal"
+      responses:
+        204:
+          description: Given content configuration was successfully withdrawn
+        400:
+          description: Given content configuration was not withdrawn
   /v1/content/download:
     get:
       tags:
@@ -67,6 +83,22 @@ paths:
               schema:
                 type: string
                 format: binary
+  /v1/content/clean:
+    post:
+      tags:
+        - ContentResource
+      requestBody:
+        required: true
+        description: Content configuration application
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContentCleanup"
+      responses:
+        201:
+          description: Content with the given configuration was successfully deleted
+        400:
+          description: Content with the given configuration was not deleted
   /v1/state/content:
     post:
       tags:
@@ -204,6 +236,21 @@ components:
             type: string
         provider:
           $ref: "#/components/schemas/Provider"
+        credentials:
+          $ref: "#/components/schemas/CredentialsFieldsFull"
+    ContentWithdrawal:
+      required:
+        - credentials
+        - provider
+      properties:
+        provider:
+          $ref: "#/components/schemas/Provider"
+        credentials:
+          $ref: "#/components/schemas/CredentialsFieldsFull"
+    ContentCleanup:
+      required:
+        - credentials
+      properties:
         credentials:
           $ref: "#/components/schemas/CredentialsFieldsFull"
     ContentStateApplication:
