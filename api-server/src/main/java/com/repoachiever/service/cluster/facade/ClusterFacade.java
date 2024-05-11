@@ -64,6 +64,11 @@ public class ClusterFacade {
 
         for (ClusterAllocationDto clusterAllocation : StateService.
                 getClusterAllocationsByWorkspaceUnitKey(workspaceUnitKey)) {
+            logger.info(
+                    String.format(
+                            "Setting RepoAchiever Cluster allocation to suspend state: %s",
+                            clusterAllocation.getName()));
+
             try {
                 clusterCommunicationResource.performSuspend(clusterAllocation.getName());
 
@@ -104,12 +109,18 @@ public class ClusterFacade {
                                     ClusterContextEntity.Resource.Worker.of(
                                             configService.getConfig().getResource().getWorker().getFrequency()))));
 
+            logger.info(
+                    String.format("Deploying RepoAchiever Cluster new allocation: %s", name));
+
             Integer pid;
 
             try {
                 pid = clusterService.deploy(name, context);
             } catch (ClusterDeploymentFailureException e1) {
                 for (ClusterAllocationDto candidate : candidates) {
+                    logger.info(
+                            String.format("Removing RepoAchiever Cluster candidate allocation: %s", candidate.getName()));
+
                     try {
                         clusterService.destroy(candidate.getPid());
                     } catch (ClusterDestructionFailureException e2) {
@@ -118,6 +129,9 @@ public class ClusterFacade {
                 }
 
                 for (ClusterAllocationDto suspended : suspends) {
+                    logger.info(
+                            String.format("Setting RepoAchiever Cluster suspended allocation to serve state: %s", suspended.getName()));
+
                     try {
                         clusterCommunicationResource.performServe(suspended.getName());
                     } catch (ClusterOperationFailureException e2) {
@@ -133,10 +147,20 @@ public class ClusterFacade {
         }
 
         for (ClusterAllocationDto candidate : candidates) {
+            logger.info(
+                    String.format(
+                            "Setting RepoAchiever Cluster candidate allocation to serve state: %s",
+                            candidate.getName()));
+
             try {
                 clusterCommunicationResource.performServe(candidate.getName());
             } catch (ClusterOperationFailureException e1) {
                 for (ClusterAllocationDto suspended : suspends) {
+                    logger.info(
+                            String.format(
+                                    "Setting RepoAchiever Cluster suspended allocation to serve state: %s",
+                                    suspended.getName()));
+
                     try {
                         clusterCommunicationResource.performServe(suspended.getName());
                     } catch (ClusterOperationFailureException e2) {
@@ -151,6 +175,9 @@ public class ClusterFacade {
         }
 
         for (ClusterAllocationDto suspended : suspends) {
+            logger.info(
+                    String.format("Removing RepoAchiever Cluster suspended allocation: %s", suspended.getName()));
+
             try {
                 clusterService.destroy(suspended.getPid());
             } catch (ClusterDestructionFailureException e) {
@@ -179,21 +206,24 @@ public class ClusterFacade {
                 workspaceFacade.createUnitKey(
                         contentWithdrawal.getProvider(), contentWithdrawal.getCredentials());
 
-        List<ClusterAllocationDto> candidates = StateService.getClusterAllocations()
+        List<ClusterAllocationDto> clusterAllocations = StateService.getClusterAllocations()
                 .stream()
                 .filter(element -> Objects.equals(element.getWorkspaceUnitKey(), workspaceUnitKey))
                 .toList();
 
-        for (ClusterAllocationDto candidate : candidates) {
+        for (ClusterAllocationDto clusterAllocation : clusterAllocations) {
+            logger.info(
+                    String.format("Removing RepoAchiever Cluster allocation: %s", clusterAllocation.getName()));
+
             try {
-                clusterService.destroy(candidate.getPid());
+                clusterService.destroy(clusterAllocation.getPid());
             } catch (ClusterDestructionFailureException e) {
                 throw new ClusterWithdrawalFailureException(e.getMessage());
             }
         }
 
         StateService.removeClusterAllocationByNames(
-                candidates.stream().map(ClusterAllocationDto::getName).toList());
+                clusterAllocations.stream().map(ClusterAllocationDto::getName).toList());
 
         StateService.getTopologyStateGuard().unlock();
     }
@@ -207,6 +237,9 @@ public class ClusterFacade {
         StateService.getTopologyStateGuard().lock();
 
         for (ClusterAllocationDto clusterAllocation : StateService.getClusterAllocations()) {
+            logger.info(
+                    String.format("Removing RepoAchiever Cluster allocation: %s", clusterAllocation.getName()));
+
             try {
                 clusterService.destroy(clusterAllocation.getPid());
             } catch (ClusterDestructionFailureException e) {
@@ -257,6 +290,3 @@ public class ClusterFacade {
         StateService.getTopologyStateGuard().unlock();
     }
 }
-
-// TODO: if cluster stops existing --> recreate it
-// TODO: if api server stops existing --> selfdestruct all clusters

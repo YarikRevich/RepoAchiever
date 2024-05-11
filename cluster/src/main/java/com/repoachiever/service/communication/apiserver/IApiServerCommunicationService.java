@@ -26,6 +26,15 @@ public interface IApiServerCommunicationService {
     void performAdditionalContentUpload(String workspaceUnitKey, String content) throws RemoteException;
 
     /**
+     * Handles incoming log messages related to the given RepoAchiever Cluster allocation.
+     *
+     * @param name    given RepoAchiever Cluster allocation name.
+     * @param message given RepoAchiever Cluster log message.
+     * @throws RemoteException if remote request fails.
+     */
+    void transferLogs(String name, String message) throws RemoteException;
+
+    /**
      * Retrieves latest RepoAchiever API Server health check states.
      *
      * @return RepoAchiever API Server health check status.
