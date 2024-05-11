@@ -38,8 +38,7 @@ public class ClusterTopologyCommunicationConfigService {
 
         try {
             applications = repositoryFacade.retrieveContentApplication();
-        } catch (ContentApplicationRetrievalFailureException e) {
-            logger.fatal(e.getMessage());
+        } catch (ContentApplicationRetrievalFailureException ignored) {
             return;
         }
 

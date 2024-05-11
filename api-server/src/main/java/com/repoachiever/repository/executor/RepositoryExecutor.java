@@ -109,14 +109,6 @@ public class RepositoryExecutor {
             throw new QueryExecutionFailureException(e.getMessage());
         }
 
-        try {
-            if (!resultSet.isBeforeFirst()) {
-                throw new QueryEmptyResultException();
-            }
-        } catch (SQLException e) {
-            throw new QueryExecutionFailureException(e.getMessage());
-        }
-
         statements.add(statement);
 
         scheduledExecutorService.schedule(() -> {
@@ -126,6 +118,14 @@ public class RepositoryExecutor {
                 logger.fatal(new QueryExecutionFailureException(e.getMessage()).getMessage());
             }
         }, properties.getDatabaseStatementCloseDelay(), TimeUnit.MILLISECONDS);
+
+        try {
+            if (!resultSet.isBeforeFirst()) {
+                throw new QueryEmptyResultException();
+            }
+        } catch (SQLException e) {
+            throw new QueryExecutionFailureException(e.getMessage());
+        }
 
         return resultSet;
     }

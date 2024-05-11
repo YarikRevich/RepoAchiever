@@ -132,11 +132,13 @@
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ClusterOperationFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/DockerNetworkRemoveFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/dto/CommandExecutorOutputDto.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/integration/state/StateConfigService.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/vendor/git/github/GitGitHubVendorService.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/DockerNetworkCreateFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/logging/FatalAppender.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/api/StateResourceApi.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/command/grafana/common/GrafanaConfigurationHelper.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ApiServerInstanceIsAlreadyRunningException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/CredentialsAreNotValidException.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/ReadinessCheckResult.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/ContentStateApplicationResult.java

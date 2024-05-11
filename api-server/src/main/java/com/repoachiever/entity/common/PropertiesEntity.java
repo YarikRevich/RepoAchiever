@@ -20,6 +20,12 @@ public class PropertiesEntity {
     @ConfigProperty(name = "quarkus.http.port")
     Integer applicationPort;
 
+    @ConfigProperty(name = "state.location")
+    String stateLocation;
+
+    @ConfigProperty(name = "state.running.name")
+    String stateRunningName;
+
     @ConfigProperty(name = "database.tables.config.name")
     String databaseConfigTableName;
 
@@ -71,8 +77,8 @@ public class PropertiesEntity {
     @ConfigProperty(name = "repoachiever-cluster.context.alias")
     String clusterContextAlias;
 
-    @ConfigProperty(name = "communication.provider.name")
-    String communicationProviderName;
+    @ConfigProperty(name = "communication.api-server.name")
+    String communicationApiServerName;
 
     @ConfigProperty(name = "communication.cluster.base")
     String communicationClusterBase;

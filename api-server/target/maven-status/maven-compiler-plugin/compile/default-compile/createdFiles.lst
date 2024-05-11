@@ -87,6 +87,7 @@ com/repoachiever/entity/common/ClusterContextEntity$Service.class
 com/repoachiever/service/telemetry/TelemetryService.class
 com/repoachiever/service/command/docker/network/create/DockerNetworkCreateCommandService.class
 com/repoachiever/entity/common/ConfigEntity$Content.class
+com/repoachiever/service/integration/state/StateConfigService.class
 com/repoachiever/service/command/cluster/destroy/ClusterDestroyCommandService$1.class
 com/repoachiever/service/integration/diagnostics/template/TemplateConfigService.class
 com/repoachiever/exception/ClusterUnhealthyReapplicationFailureException.class
@@ -94,6 +95,7 @@ com/repoachiever/service/command/grafana/GrafanaDeployCommandService$1.class
 com/repoachiever/exception/ConfigValidationException.class
 com/repoachiever/exception/CredentialsFieldIsNotValidException.class
 com/repoachiever/service/healthcheck/readiness/ReadinessCheckService.class
+com/repoachiever/exception/ApiServerInstanceIsAlreadyRunningException.class
 com/repoachiever/exception/RepositoryContentDestructionFailureException.class
 com/repoachiever/service/telemetry/binding/TelemetryBinding.class
 com/repoachiever/exception/DockerInspectRemovalFailureException.class

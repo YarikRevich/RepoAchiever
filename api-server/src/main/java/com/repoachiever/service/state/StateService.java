@@ -15,6 +15,13 @@ import java.util.stream.Collectors;
  */
 public class StateService {
     /**
+     * Represents if RepoAchiever API Server application has been started.
+     */
+    @Getter
+    @Setter
+    private static Boolean started = false;
+
+    /**
      * Represents RepoAchiever Cluster topology state guard.
      */
     @Getter
@@ -59,20 +66,6 @@ public class StateService {
         return clusterAllocations
                 .stream()
                 .anyMatch(element -> Objects.equals(element.getName(), name));
-    }
-
-    /**
-     * Retrieves RepoAchiever Cluster allocation with the given name.
-     *
-     * @param name given RepoAchiever Cluster allocation name.
-     * @return retrieved RepoAchiever Cluster allocation.
-     */
-    public static ClusterAllocationDto getClusterAllocationByName(String name) {
-        return clusterAllocations
-                .stream()
-                .filter(element -> Objects.equals(element.getName(), name))
-                .findFirst()
-                .get();
     }
 
     /**

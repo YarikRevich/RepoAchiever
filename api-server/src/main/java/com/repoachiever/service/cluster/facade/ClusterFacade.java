@@ -13,7 +13,6 @@ import com.repoachiever.service.cluster.ClusterService;
 import com.repoachiever.service.cluster.common.ClusterConfigurationHelper;
 import com.repoachiever.service.cluster.resource.ClusterCommunicationResource;
 import com.repoachiever.service.config.ConfigService;
-import com.repoachiever.service.integration.communication.cluster.topology.ClusterTopologyCommunicationConfigService;
 import com.repoachiever.service.state.StateService;
 import com.repoachiever.service.workspace.facade.WorkspaceFacade;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -23,7 +22,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Provides high-level access to RepoAchiever Cluster related operations.
@@ -206,10 +204,8 @@ public class ClusterFacade {
                 workspaceFacade.createUnitKey(
                         contentWithdrawal.getProvider(), contentWithdrawal.getCredentials());
 
-        List<ClusterAllocationDto> clusterAllocations = StateService.getClusterAllocations()
-                .stream()
-                .filter(element -> Objects.equals(element.getWorkspaceUnitKey(), workspaceUnitKey))
-                .toList();
+        List<ClusterAllocationDto> clusterAllocations =
+                StateService.getClusterAllocationsByWorkspaceUnitKey(workspaceUnitKey);
 
         for (ClusterAllocationDto clusterAllocation : clusterAllocations) {
             logger.info(
@@ -285,7 +281,6 @@ public class ClusterFacade {
         StateService.removeClusterAllocationByNames(removable);
 
 //        updates.forEach(StateService::addClusterAllocation);
-
 
         StateService.getTopologyStateGuard().unlock();
     }

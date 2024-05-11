@@ -40,7 +40,8 @@ create-local-api-server: ## Create ResourceTracker local directory for API Serve
 	@mkdir -p $(HOME)/.repoachiever/diagnostics/grafana/config/dashboards
 	@mkdir -p $(HOME)/.repoachiever/diagnostics/grafana/config/datasources
 	@mkdir -p $(HOME)/.repoachiever/workspace
-	@mkdir -p $(HOME)/.repoachiever/internal
+	@mkdir -p $(HOME)/.repoachiever/internal/database
+	@mkdir -p $(HOME)/.repoachiever/internal/state
 
 .PHONY: clone-client-config
 clone-client-config: ## Clone configuration files to local directory

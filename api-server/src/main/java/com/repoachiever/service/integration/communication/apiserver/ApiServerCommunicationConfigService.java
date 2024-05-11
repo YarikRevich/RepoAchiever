@@ -50,7 +50,7 @@ public class ApiServerCommunicationConfigService {
                 registry.rebind(
                         CommunicationProviderConfigurationHelper.getBindName(
                                 configService.getConfig().getCommunication().getPort(),
-                                properties.getCommunicationProviderName()),
+                                properties.getCommunicationApiServerName()),
                         new ApiServerCommunicationResource(properties));
             } catch (RemoteException e) {
                 logger.fatal(e.getMessage());

@@ -246,6 +246,7 @@ org.jboss.resteasy:resteasy-jackson2-provider::jar:6.2.5.Final
 org.jboss.slf4j:slf4j-jboss-logmanager::jar:2.0.0.Final
 org.jboss.threads:jboss-threads::jar:3.5.0.Final
 org.jboss:jboss-transaction-spi::jar:8.0.0.Final
+org.jetbrains:annotations::jar:24.1.0
 org.junit.jupiter:junit-jupiter-api::jar:5.9.3
 org.junit.jupiter:junit-jupiter-engine::jar:5.9.3
 org.junit.jupiter:junit-jupiter-params::jar:5.9.3
@@ -290,4 +291,3 @@ org.unbescape:unbescape::jar:1.1.6.RELEASE
 org.wildfly.common:wildfly-common::jar:1.5.4.Final-format-001
 org.xerial:sqlite-jdbc::jar:3.41.2.2
 org.yaml:snakeyaml::jar:1.33
-xyz:farhanfarooqui::jar:1.0-SNAPSHOT
