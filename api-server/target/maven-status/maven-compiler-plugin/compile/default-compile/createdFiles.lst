@@ -8,6 +8,7 @@ com/repoachiever/entity/common/ClusterContextEntity$Metadata.class
 com/repoachiever/api/InfoResourceApi.class
 com/repoachiever/service/integration/communication/cluster/healthcheck/ClusterHealthCheckCommunicationService.class
 com/repoachiever/service/workspace/WorkspaceService$1.class
+com/repoachiever/exception/RepositoryContentApplicationFailureException.class
 com/repoachiever/model/HealthCheckUnit.class
 com/repoachiever/dto/CommandExecutorOutputDto.class
 com/repoachiever/model/HealthCheckResult.class
@@ -93,6 +94,7 @@ com/repoachiever/service/command/grafana/GrafanaDeployCommandService$1.class
 com/repoachiever/exception/ConfigValidationException.class
 com/repoachiever/exception/CredentialsFieldIsNotValidException.class
 com/repoachiever/service/healthcheck/readiness/ReadinessCheckService.class
+com/repoachiever/exception/RepositoryContentDestructionFailureException.class
 com/repoachiever/service/telemetry/binding/TelemetryBinding.class
 com/repoachiever/exception/DockerInspectRemovalFailureException.class
 com/repoachiever/mapping/ClusterApplicationFailureExceptionMapper.class
@@ -133,7 +135,6 @@ com/repoachiever/service/integration/communication/apiserver/ApiServerCommunicat
 com/repoachiever/entity/repository/ConfigEntity.class
 com/repoachiever/exception/DockerIsNotAvailableException.class
 com/repoachiever/service/command/nodeexporter/common/NodeExporterConfigurationHelper$2.class
-com/repoachiever/exception/RepositoryApplicationFailureException.class
 com/repoachiever/service/vendor/VendorFacade.class
 com/repoachiever/service/command/grafana/common/GrafanaConfigurationHelper.class
 com/repoachiever/exception/PrometheusDeploymentFailureException.class
@@ -141,6 +142,7 @@ com/repoachiever/model/ClusterInfoUnit.class
 com/repoachiever/entity/repository/ContentEntity.class
 com/repoachiever/service/command/grafana/common/GrafanaConfigurationHelper$2.class
 com/repoachiever/service/command/grafana/GrafanaDeployCommandService.class
+com/repoachiever/mapping/RepositoryContentDestructionFailureExceptionMapper.class
 com/repoachiever/entity/common/PropertiesEntity.class
 com/repoachiever/model/ContentWithdrawal.class
 com/repoachiever/service/command/prometheus/common/PrometheusConfigurationHelper$1.class
@@ -160,9 +162,9 @@ com/repoachiever/service/command/prometheus/common/PrometheusConfigurationHelper
 com/repoachiever/service/vendor/git/github/GitGitHubVendorService.class
 com/repoachiever/repository/ConfigRepository.class
 com/repoachiever/entity/repository/SecretEntity.class
-com/repoachiever/mapping/RepositoryApplicationFailureExceptionMapper.class
 com/repoachiever/service/state/StateService.class
 com/repoachiever/model/VersionInfoResult.class
+com/repoachiever/mapping/RepositoryContentApplicationFailureExceptionMapper.class
 com/repoachiever/service/executor/CommandExecutorService.class
 com/repoachiever/converter/ContentCredentialsToClusterContextCredentialsConverter.class
 com/repoachiever/api/StateResourceApi.class

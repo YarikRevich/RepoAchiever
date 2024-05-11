@@ -78,8 +78,25 @@ public class ContentResource implements ContentResourceApi {
      * @param contentWithdrawal content withdrawal application.
      */
     @Override
+    @SneakyThrows
     public void v1ContentWithdrawDelete(ContentWithdrawal contentWithdrawal) {
+        if (Objects.isNull(contentWithdrawal)) {
+            throw new BadRequestException();
+        }
 
+        if (!ResourceConfigurationHelper.isExternalCredentialsFieldValid(
+                contentWithdrawal.getProvider(), contentWithdrawal.getCredentials().getExternal())) {
+            throw new CredentialsFieldIsNotValidException();
+        }
+
+        if (!vendorFacade.isExternalCredentialsValid(
+                contentWithdrawal.getProvider(), contentWithdrawal.getCredentials().getExternal())) {
+            throw new CredentialsAreNotValidException();
+        }
+
+        clusterFacade.destroy(contentWithdrawal);
+
+        repositoryFacade.destroy(contentWithdrawal);
     }
 
     /**

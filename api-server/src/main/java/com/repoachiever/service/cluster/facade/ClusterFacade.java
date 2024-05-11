@@ -192,6 +192,9 @@ public class ClusterFacade {
             }
         }
 
+        StateService.removeClusterAllocationByNames(
+                candidates.stream().map(ClusterAllocationDto::getName).toList());
+
         StateService.getTopologyStateGuard().unlock();
     }
 

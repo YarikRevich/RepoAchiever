@@ -5,7 +5,8 @@ import com.repoachiever.entity.repository.ContentEntity;
 import com.repoachiever.entity.repository.ProviderEntity;
 import com.repoachiever.entity.repository.SecretEntity;
 import com.repoachiever.exception.ContentApplicationRetrievalFailureException;
-import com.repoachiever.exception.RepositoryApplicationFailureException;
+import com.repoachiever.exception.RepositoryContentApplicationFailureException;
+import com.repoachiever.exception.RepositoryContentDestructionFailureException;
 import com.repoachiever.exception.RepositoryOperationFailureException;
 import com.repoachiever.model.*;
 import com.repoachiever.repository.ConfigRepository;
@@ -125,15 +126,15 @@ public class RepositoryFacade {
      * Applies given content application, updating previous state.
      *
      * @param contentApplication given content application used for topology configuration.
-     * @throws RepositoryApplicationFailureException if RepoAchiever Cluster repository application failed.
+     * @throws RepositoryContentApplicationFailureException if RepoAchiever Cluster repository content application failed.
      */
-    public void apply(ContentApplication contentApplication) throws RepositoryApplicationFailureException {
+    public void apply(ContentApplication contentApplication) throws RepositoryContentApplicationFailureException {
         ProviderEntity provider;
 
         try {
             provider = providerRepository.findByName(contentApplication.getProvider().toString());
         } catch (RepositoryOperationFailureException e) {
-            throw new RepositoryApplicationFailureException(e.getMessage());
+            throw new RepositoryContentApplicationFailureException(e.getMessage());
         }
 
         Optional<String> credentials = RepositoryConfigurationHelper.getExternalCredentials(
@@ -147,7 +148,7 @@ public class RepositoryFacade {
                         credentials);
             }
         } catch (RepositoryOperationFailureException e) {
-            throw new RepositoryApplicationFailureException(e.getMessage());
+            throw new RepositoryContentApplicationFailureException(e.getMessage());
         }
 
         SecretEntity secret;
@@ -157,21 +158,48 @@ public class RepositoryFacade {
                     contentApplication.getCredentials().getInternal().getId(),
                     credentials);
         } catch (RepositoryOperationFailureException e) {
-            throw new RepositoryApplicationFailureException(e.getMessage());
+            throw new RepositoryContentApplicationFailureException(e.getMessage());
         }
 
         try {
             contentRepository.deleteBySecret(secret.getId());
         } catch (RepositoryOperationFailureException e) {
-            throw new RepositoryApplicationFailureException(e.getMessage());
+            throw new RepositoryContentApplicationFailureException(e.getMessage());
         }
 
         for (String location : contentApplication.getLocations()) {
             try {
                 contentRepository.insert(location, provider.getId(), secret.getId());
             } catch (RepositoryOperationFailureException e) {
-                throw new RepositoryApplicationFailureException(e.getMessage());
+                throw new RepositoryContentApplicationFailureException(e.getMessage());
             }
+        }
+    }
+
+    /**
+     * Applies given content withdrawal, removing previous state.
+     *
+     * @param contentWithdrawal given content application used for topology configuration.
+     * @throws RepositoryContentDestructionFailureException if RepoAchiever Cluster repository content destruction failed.
+     */
+    public void destroy(ContentWithdrawal contentWithdrawal) throws RepositoryContentDestructionFailureException {
+        Optional<String> credentials = RepositoryConfigurationHelper.getExternalCredentials(
+                contentWithdrawal.getProvider(), contentWithdrawal.getCredentials().getExternal());
+
+        SecretEntity secret;
+
+        try {
+            secret = secretRepository.findBySessionAndCredentials(
+                    contentWithdrawal.getCredentials().getInternal().getId(),
+                    credentials);
+        } catch (RepositoryOperationFailureException e) {
+            throw new RepositoryContentDestructionFailureException(e.getMessage());
+        }
+
+        try {
+            contentRepository.deleteBySecret(secret.getId());
+        } catch (RepositoryOperationFailureException e) {
+            throw new RepositoryContentDestructionFailureException(e.getMessage());
         }
     }
 }
