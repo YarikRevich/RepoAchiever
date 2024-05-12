@@ -46,10 +46,12 @@ public class ClusterService {
         for (Integer i = 0; i < locations.size(); i++) {
             temp.add(locations.get(0));
 
-            if (counter > separator) {
+            if (counter.equals(separator - 1)) {
                 result.add(new ArrayList<>(temp));
 
                 temp.clear();
+
+                counter = 0;
             } else {
                 counter++;
             }

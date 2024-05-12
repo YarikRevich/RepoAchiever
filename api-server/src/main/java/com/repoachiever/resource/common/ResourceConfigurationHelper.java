@@ -3,6 +3,7 @@ package com.repoachiever.resource.common;
 import com.repoachiever.model.CredentialsFieldsExternal;
 import com.repoachiever.model.Provider;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -22,5 +23,15 @@ public class ResourceConfigurationHelper {
             case LOCAL -> true;
             case GITHUB -> Objects.nonNull(credentialsFieldExternal);
         };
+    }
+
+    /**
+     * Checks if the given locations have duplicates.
+     *
+     * @param locations given locations.
+     * @return result of the check.
+     */
+    public static Boolean isLocationsDuplicate(List<String> locations) {
+        return locations.stream().distinct().count() == locations.size();
     }
 }

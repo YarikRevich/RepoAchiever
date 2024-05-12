@@ -17,10 +17,10 @@ import com.repoachiever.repository.common.RepositoryConfigurationHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.groupingBy;
 
 /**
  * Represents facade for repository implementations used to handle tables.
@@ -66,6 +66,8 @@ public class RepositoryFacade {
      * @throws ContentApplicationRetrievalFailureException if content application retrieval fails.
      */
     public List<ContentApplication> retrieveContentApplication() throws ContentApplicationRetrievalFailureException {
+        List<ContentApplication> result = new ArrayList<>();
+
         List<RepositoryContentUnitDto> units = new ArrayList<>();
 
         List<ContentEntity> contents;
@@ -107,19 +109,24 @@ public class RepositoryFacade {
                     credentials));
         }
 
-        return units
-                .stream()
-                .map(element1 -> {
-                    List<String> locations = units
-                            .stream()
-                            .filter(
-                                    element2 -> Objects.equals(element1.getCredentials(), element2.getCredentials()))
-                            .map(RepositoryContentUnitDto::getLocation)
-                            .toList();
+        Map<CredentialsFieldsFull, Map<Provider, List<RepositoryContentUnitDto>>> groups =
+                units
+                        .stream()
+                        .collect(
+                                groupingBy(
+                                        RepositoryContentUnitDto::getCredentials,
+                                        groupingBy(RepositoryContentUnitDto::getProvider)));
 
-                    return ContentApplication.of(locations, element1.getProvider(), element1.getCredentials());
-                })
-                .toList();
+        groups
+                .forEach((key1, value1) -> {
+                    value1
+                            .forEach((key2, value2) -> {
+                                result.add(
+                                        ContentApplication.of(value2.stream().map(RepositoryContentUnitDto::getLocation).toList(), key2, key1));
+                            });
+                });
+
+        return result;
     }
 
     /**
