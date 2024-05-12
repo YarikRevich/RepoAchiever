@@ -95,6 +95,10 @@ public class ConfigEntity {
     @Getter
     public static class Communication {
         @NotNull
+        @JsonProperty("api_server_name")
+        public String apiServerName;
+
+        @NotNull
         @JsonProperty("port")
         public Integer port;
     }

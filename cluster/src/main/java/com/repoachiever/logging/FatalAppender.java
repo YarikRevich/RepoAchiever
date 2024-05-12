@@ -1,9 +1,5 @@
 package com.repoachiever.logging;
 
-import java.time.Instant;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 import com.repoachiever.service.state.StateService;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Appender;

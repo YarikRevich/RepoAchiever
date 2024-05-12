@@ -2,6 +2,9 @@ package com.repoachiever.resource.communication;
 
 import com.repoachiever.entity.common.PropertiesEntity;
 import com.repoachiever.service.communication.apiserver.IApiServerCommunicationService;
+import com.repoachiever.service.integration.diagnostics.DiagnosticsConfigService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.InputStream;
 import java.rmi.RemoteException;
@@ -11,6 +14,8 @@ import java.rmi.server.UnicastRemoteObject;
  * Contains implementation of communication provider for RepoAchiever API Server.
  */
 public class ApiServerCommunicationResource extends UnicastRemoteObject implements IApiServerCommunicationService {
+    private static final Logger logger = LogManager.getLogger(ApiServerCommunicationResource.class);
+
     private final PropertiesEntity properties;
 
     public ApiServerCommunicationResource(PropertiesEntity properties) throws RemoteException {
@@ -37,8 +42,8 @@ public class ApiServerCommunicationResource extends UnicastRemoteObject implemen
      * @see IApiServerCommunicationService
      */
     @Override
-    public void transferLogs(String name, String message) throws RemoteException {
-
+    public void performLogsTransfer(String name, String message) throws RemoteException {
+        logger.info(String.format("Transferred logs(instance: %s): %s", name, message));
     }
 
     /**
@@ -47,13 +52,5 @@ public class ApiServerCommunicationResource extends UnicastRemoteObject implemen
     @Override
     public Boolean retrieveHealthCheck() throws RemoteException {
         return true;
-    }
-
-    /**
-     * @see IApiServerCommunicationService
-     */
-    @Override
-    public String retrieveVersion() throws RemoteException {
-        return properties.getGitCommitId();
     }
 }

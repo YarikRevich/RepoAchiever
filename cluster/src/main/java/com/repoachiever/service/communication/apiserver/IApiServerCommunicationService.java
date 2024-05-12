@@ -1,12 +1,13 @@
 package com.repoachiever.service.communication.apiserver;
 
 import java.io.InputStream;
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 /**
  * Represents communication provider for RepoAchiever API Server.
  */
-public interface IApiServerCommunicationService {
+public interface IApiServerCommunicationService extends Remote {
     /**
      * Performs raw content upload operation, initiated by RepoAchiever Cluster.
      *
@@ -32,7 +33,7 @@ public interface IApiServerCommunicationService {
      * @param message given RepoAchiever Cluster log message.
      * @throws RemoteException if remote request fails.
      */
-    void transferLogs(String name, String message) throws RemoteException;
+    void performLogsTransfer(String name, String message) throws RemoteException;
 
     /**
      * Retrieves latest RepoAchiever API Server health check states.
@@ -41,13 +42,4 @@ public interface IApiServerCommunicationService {
      * @throws RemoteException if remote request fails.
      */
     Boolean retrieveHealthCheck() throws RemoteException;
-
-    /**
-     * Retrieves version of the allocated RepoAchiever Cluster instance allowing to confirm API
-     * compatability.
-     *
-     * @return RepoAchiever Cluster version.
-     * @throws RemoteException if remote request fails.
-     */
-    String retrieveVersion() throws RemoteException;
 }

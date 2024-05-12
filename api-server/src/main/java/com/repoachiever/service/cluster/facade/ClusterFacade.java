@@ -98,6 +98,7 @@ public class ClusterFacade {
                                             contentApplication.getProvider(),
                                             contentApplication.getCredentials().getExternal())),
                             ClusterContextEntity.Communication.of(
+                                    properties.getCommunicationApiServerName(),
                                     configService.getConfig().getCommunication().getPort()),
                             ClusterContextEntity.Content.of(
                                     configService.getConfig().getContent().getFormat()),

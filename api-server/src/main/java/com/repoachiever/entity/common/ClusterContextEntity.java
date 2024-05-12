@@ -3,6 +3,7 @@ package com.repoachiever.entity.common;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -86,6 +87,10 @@ public class ClusterContextEntity {
      */
     @AllArgsConstructor(staticName = "of")
     public static class Communication {
+        @NotNull
+        @JsonProperty("api_server_name")
+        public String apiServerName;
+
         @JsonProperty("port")
         public Integer port;
     }

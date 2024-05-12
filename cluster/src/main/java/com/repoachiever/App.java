@@ -1,10 +1,12 @@
 package com.repoachiever;
 
 import com.repoachiever.entity.PropertiesEntity;
+import com.repoachiever.service.apiserver.resource.ApiServerCommunicationResource;
 import com.repoachiever.service.config.ConfigService;
 import com.repoachiever.service.integration.communication.cluster.ClusterCommunicationConfigService;
-import com.repoachiever.service.integration.logging.LoggingStateConfigService;
+import com.repoachiever.service.integration.logging.state.LoggingStateService;
 import com.repoachiever.service.executor.CommandExecutorService;
+import com.repoachiever.service.integration.logging.transfer.LoggingTransferService;
 import com.repoachiever.service.waiter.WaiterHelper;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -20,7 +22,9 @@ import org.springframework.stereotype.Component;
         CommandExecutorService.class,
         PropertiesEntity.class,
         ClusterCommunicationConfigService.class,
-        LoggingStateConfigService.class
+        ApiServerCommunicationResource.class,
+        LoggingStateService.class,
+        LoggingTransferService.class
 })
 public class App implements ApplicationRunner {
     /**
