@@ -12,6 +12,7 @@
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/repository/ConfigRepository.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/HealthCheckStatus.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/mapping/RepositoryContentDestructionFailureExceptionMapper.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/GrafanaDeploymentFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/integration/diagnostics/telemetry/TelemetryConfigService.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/entity/repository/ConfigEntity.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/integration/communication/cluster/healthcheck/ClusterHealthCheckCommunicationService.java
@@ -58,6 +59,7 @@
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/ContentRetrievalApplication.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/CommunicationConfigurationFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ContentFileNotFoundException.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ApplicationStartGuardFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/GitGitHubCredentials.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/resource/HealthResource.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/cluster/ClusterService.java
@@ -73,6 +75,7 @@
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/RepositoryContentApplicationFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/converter/ClusterContextToJsonConverter.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ClusterDestructionFailureException.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/integration/common/IntegrationConfigurationHelper.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/vendor/common/VendorConfigurationHelper.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/MetadataFileWriteFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/mapping/LocationsFieldIsNotValidExceptionMapper.java
@@ -130,11 +133,13 @@
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/config/ConfigService.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/telemetry/binding/TelemetryBinding.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ClusterFullDestructionFailureException.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ClusterStartTopologyApplicationFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/CredentialsFieldsInternal.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ClusterOperationFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/DockerNetworkRemoveFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/dto/CommandExecutorOutputDto.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/integration/state/StateConfigService.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/RunningStateFileCreationFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/vendor/git/github/GitGitHubVendorService.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/DockerNetworkCreateFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/logging/FatalAppender.java

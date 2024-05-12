@@ -29,8 +29,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Service used to perform RepoAchiever Cluster communication health check operations.
  */
-@Startup
-@Priority(value = 210)
+@Startup(value = 800)
 @ApplicationScoped
 public class ClusterHealthCheckCommunicationService {
     private static final Logger logger = LogManager.getLogger(ClusterHealthCheckCommunicationService.class);
@@ -47,9 +46,18 @@ public class ClusterHealthCheckCommunicationService {
     /**
      * Performs RepoAchiever Cluster communication health check operations. If RepoAchiever Cluster is not responding,
      * then it will be redeployed.
+     *
+     * @throws ApplicationStartGuardFailureException if RepoAchiever API Server application start guard operation
+     *                                               fails.
      */
     @PostConstruct
-    private void process() {
+    private void process() throws ApplicationStartGuardFailureException {
+        try {
+            StateService.getStartGuard().await();
+        } catch (InterruptedException e) {
+            throw new ApplicationStartGuardFailureException(e.getMessage());
+        }
+
         scheduledExecutorService.scheduleAtFixedRate(() -> {
             try {
                 clusterFacade.reApplyUnhealthy();

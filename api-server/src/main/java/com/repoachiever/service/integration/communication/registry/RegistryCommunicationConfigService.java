@@ -1,7 +1,9 @@
 package com.repoachiever.service.integration.communication.registry;
 
+import com.repoachiever.exception.ApplicationStartGuardFailureException;
 import com.repoachiever.exception.CommunicationConfigurationFailureException;
 import com.repoachiever.service.config.ConfigService;
+import com.repoachiever.service.state.StateService;
 import io.quarkus.runtime.Startup;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -16,33 +18,42 @@ import java.rmi.registry.Registry;
 /**
  * Service used to perform initial communication infrastructure configuration.
  */
-@Startup(value = 150)
+@Startup(value = 200)
 @ApplicationScoped
 public class RegistryCommunicationConfigService {
-    private static final Logger logger = LogManager.getLogger(RegistryCommunicationConfigService.class);
-
     @Inject
     ConfigService configService;
 
     /**
      * Performs initial communication infrastructure configuration.
+     *
+     * @throws ApplicationStartGuardFailureException      if RepoAchiever API Server application start guard operation fails.
+     * @throws CommunicationConfigurationFailureException if RepoAchiever API Server communication configuration
+     *                                                    operation fails.
      */
     @PostConstruct
-    private void process() {
+    private void process() throws
+            ApplicationStartGuardFailureException,
+            CommunicationConfigurationFailureException {
+        try {
+            StateService.getStartGuard().await();
+        } catch (InterruptedException e) {
+            throw new ApplicationStartGuardFailureException(e.getMessage());
+        }
+
         Registry registry;
 
         try {
             registry = LocateRegistry.createRegistry(
                     configService.getConfig().getCommunication().getPort());
         } catch (RemoteException e) {
-            logger.fatal(new CommunicationConfigurationFailureException(e.getMessage()).getMessage());
-            return;
+            throw new CommunicationConfigurationFailureException(e.getMessage());
         }
 
         try {
             registry.list();
         } catch (RemoteException e) {
-            logger.fatal(new CommunicationConfigurationFailureException(e.getMessage()).getMessage());
+            throw new CommunicationConfigurationFailureException(e.getMessage());
         }
     }
 }

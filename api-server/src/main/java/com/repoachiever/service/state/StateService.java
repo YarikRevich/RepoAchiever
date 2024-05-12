@@ -7,6 +7,7 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
@@ -20,6 +21,12 @@ public class StateService {
     @Getter
     @Setter
     private static Boolean started = false;
+
+    /**
+     * Represents RepoAchiever API Server application startup guard.
+     */
+    @Getter
+    private final static CountDownLatch startGuard = new CountDownLatch(1);
 
     /**
      * Represents RepoAchiever Cluster topology state guard.
