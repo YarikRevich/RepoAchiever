@@ -15,6 +15,7 @@ com/repoachiever/model/HealthCheckResult.class
 com/repoachiever/exception/CommandExecutorException.class
 com/repoachiever/exception/QueryExecutionFailureException.class
 com/repoachiever/entity/common/ClusterContextEntity$Resource$Cluster.class
+com/repoachiever/exception/ClusterStartTopologyApplicationFailureException.class
 com/repoachiever/mapping/CredentialsFieldIsNotValidExceptionMapper.class
 com/repoachiever/service/cluster/resource/ClusterCommunicationResource.class
 com/repoachiever/model/ContentStateApplication.class
@@ -96,6 +97,7 @@ com/repoachiever/exception/ConfigValidationException.class
 com/repoachiever/exception/CredentialsFieldIsNotValidException.class
 com/repoachiever/service/healthcheck/readiness/ReadinessCheckService.class
 com/repoachiever/exception/ApiServerInstanceIsAlreadyRunningException.class
+com/repoachiever/service/integration/common/IntegrationConfigurationHelper.class
 com/repoachiever/exception/RepositoryContentDestructionFailureException.class
 com/repoachiever/service/telemetry/binding/TelemetryBinding.class
 com/repoachiever/exception/DockerInspectRemovalFailureException.class
@@ -103,6 +105,7 @@ com/repoachiever/mapping/ClusterApplicationFailureExceptionMapper.class
 com/repoachiever/resource/StateResource.class
 com/repoachiever/service/workspace/WorkspaceService.class
 com/repoachiever/service/command/grafana/common/GrafanaConfigurationHelper$3.class
+com/repoachiever/exception/ApplicationStartGuardFailureException.class
 com/repoachiever/entity/common/MetadataFileEntity.class
 com/repoachiever/service/workspace/facade/WorkspaceFacade$1.class
 com/repoachiever/entity/common/ConfigEntity$Resource$Worker.class
@@ -172,6 +175,7 @@ com/repoachiever/service/executor/CommandExecutorService.class
 com/repoachiever/converter/ContentCredentialsToClusterContextCredentialsConverter.class
 com/repoachiever/api/StateResourceApi.class
 com/repoachiever/service/integration/communication/registry/RegistryCommunicationConfigService.class
+com/repoachiever/exception/GrafanaDeploymentFailureException.class
 com/repoachiever/model/CredentialsFieldsExternal.class
 com/repoachiever/exception/ContentFileRemovalFailureException.class
 com/repoachiever/exception/ClusterApplicationFailureException.class
@@ -186,6 +190,7 @@ com/repoachiever/exception/TelemetryOperationFailureException.class
 com/repoachiever/service/communication/cluster/IClusterCommunicationService.class
 com/repoachiever/resource/communication/ApiServerCommunicationResource.class
 com/repoachiever/logging/FatalAppender.class
+com/repoachiever/exception/RunningStateFileCreationFailureException.class
 com/repoachiever/service/command/docker/network/remove/DockerNetworkRemoveCommandService$1.class
 com/repoachiever/exception/ClusterRecreationFailureException.class
 com/repoachiever/service/communication/common/CommunicationProviderConfigurationHelper.class
