@@ -11,6 +11,7 @@
 /Volumes/Files/java/RepoAchiever/cluster/src/main/java/com/repoachiever/service/integration/communication/cluster/ClusterCommunicationConfigService.java
 /Volumes/Files/java/RepoAchiever/cluster/src/main/java/com/repoachiever/Cluster.java
 /Volumes/Files/java/RepoAchiever/cluster/src/main/java/com/repoachiever/service/integration/logging/state/LoggingStateService.java
+/Volumes/Files/java/RepoAchiever/cluster/src/main/java/com/repoachiever/logging/common/LoggingConfigurationHelper.java
 /Volumes/Files/java/RepoAchiever/cluster/src/main/java/com/repoachiever/entity/PropertiesEntity.java
 /Volumes/Files/java/RepoAchiever/cluster/src/main/java/com/repoachiever/exception/CommunicationConfigurationFailureException.java
 /Volumes/Files/java/RepoAchiever/cluster/src/main/java/com/repoachiever/dto/CommandExecutorOutputDto.java

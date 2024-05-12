@@ -2,6 +2,7 @@ package com.repoachiever.service.integration.logging.transfer;
 
 import com.repoachiever.entity.PropertiesEntity;
 import com.repoachiever.exception.ApiServerOperationFailureException;
+import com.repoachiever.logging.common.LoggingConfigurationHelper;
 import com.repoachiever.service.apiserver.resource.ApiServerCommunicationResource;
 import com.repoachiever.service.state.StateService;
 import jakarta.annotation.PostConstruct;
@@ -33,7 +34,7 @@ public class LoggingTransferService {
      */
     @PostConstruct
     private void process() {
-        logger.info("it works");
+        logger.info(LoggingConfigurationHelper.getTransferableMessage("it works"));
 
         scheduledExecutorService.scheduleAtFixedRate(() -> {
             if (!StateService.getExit()) {

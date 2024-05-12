@@ -1,6 +1,7 @@
 com/repoachiever/entity/PropertiesEntity.class
 com/repoachiever/exception/CronExpressionException.class
 com/repoachiever/entity/ConfigEntity$Resource.class
+com/repoachiever/logging/common/LoggingConfigurationHelper.class
 META-INF/org/apache/logging/log4j/core/config/plugins/Log4j2Plugins.dat
 com/repoachiever/service/integration/communication/cluster/ClusterCommunicationConfigService.class
 com/repoachiever/service/communication/cluster/IClusterCommunicationService.class

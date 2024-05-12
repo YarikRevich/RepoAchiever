@@ -1,5 +1,6 @@
 package com.repoachiever.logging;
 
+import com.repoachiever.logging.common.LoggingConfigurationHelper;
 import com.repoachiever.service.state.StateService;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.Core;
@@ -28,6 +29,11 @@ public class TransferAppender extends AbstractAppender {
 
     @Override
     public void append(LogEvent event) {
-        StateService.addLogMessage(event.getMessage().getFormattedMessage());
+        String message = event.getMessage().getFormattedMessage();
+
+        if (LoggingConfigurationHelper.isMessageTransferable(message)) {
+            StateService.addLogMessage(
+                    LoggingConfigurationHelper.extractTransferableMessage(message));
+        }
     }
 }

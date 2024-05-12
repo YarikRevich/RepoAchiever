@@ -22,9 +22,6 @@ public class PropertiesEntity {
     @Value(value = "${logging.transfer.frequency}")
     private Integer loggingTransferFrequency;
 
-    @Value(value = "${logging.transferable.prefix}")
-    private String loggingTransferablePrefix;
-
     @Value(value = "${logging.state.frequency}")
     private Integer loggingStateFrequency;
 
