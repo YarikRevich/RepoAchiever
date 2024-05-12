@@ -89,7 +89,7 @@ public class PropertiesEntity {
     @ConfigProperty(name = "communication.cluster.startup-timeout")
     Integer communicationClusterStartupTimeout;
 
-    @ConfigProperty(name = "communication.cluster.health-check-frequency")
+    @ConfigProperty(name = "communication.cluster.health-check.frequency")
     Integer communicationClusterHealthCheckFrequency;
 
     @ConfigProperty(name = "diagnostics.common.docker.network.name")

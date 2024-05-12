@@ -19,6 +19,9 @@ public class PropertiesEntity {
     @Value(value = "${REPOACHIEVER_CLUSTER_CONTEXT:null}")
     private String clusterContext;
 
+    @Value(value = "${communication.api-server.health-check.frequency}")
+    private Integer communicationApiServerHealthCheckFrequency;
+
     @Value(value = "${logging.transfer.frequency}")
     private Integer loggingTransferFrequency;
 
