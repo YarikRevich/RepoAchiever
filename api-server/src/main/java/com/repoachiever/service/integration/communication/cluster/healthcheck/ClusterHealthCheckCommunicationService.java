@@ -11,6 +11,7 @@ import com.repoachiever.service.config.ConfigService;
 import com.repoachiever.service.state.StateService;
 import io.quarkus.runtime.Startup;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.apache.logging.log4j.LogManager;
@@ -28,6 +29,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * Service used to perform RepoAchiever Cluster communication health check operations.
  */
+@Startup
+@Priority(value = 210)
 @ApplicationScoped
 public class ClusterHealthCheckCommunicationService {
     private static final Logger logger = LogManager.getLogger(ClusterHealthCheckCommunicationService.class);
@@ -47,12 +50,12 @@ public class ClusterHealthCheckCommunicationService {
      */
     @PostConstruct
     private void process() {
-        scheduledExecutorService.schedule(() -> {
-//            try {
-//                clusterFacade.reapplyUnhealthy();
-//            } catch (ClusterUnhealthyReapplicationFailureException e) {
-//                logger.fatal(e.getMessage());
-//            }
-        }, properties.getCommunicationClusterHealthCheckFrequency(), TimeUnit.MILLISECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(() -> {
+            try {
+                clusterFacade.reApplyUnhealthy();
+            } catch (ClusterUnhealthyReapplicationFailureException e) {
+                logger.fatal(e.getMessage());
+            }
+        }, 0, properties.getCommunicationClusterHealthCheckFrequency(), TimeUnit.MILLISECONDS);
     }
 }

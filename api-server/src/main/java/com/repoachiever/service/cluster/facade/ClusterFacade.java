@@ -252,36 +252,94 @@ public class ClusterFacade {
      *
      * @throws ClusterUnhealthyReapplicationFailureException if RepoAchiever Cluster unhealthy allocation reapplication fails.
      */
-    public void reapplyUnhealthy() throws ClusterUnhealthyReapplicationFailureException {
+    public void reApplyUnhealthy() throws ClusterUnhealthyReapplicationFailureException {
         StateService.getTopologyStateGuard().lock();
 
+        List<ClusterAllocationDto> removables = new ArrayList<>();
 
-        List<ClusterAllocationDto> updates = new ArrayList<>();
-        List<String> removable = new ArrayList<>();
+        List<ClusterAllocationDto> candidates = new ArrayList<>();
 
         for (ClusterAllocationDto clusterAllocation : StateService.getClusterAllocations()) {
             try {
-                clusterService.destroy(clusterAllocation.getPid());
-            } catch (ClusterDestructionFailureException ignored) {
+                if (!clusterCommunicationResource.retrieveHealthCheck(clusterAllocation.getName())) {
+                    logger.info(
+                            String.format(
+                                    "Setting RepoAchiever Cluster allocation to suspend state: %s",
+                                    clusterAllocation.getName()));
+
+                    try {
+                        clusterCommunicationResource.performSuspend(clusterAllocation.getName());
+                    } catch (ClusterOperationFailureException ignored) {
+                        logger.info(
+                                String.format("RepoAchiever Cluster allocation is not responding on suspend request: %s",
+                                        clusterAllocation.getName()));
+                    }
+
+                    logger.info(
+                            String.format("Removing RepoAchiever Cluster allocation: %s", clusterAllocation.getName()));
+
+                    try {
+                        clusterService.destroy(clusterAllocation.getPid());
+                    } catch (ClusterDestructionFailureException ignored) {
+                    }
+                } else {
+                    continue;
+                }
+            } catch (ClusterOperationFailureException e) {
+                logger.info(
+                        String.format("Removing RepoAchiever Cluster allocation: %s", clusterAllocation.getName()));
+
+                try {
+                    clusterService.destroy(clusterAllocation.getPid());
+                } catch (ClusterDestructionFailureException ignored) {
+                }
             }
+
+            removables.add(clusterAllocation);
+        }
+
+        if (removables.isEmpty()) {
+            StateService.getTopologyStateGuard().unlock();
+
+            return;
+        }
+
+        for (ClusterAllocationDto removable : removables) {
+            logger.info(
+                    String.format("Redeploying RepoAchiever Cluster allocation: %s", removable.getName()));
 
             Integer pid;
 
             try {
-                pid = clusterService.deploy(clusterAllocation.getName(), clusterAllocation.getContext());
+                pid = clusterService.deploy(removable.getName(), removable.getContext());
             } catch (ClusterDeploymentFailureException e) {
                 throw new ClusterUnhealthyReapplicationFailureException(e.getMessage());
             }
 
-            removable.add(clusterAllocation.getName());
-//
-//            updates.add(ClusterAllocationDto.of(
-//                    clusterAllocation.getName(), pid, clusterAllocation.getContext()));
+            candidates.add(ClusterAllocationDto.of(
+                    removable.getName(),
+                    pid,
+                    removable.getContext(),
+                    removable.getWorkspaceUnitKey()));
         }
 
-        StateService.removeClusterAllocationByNames(removable);
+        for (ClusterAllocationDto candidate: candidates) {
+            logger.info(
+                    String.format(
+                            "Setting RepoAchiever Cluster candidate allocation to serve state: %s",
+                            candidate.getName()));
 
-//        updates.forEach(StateService::addClusterAllocation);
+            try {
+                clusterCommunicationResource.performServe(candidate.getName());
+            } catch (ClusterOperationFailureException e1) {
+                throw new ClusterUnhealthyReapplicationFailureException(e1.getMessage());
+            }
+        }
+
+        StateService.removeClusterAllocationByNames(
+                removables.stream().map(ClusterAllocationDto::getName).toList());
+
+        StateService.addClusterAllocations(candidates);
 
         StateService.getTopologyStateGuard().unlock();
     }

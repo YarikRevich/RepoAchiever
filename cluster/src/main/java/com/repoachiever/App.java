@@ -3,6 +3,7 @@ package com.repoachiever;
 import com.repoachiever.entity.PropertiesEntity;
 import com.repoachiever.service.apiserver.resource.ApiServerCommunicationResource;
 import com.repoachiever.service.config.ConfigService;
+import com.repoachiever.service.integration.communication.apiserver.healthcheck.ApiServerHealthCheckCommunicationService;
 import com.repoachiever.service.integration.communication.cluster.ClusterCommunicationConfigService;
 import com.repoachiever.service.integration.logging.state.LoggingStateService;
 import com.repoachiever.service.executor.CommandExecutorService;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Component;
         ConfigService.class,
         CommandExecutorService.class,
         PropertiesEntity.class,
+        ApiServerHealthCheckCommunicationService.class,
         ClusterCommunicationConfigService.class,
         ApiServerCommunicationResource.class,
         LoggingStateService.class,
