@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Formatter;
 
+/**
+ * Represents exception used when communication configuration fails.
+ */
 public class CommunicationConfigurationFailureException extends IOException {
     public CommunicationConfigurationFailureException() {
         this("");

@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Formatter;
 
 /**
- * Represents exception used to indicate configuration validation failure.
+ * Represents exception used when config file is not valid.
  */
 public class ConfigValidationException extends IOException {
   public ConfigValidationException() {
