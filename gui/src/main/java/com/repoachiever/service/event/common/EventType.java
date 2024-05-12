@@ -1,0 +1,14 @@
+package com.repoachiever.service.event.common;
+
+/** Represents all available internal event types. */
+public enum EventType {
+  DEPLOYMENT_STATE_RETRIEVAL_EVENT,
+  CONNECTION_STATUS_EVENT,
+  START_DEPLOYMENT_EVENT,
+  STOP_DEPLOYMENT_EVENT,
+  MAIN_WINDOW_HEIGHT_UPDATE_EVENT,
+  MAIN_WINDOW_WIDTH_UPDATE_EVENT,
+  EDITOR_OPEN_WINDOW_EVENT,
+  SWAP_FILE_OPEN_WINDOW_EVENT,
+  CONFIG_RELOAD_EVENT,
+}
