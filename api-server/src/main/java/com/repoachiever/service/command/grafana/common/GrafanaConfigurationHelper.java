@@ -9,21 +9,6 @@ import java.util.List;
 /** Contains helpful tools used for Grafana deployment configuration. */
 public class GrafanaConfigurationHelper {
     /**
-     * Composes environment variables for Grafana deployment.
-     *
-     * @return composed environment variables.
-     */
-    public static String getEnvironmentVariables() {
-        return CommandConfigurationHelper.getEnvironmentVariables(
-                new HashMap<>() {
-                    {
-                        put("GF_SECURITY_ADMIN_PASSWORD", "repoachiever");
-                        put("GF_USERS_ALLOW_SIGN_UP", "false");
-                    }
-                });
-    }
-
-    /**
      * Composes Grafana Docker volumes declaration.
      *
      * @param configLocation given Grafana local config directory location.
@@ -36,6 +21,22 @@ public class GrafanaConfigurationHelper {
                     {
                         put(configLocation, "/etc/grafana/provisioning/");
                         put(internalLocation, "/var/lib/grafana");
+                    }
+                });
+    }
+
+    /**
+     * Composes environment variables for Grafana deployment.
+     *
+     * @return composed environment variables.
+     */
+    public static String getDockerEnvironmentVariables() {
+        return CommandConfigurationHelper.getDockerEnvironmentVariables(
+                new HashMap<>() {
+                    {
+                        put("GF_SECURITY_ADMIN_USER", "repoachiever");
+                        put("GF_SECURITY_ADMIN_PASSWORD", "repoachiever");
+                        put("GF_USERS_ALLOW_SIGN_UP", "false");
                     }
                 });
     }

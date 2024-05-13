@@ -21,6 +21,26 @@ public class CommandConfigurationHelper {
     }
 
     /**
+     * Composes Docker name declaration.
+     *
+     * @param attribute attribute to be included.
+     * @return composed Docker name declaration.
+     */
+    public static String getDockerName(String attribute) {
+        return String.format("--name '%s'", attribute);
+    }
+
+    /**
+     * Composes Docker network declaration.
+     *
+     * @param attribute attribute to be included.
+     * @return composed Docker network declaration.
+     */
+    public static String getDockerNetwork(String attribute) {
+        return String.format("--network '%s'", attribute);
+    }
+
+    /**
      * Composes Docker volumes declaration.
      *
      * @param attributes attributes to be included.
@@ -33,10 +53,22 @@ public class CommandConfigurationHelper {
     }
 
     /**
-     * Composes Docker command arguments declaration.
+     * Composes Docker environment variables declaration.
      *
      * @param attributes attributes to be included.
-     * @return composed Docker command arguments declaration.
+     * @return composed Docker environment variables declaration.
+     */
+    public static String getDockerEnvironmentVariables(Map<String, String> attributes) {
+        return attributes.entrySet().stream()
+                .map(element -> String.format("-e %s=%s", element.getKey(), element.getValue()))
+                .collect(Collectors.joining(" "));
+    }
+
+    /**
+     * Composes Docker command arguments' declaration.
+     *
+     * @param attributes attributes to be included.
+     * @return composed Docker command arguments' declaration.
      */
     public static String getDockerCommandArguments(Map<String, String> attributes) {
         return attributes.entrySet().stream()

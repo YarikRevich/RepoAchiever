@@ -25,7 +25,6 @@ com/repoachiever/exception/WorkspaceUnitDirectoryNotFoundException.class
 com/repoachiever/resource/HealthResource.class
 com/repoachiever/entity/common/ClusterContextEntity$Filter.class
 com/repoachiever/entity/common/ConfigEntity$Connection.class
-com/repoachiever/service/command/prometheus/common/PrometheusConfigurationHelper$3.class
 com/repoachiever/exception/DockerNetworkRemoveFailureException.class
 com/repoachiever/service/command/cluster/destroy/ClusterDestroyCommandService.class
 com/repoachiever/service/command/grafana/common/GrafanaConfigurationHelper$1.class
@@ -65,7 +64,6 @@ com/repoachiever/model/ContentApplication.class
 com/repoachiever/converter/HealthCheckResponseToReadinessCheckResult.class
 com/repoachiever/exception/ClusterOperationFailureException.class
 com/repoachiever/service/command/docker/availability/DockerAvailabilityCheckCommandService.class
-com/repoachiever/service/integration/diagnostics/template/TemplateConfigService$3$2.class
 com/repoachiever/service/command/nodeexporter/common/NodeExporterConfigurationHelper$1.class
 com/repoachiever/model/Provider.class
 com/repoachiever/exception/MetadataFileNotFoundException.class
@@ -157,7 +155,6 @@ com/repoachiever/service/integration/diagnostics/DiagnosticsConfigService.class
 com/repoachiever/entity/common/ConfigEntity$Resource.class
 com/repoachiever/exception/DockerNetworkCreateFailureException.class
 com/repoachiever/entity/common/ConfigEntity$Diagnostics$Prometheus.class
-com/repoachiever/service/command/nodeexporter/common/NodeExporterConfigurationHelper$3.class
 com/repoachiever/repository/ContentRepository.class
 com/repoachiever/model/ReadinessCheckStatus.class
 com/repoachiever/converter/ContentProviderToClusterContextProviderConverter.class

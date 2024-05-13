@@ -190,12 +190,6 @@ public class TemplateConfigService {
                             put("version", properties.getGitCommitId());
                         }
                     });
-                    put("nodeexporter", new HashMap<String, Object>() {
-                        {
-                            put("port", String.valueOf(
-                                    configService.getConfig().getDiagnostics().getNodeExporter().getPort()));
-                        }
-                    });
                 }
             };
 

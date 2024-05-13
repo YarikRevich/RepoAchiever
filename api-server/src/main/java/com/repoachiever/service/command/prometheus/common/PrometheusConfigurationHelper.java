@@ -39,11 +39,12 @@ public class PrometheusConfigurationHelper {
     }
 
     /**
-     * Composes Prometheus Docker command arguments declaration.
+     * Composes Prometheus Docker command arguments' declaration.
      *
-     * @return composed Prometheus Docker command arguments declaration.
+     * @param port given Prometheus listening port.
+     * @return composed Prometheus Docker command arguments' declaration.
      */
-    public static String getDockerCommandArguments() {
+    public static String getDockerCommandArguments(Integer port) {
         return CommandConfigurationHelper.getDockerCommandArguments(
                 new LinkedHashMap<>() {
                     {
@@ -51,6 +52,7 @@ public class PrometheusConfigurationHelper {
                         put("storage.tsdb.path", "/prometheus");
                         put("web.console.libraries", "/usr/share/prometheus/console_libraries");
                         put("web.console.templates", "/usr/share/prometheus/consoles");
+                        put("web.listen-address", String.format("0.0.0.0:%d", port));
                     }
                 });
     }
@@ -64,21 +66,6 @@ public class PrometheusConfigurationHelper {
         return CommandConfigurationHelper.getDockerCommandOptions(
                 List.of("web.enable-lifecycle",
                         "web.enable-admin-api"));
-    }
-
-    /**
-     * Composes Prometheus Docker port mappings.
-     *
-     * @param port given Prometheus Docker port.
-     * @return composed Prometheus Docker port mappings.
-     */
-    public static String getDockerPorts(Integer port) {
-        return CommandConfigurationHelper.getDockerPorts(
-                new HashMap<>() {
-                    {
-                        put(port, port);
-                    }
-                });
     }
 }
 

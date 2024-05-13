@@ -166,7 +166,8 @@ public class DiagnosticsConfigService {
                     new NodeExporterDeployCommandService(
                             properties.getDiagnosticsPrometheusNodeExporterDockerName(),
                             properties.getDiagnosticsPrometheusNodeExporterDockerImage(),
-                            configService.getConfig().getDiagnostics().getNodeExporter().getPort());
+                            configService.getConfig().getDiagnostics().getNodeExporter().getPort(),
+                            properties.getDiagnosticsCommonDockerNetworkName());
 
             CommandExecutorOutputDto nodeExporterDeployCommandOutput;
 
@@ -189,6 +190,7 @@ public class DiagnosticsConfigService {
                             properties.getDiagnosticsPrometheusDockerName(),
                             properties.getDiagnosticsPrometheusDockerImage(),
                             configService.getConfig().getDiagnostics().getPrometheus().getPort(),
+                            properties.getDiagnosticsCommonDockerNetworkName(),
                             properties.getDiagnosticsPrometheusConfigLocation(),
                             properties.getDiagnosticsPrometheusInternalLocation());
 
@@ -213,6 +215,7 @@ public class DiagnosticsConfigService {
                             properties.getDiagnosticsGrafanaDockerName(),
                             properties.getDiagnosticsGrafanaDockerImage(),
                             configService.getConfig().getDiagnostics().getGrafana().getPort(),
+                            properties.getDiagnosticsCommonDockerNetworkName(),
                             properties.getDiagnosticsGrafanaConfigLocation(),
                             properties.getDiagnosticsGrafanaInternalLocation());
 

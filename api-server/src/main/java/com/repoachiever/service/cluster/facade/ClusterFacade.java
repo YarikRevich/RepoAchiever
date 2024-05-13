@@ -243,8 +243,6 @@ public class ClusterFacade {
                 throw new ClusterFullDestructionFailureException(e.getMessage());
             }
         }
-
-        StateService.getTopologyStateGuard().unlock();
     }
 
     /**
