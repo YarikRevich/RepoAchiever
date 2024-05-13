@@ -92,6 +92,9 @@ public class PropertiesEntity {
     @ConfigProperty(name = "communication.cluster.health-check.frequency")
     Integer communicationClusterHealthCheckFrequency;
 
+    @ConfigProperty(name = "diagnostics.scrape.delay")
+    Integer diagnosticsScrapeDelay;
+
     @ConfigProperty(name = "diagnostics.common.docker.network.name")
     String diagnosticsCommonDockerNetworkName;
 

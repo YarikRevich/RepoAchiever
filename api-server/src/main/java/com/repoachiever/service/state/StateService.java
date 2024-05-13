@@ -23,6 +23,12 @@ public class StateService {
     private static Boolean started = false;
 
     /**
+     * Represents RepoAchiever API Server healthcheck telemetry guard.
+     */
+    @Getter
+    private static ReentrantLock telemetryApiServerHealthCheckGuard = new ReentrantLock();
+
+    /**
      * Represents RepoAchiever API Server application startup guard.
      */
     @Getter

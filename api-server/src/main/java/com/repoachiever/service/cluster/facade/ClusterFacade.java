@@ -35,10 +35,10 @@ public class ClusterFacade {
     PropertiesEntity properties;
 
     @Inject
-    WorkspaceFacade workspaceFacade;
+    ConfigService configService;
 
     @Inject
-    ConfigService configService;
+    WorkspaceFacade workspaceFacade;
 
     @Inject
     ClusterService clusterService;
@@ -252,9 +252,16 @@ public class ClusterFacade {
         }
 
         StateService.removeClusterAllocationByNames(
-                clusterAllocations.stream().map(ClusterAllocationDto::getName).toList());
+                clusterAllocations.stream().
 
-        StateService.getTopologyStateGuard().unlock();
+                        map(ClusterAllocationDto::getName).
+
+                        toList());
+
+        StateService.getTopologyStateGuard().
+
+                unlock();
+
     }
 
     /**
@@ -375,7 +382,7 @@ public class ClusterFacade {
                     removable.getWorkspaceUnitKey()));
         }
 
-        for (ClusterAllocationDto candidate: candidates) {
+        for (ClusterAllocationDto candidate : candidates) {
             logger.info(
                     String.format(
                             "Setting RepoAchiever Cluster candidate allocation to serve state: %s",

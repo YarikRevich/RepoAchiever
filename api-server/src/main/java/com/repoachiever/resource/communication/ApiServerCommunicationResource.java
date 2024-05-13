@@ -1,7 +1,9 @@
 package com.repoachiever.resource.communication;
 
+import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import com.repoachiever.entity.common.PropertiesEntity;
 import com.repoachiever.service.communication.apiserver.IApiServerCommunicationService;
+import com.repoachiever.service.config.ConfigService;
 import com.repoachiever.service.integration.diagnostics.DiagnosticsConfigService;
 import com.repoachiever.service.telemetry.TelemetryService;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -12,6 +14,9 @@ import org.apache.logging.log4j.Logger;
 import java.io.InputStream;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Contains implementation of communication provider for RepoAchiever API Server.

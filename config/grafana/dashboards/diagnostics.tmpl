@@ -91,6 +91,7 @@
               "mode": "off"
             }
           },
+          "decimals": 0,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -146,7 +147,7 @@
           "useBackend": false
         }
       ],
-      "title": "RepoAchiever API Server healthcheck requests",
+      "title": "RepoAchiever API Server healthcheck ongoing requests",
       "type": "timeseries"
     },
     {
@@ -453,12 +454,84 @@
       "type": "timeseries"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P21B111CBFE6E8FCA"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 18
+      },
+      "id": 35,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "10.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P21B111CBFE6E8FCA"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "disk_free_bytes",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Available workspace disk space",
+      "type": "stat"
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 26
       },
       "id": 28,
       "panels": [],
@@ -507,7 +580,7 @@
         "h": 7,
         "w": 3,
         "x": 0,
-        "y": 19
+        "y": 27
       },
       "id": 15,
       "maxDataPoints": 100,
@@ -592,7 +665,7 @@
         "h": 6,
         "w": 6,
         "x": 3,
-        "y": 19
+        "y": 27
       },
       "id": 6,
       "maxDataPoints": 100,
@@ -678,7 +751,7 @@
         "h": 6,
         "w": 6,
         "x": 9,
-        "y": 19
+        "y": 27
       },
       "id": 4,
       "maxDataPoints": 100,
