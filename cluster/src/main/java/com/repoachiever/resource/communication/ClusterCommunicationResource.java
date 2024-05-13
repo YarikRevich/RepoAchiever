@@ -3,6 +3,8 @@ package com.repoachiever.resource.communication;
 import com.repoachiever.entity.PropertiesEntity;
 import com.repoachiever.service.communication.cluster.IClusterCommunicationService;
 import com.repoachiever.service.state.StateService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -10,11 +12,12 @@ import java.rmi.server.UnicastRemoteObject;
 /**
  * Contains implementation of communication provider for RepoAchiever Cluster.
  */
+@Component
 public class ClusterCommunicationResource extends UnicastRemoteObject implements IClusterCommunicationService {
-    private final PropertiesEntity properties;
+    @Autowired
+    private PropertiesEntity properties;
 
-    public ClusterCommunicationResource(PropertiesEntity properties) throws RemoteException {
-        this.properties = properties;
+    public ClusterCommunicationResource() throws RemoteException {
     }
 
     /**

@@ -47,7 +47,6 @@ public class ApiServerHealthCheckCommunicationService {
                     System.exit(1);
                 }
 
-                System.out.println("health check");
             } catch (ApiServerOperationFailureException e) {
                 logger.fatal(e.getMessage());
             }

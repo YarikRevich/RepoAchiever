@@ -31,27 +31,58 @@ public class TelemetryService {
     }
 
     /**
-     * Increases allocated clusters amount counter.
-     *
-     * @param value given increment value.
+     * Increases serving RepoAchiever Cluster allocations amount counter.
      */
-    public void increaseClustersAmountBy(Integer value) {
-        telemetryBinding.getWorkerAmount().set(telemetryBinding.getWorkerAmount().get() + value);
+    public void increaseServingClustersAmount() {
+        telemetryBinding.getServingClusterAmount().set(telemetryBinding.getServingClusterAmount().get() + 1);
     }
 
     /**
-     * Decreases allocated clusters amount counter.
-     *
-     * @param value given increment value.
+     * Decreases serving RepoAchiever Cluster allocations amount counter.
      */
-    public void decreaseClustersAmountBy(Integer value) {
-        telemetryBinding.getWorkerAmount().set(telemetryBinding.getWorkerAmount().get() - value);
+    public void decreaseServingClustersAmount() {
+        telemetryBinding.getServingClusterAmount().set(telemetryBinding.getServingClusterAmount().get() - 1);
     }
 
     /**
-     * Records latest cluster allocation health check.
+     * Increases suspended RepoAchiever Cluster allocations amount counter.
      */
-    public void recordClusterHealthCheck() {
+    public void increaseSuspendedClustersAmount() {
+        telemetryBinding.getSuspendedClusterAmount().set(telemetryBinding.getSuspendedClusterAmount().get() + 1);
+    }
 
+    /**
+     * Decreases suspended RepoAchiever Cluster allocations amount counter.
+     */
+    public void decreaseSuspendedClustersAmount() {
+        telemetryBinding.getSuspendedClusterAmount().set(telemetryBinding.getSuspendedClusterAmount().get() - 1);
+    }
+
+    /**
+     * Increases healthcheck requests for RepoAchiever API Server instance amount counter.
+     */
+    public void increaseApiServerHealthCheckAmount() {
+        telemetryBinding.getApiServerHealthCheckAmount().set(telemetryBinding.getApiServerHealthCheckAmount().get() + 1);
+    }
+
+    /**
+     * Decreases healthcheck requests for RepoAchiever API Server instance amount counter.
+     */
+    public void decreaseApiServerHealthCheckAmount() {
+        telemetryBinding.getApiServerHealthCheckAmount().set(telemetryBinding.getApiServerHealthCheckAmount().get() - 1);
+    }
+
+    /**
+     * Increases healthcheck requests for RepoAchiever Cluster allocations amount counter.
+     */
+    public void increaseClusterHealthCheckAmount() {
+        telemetryBinding.getClusterHealthCheckAmount().set(telemetryBinding.getClusterHealthCheckAmount().get() + 1);
+    }
+
+    /**
+     * Decreases healthcheck requests for RepoAchiever Cluster allocations amount counter.
+     */
+    public void decreaseClusterHealthCheckAmount() {
+        telemetryBinding.getClusterHealthCheckAmount().set(telemetryBinding.getClusterHealthCheckAmount().get() - 1);
     }
 }

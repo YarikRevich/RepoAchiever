@@ -14,6 +14,7 @@ import com.repoachiever.service.cluster.common.ClusterConfigurationHelper;
 import com.repoachiever.service.cluster.resource.ClusterCommunicationResource;
 import com.repoachiever.service.config.ConfigService;
 import com.repoachiever.service.state.StateService;
+import com.repoachiever.service.telemetry.TelemetryService;
 import com.repoachiever.service.workspace.facade.WorkspaceFacade;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -44,6 +45,9 @@ public class ClusterFacade {
 
     @Inject
     ClusterCommunicationResource clusterCommunicationResource;
+
+    @Inject
+    TelemetryService telemetryService;
 
     /**
      * Applies given content application, removing previous topology and deploying new one with up-to-date configuration.
@@ -76,6 +80,10 @@ public class ClusterFacade {
             }
 
             suspends.add(clusterAllocation);
+
+            telemetryService.decreaseServingClustersAmount();
+
+            telemetryService.increaseSuspendedClustersAmount();
         }
 
         List<List<String>> segregation = clusterService.performContentLocationsSegregation(
@@ -137,6 +145,10 @@ public class ClusterFacade {
                         logger.fatal(new ClusterApplicationFailureException(e1.getMessage(), e2.getMessage()).getMessage());
                         return;
                     }
+
+                    telemetryService.decreaseSuspendedClustersAmount();
+
+                    telemetryService.increaseServingClustersAmount();
                 }
 
                 throw new ClusterApplicationFailureException(e1.getMessage());
@@ -167,10 +179,16 @@ public class ClusterFacade {
                                 e1.getMessage(), e2.getMessage()).getMessage());
                         return;
                     }
+
+                    telemetryService.decreaseSuspendedClustersAmount();
+
+                    telemetryService.increaseServingClustersAmount();
                 }
 
                 throw new ClusterApplicationFailureException(e1.getMessage());
             }
+
+            telemetryService.increaseServingClustersAmount();
         }
 
         for (ClusterAllocationDto suspended : suspends) {
@@ -182,6 +200,8 @@ public class ClusterFacade {
             } catch (ClusterDestructionFailureException e) {
                 throw new ClusterApplicationFailureException(e.getMessage());
             }
+
+            telemetryService.decreaseSuspendedClustersAmount();
         }
 
         StateService.addClusterAllocations(candidates);
@@ -209,6 +229,16 @@ public class ClusterFacade {
                 StateService.getClusterAllocationsByWorkspaceUnitKey(workspaceUnitKey);
 
         for (ClusterAllocationDto clusterAllocation : clusterAllocations) {
+            try {
+                clusterCommunicationResource.performSuspend(clusterAllocation.getName());
+            } catch (ClusterOperationFailureException e) {
+                throw new ClusterWithdrawalFailureException(e.getMessage());
+            }
+
+            telemetryService.increaseSuspendedClustersAmount();
+
+            telemetryService.decreaseServingClustersAmount();
+
             logger.info(
                     String.format("Removing RepoAchiever Cluster allocation: %s", clusterAllocation.getName()));
 
@@ -217,6 +247,8 @@ public class ClusterFacade {
             } catch (ClusterDestructionFailureException e) {
                 throw new ClusterWithdrawalFailureException(e.getMessage());
             }
+
+            telemetryService.decreaseSuspendedClustersAmount();
         }
 
         StateService.removeClusterAllocationByNames(
@@ -234,6 +266,18 @@ public class ClusterFacade {
         StateService.getTopologyStateGuard().lock();
 
         for (ClusterAllocationDto clusterAllocation : StateService.getClusterAllocations()) {
+            try {
+                clusterCommunicationResource.performSuspend(clusterAllocation.getName());
+            } catch (ClusterOperationFailureException ignored) {
+                logger.info(
+                        String.format("RepoAchiever Cluster allocation is not responding on suspend request: %s",
+                                clusterAllocation.getName()));
+            }
+
+            telemetryService.increaseSuspendedClustersAmount();
+
+            telemetryService.decreaseServingClustersAmount();
+
             logger.info(
                     String.format("Removing RepoAchiever Cluster allocation: %s", clusterAllocation.getName()));
 
@@ -242,6 +286,8 @@ public class ClusterFacade {
             } catch (ClusterDestructionFailureException e) {
                 throw new ClusterFullDestructionFailureException(e.getMessage());
             }
+
+            telemetryService.decreaseSuspendedClustersAmount();
         }
     }
 
@@ -273,6 +319,10 @@ public class ClusterFacade {
                                         clusterAllocation.getName()));
                     }
 
+                    telemetryService.increaseSuspendedClustersAmount();
+
+                    telemetryService.decreaseServingClustersAmount();
+
                     logger.info(
                             String.format("Removing RepoAchiever Cluster allocation: %s", clusterAllocation.getName()));
 
@@ -280,6 +330,8 @@ public class ClusterFacade {
                         clusterService.destroy(clusterAllocation.getPid());
                     } catch (ClusterDestructionFailureException ignored) {
                     }
+
+                    telemetryService.decreaseSuspendedClustersAmount();
                 } else {
                     continue;
                 }
@@ -291,6 +343,8 @@ public class ClusterFacade {
                     clusterService.destroy(clusterAllocation.getPid());
                 } catch (ClusterDestructionFailureException ignored) {
                 }
+
+                telemetryService.decreaseServingClustersAmount();
             }
 
             removables.add(clusterAllocation);
@@ -332,6 +386,8 @@ public class ClusterFacade {
             } catch (ClusterOperationFailureException e1) {
                 throw new ClusterUnhealthyReapplicationFailureException(e1.getMessage());
             }
+
+            telemetryService.increaseServingClustersAmount();
         }
 
         StateService.removeClusterAllocationByNames(

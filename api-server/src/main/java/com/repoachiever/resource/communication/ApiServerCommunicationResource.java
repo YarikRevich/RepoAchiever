@@ -3,6 +3,9 @@ package com.repoachiever.resource.communication;
 import com.repoachiever.entity.common.PropertiesEntity;
 import com.repoachiever.service.communication.apiserver.IApiServerCommunicationService;
 import com.repoachiever.service.integration.diagnostics.DiagnosticsConfigService;
+import com.repoachiever.service.telemetry.TelemetryService;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -13,13 +16,14 @@ import java.rmi.server.UnicastRemoteObject;
 /**
  * Contains implementation of communication provider for RepoAchiever API Server.
  */
+@ApplicationScoped
 public class ApiServerCommunicationResource extends UnicastRemoteObject implements IApiServerCommunicationService {
     private static final Logger logger = LogManager.getLogger(ApiServerCommunicationResource.class);
 
-    private final PropertiesEntity properties;
+    @Inject
+    TelemetryService telemetryService;
 
-    public ApiServerCommunicationResource(PropertiesEntity properties) throws RemoteException {
-        this.properties = properties;
+    public ApiServerCommunicationResource() throws RemoteException {
     }
 
     /**
@@ -51,6 +55,12 @@ public class ApiServerCommunicationResource extends UnicastRemoteObject implemen
      */
     @Override
     public Boolean retrieveHealthCheck() throws RemoteException {
-        return true;
+        telemetryService.increaseApiServerHealthCheckAmount();
+
+        Boolean result = true;
+
+        telemetryService.decreaseApiServerHealthCheckAmount();
+
+        return result;
     }
 }

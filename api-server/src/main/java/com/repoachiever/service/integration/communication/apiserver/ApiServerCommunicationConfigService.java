@@ -7,6 +7,7 @@ import com.repoachiever.resource.communication.ApiServerCommunicationResource;
 import com.repoachiever.service.config.ConfigService;
 import com.repoachiever.service.communication.common.CommunicationProviderConfigurationHelper;
 import com.repoachiever.service.state.StateService;
+import com.repoachiever.service.telemetry.TelemetryService;
 import io.quarkus.runtime.Startup;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -31,6 +32,9 @@ public class ApiServerCommunicationConfigService {
 
     @Inject
     ConfigService configService;
+
+    @Inject
+    ApiServerCommunicationResource apiServerCommunicationResource;
 
     /**
      * Performs setup of RepoAchiever API Server communication provider.
@@ -64,7 +68,7 @@ public class ApiServerCommunicationConfigService {
                         CommunicationProviderConfigurationHelper.getBindName(
                                 configService.getConfig().getCommunication().getPort(),
                                 properties.getCommunicationApiServerName()),
-                        new ApiServerCommunicationResource(properties));
+                        apiServerCommunicationResource);
             } catch (RemoteException e) {
                 logger.fatal(e.getMessage());
             }
