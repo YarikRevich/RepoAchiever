@@ -16,7 +16,6 @@
   </parent>
 
   <modules>
-    <module>worker</module>
     <module>cluster</module>
     <module>cli</module>
     <module>gui</module>

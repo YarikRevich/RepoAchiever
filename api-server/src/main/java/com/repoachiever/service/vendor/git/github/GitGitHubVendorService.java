@@ -40,7 +40,7 @@ public class GitGitHubVendorService {
     /**
      * Checks if the given content locations are valid.
      *
-     * @param token given authorization token.
+     * @param token     given authorization token.
      * @param locations given location names.
      * @return result of the check.
      */
@@ -52,12 +52,14 @@ public class GitGitHubVendorService {
                                 VendorConfigurationHelper.getWrappedToken(token),
                                 location);
 
-                return response.getStatus() == HttpStatus.SC_OK;
+                if (response.getStatus() != HttpStatus.SC_OK) {
+                    return false;
+                }
             } catch (WebApplicationException e) {
                 return false;
             }
         }
 
-        return false;
+        return true;
     }
 }

@@ -9,6 +9,7 @@ import com.repoachiever.service.integration.communication.cluster.ClusterCommuni
 import com.repoachiever.service.integration.logging.state.LoggingStateService;
 import com.repoachiever.service.executor.CommandExecutorService;
 import com.repoachiever.service.integration.logging.transfer.LoggingTransferService;
+import com.repoachiever.service.integration.scheduler.SchedulerService;
 import com.repoachiever.service.waiter.WaiterHelper;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Component;
         ConfigService.class,
         CommandExecutorService.class,
         PropertiesEntity.class,
+        SchedulerService.class,
         ApiServerHealthCheckCommunicationService.class,
         ClusterCommunicationResource.class,
         ClusterCommunicationConfigService.class,

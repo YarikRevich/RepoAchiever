@@ -2,6 +2,7 @@ package com.repoachiever.repository.facade;
 
 import com.repoachiever.dto.RepositoryContentUnitDto;
 import com.repoachiever.entity.repository.ContentEntity;
+import com.repoachiever.entity.repository.ExporterEntity;
 import com.repoachiever.entity.repository.ProviderEntity;
 import com.repoachiever.entity.repository.SecretEntity;
 import com.repoachiever.exception.ContentApplicationRetrievalFailureException;
@@ -9,10 +10,7 @@ import com.repoachiever.exception.RepositoryContentApplicationFailureException;
 import com.repoachiever.exception.RepositoryContentDestructionFailureException;
 import com.repoachiever.exception.RepositoryOperationFailureException;
 import com.repoachiever.model.*;
-import com.repoachiever.repository.ConfigRepository;
-import com.repoachiever.repository.ContentRepository;
-import com.repoachiever.repository.ProviderRepository;
-import com.repoachiever.repository.SecretRepository;
+import com.repoachiever.repository.*;
 import com.repoachiever.repository.common.RepositoryConfigurationHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -35,6 +33,9 @@ public class RepositoryFacade {
 
     @Inject
     ProviderRepository providerRepository;
+
+    @Inject
+    ExporterRepository exporterRepository;
 
     @Inject
     SecretRepository secretRepository;
@@ -87,6 +88,10 @@ public class RepositoryFacade {
                 throw new ContentApplicationRetrievalFailureException(e.getMessage());
             }
 
+            Provider provider =
+                    RepositoryConfigurationHelper.convertRawProviderToContentProvider(
+                            rawProvider.getName());
+
             SecretEntity rawSecret;
 
             try {
@@ -95,34 +100,53 @@ public class RepositoryFacade {
                 throw new ContentApplicationRetrievalFailureException(e.getMessage());
             }
 
-            Provider provider =
-                    RepositoryConfigurationHelper.convertRawProviderToContentProvider(
-                            rawProvider.getName());
-
             CredentialsFieldsFull credentials =
                     RepositoryConfigurationHelper.convertRawSecretsToContentCredentials(
                             provider, rawSecret.getSession(), rawSecret.getCredentials());
 
+            Optional<Exporter> exporter;
+
+            if (content.getExporter().isPresent()) {
+                ExporterEntity rawExporter;
+
+                try {
+                    rawExporter = exporterRepository.findById(content.getExporter().get());
+                } catch (RepositoryOperationFailureException e) {
+                    throw new RuntimeException(e);
+                }
+
+                exporter = Optional.of(
+                        RepositoryConfigurationHelper.convertRawExporterToContentExporter(
+                                rawExporter.getHost()));
+            } else {
+                exporter = Optional.empty();
+            }
+
             units.add(RepositoryContentUnitDto.of(
                     content.getLocation(),
                     provider,
+                    exporter,
                     credentials));
         }
 
-        Map<CredentialsFieldsFull, Map<Provider, List<RepositoryContentUnitDto>>> groups =
+        Map<CredentialsFieldsFull, Map<Provider, Map<Optional<Exporter>, List<RepositoryContentUnitDto>>>> groups =
                 units
                         .stream()
                         .collect(
                                 groupingBy(
                                         RepositoryContentUnitDto::getCredentials,
-                                        groupingBy(RepositoryContentUnitDto::getProvider)));
+                                        groupingBy(RepositoryContentUnitDto::getProvider,
+                                                groupingBy(RepositoryContentUnitDto::getExporter))));
 
         groups
                 .forEach((key1, value1) -> {
                     value1
                             .forEach((key2, value2) -> {
-                                result.add(
-                                        ContentApplication.of(value2.stream().map(RepositoryContentUnitDto::getLocation).toList(), key2, key1));
+                                value2
+                                        .forEach((key3, value3) -> {
+                                            result.add(
+                                                    ContentApplication.of(value3.stream().map(RepositoryContentUnitDto::getLocation).toList(), key2, key3.orElse(null), key1));
+                                        });
                             });
                 });
 
@@ -168,6 +192,33 @@ public class RepositoryFacade {
             throw new RepositoryContentApplicationFailureException(e.getMessage());
         }
 
+        Optional<Integer> exporter;
+
+        Optional<Exporter> exporterField = RepositoryConfigurationHelper.getExporter(
+                contentApplication.getProvider(), contentApplication.getExporter());
+
+        if (exporterField.isPresent()) {
+            try {
+                if (!exporterRepository.isPresentByHost(exporterField.get().getHost())) {
+                    exporterRepository.insert(exporterField.get().getHost());
+                }
+            } catch (RepositoryOperationFailureException e) {
+                throw new RepositoryContentApplicationFailureException(e.getMessage());
+            }
+
+            ExporterEntity rawExporter;
+
+            try {
+                rawExporter = exporterRepository.findByHost(exporterField.get().getHost());
+            } catch (RepositoryOperationFailureException e) {
+                throw new RepositoryContentApplicationFailureException(e.getMessage());
+            }
+
+            exporter = Optional.of(rawExporter.getId());
+        } else {
+            exporter = Optional.empty();
+        }
+
         try {
             contentRepository.deleteBySecret(secret.getId());
         } catch (RepositoryOperationFailureException e) {
@@ -176,7 +227,7 @@ public class RepositoryFacade {
 
         for (String location : contentApplication.getLocations()) {
             try {
-                contentRepository.insert(location, provider.getId(), secret.getId());
+                contentRepository.insert(location, provider.getId(), exporter, secret.getId());
             } catch (RepositoryOperationFailureException e) {
                 throw new RepositoryContentApplicationFailureException(e.getMessage());
             }

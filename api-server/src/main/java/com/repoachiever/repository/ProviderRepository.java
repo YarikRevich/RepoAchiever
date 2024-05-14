@@ -76,7 +76,7 @@ public class ProviderRepository {
     /**
      * Attempts to retrieve provider entity by the given name.
      *
-     * @param name given name of the configuration.
+     * @param name given name of the provider.
      * @return retrieved config entity.
      * @throws RepositoryOperationFailureException if repository operation fails.
      */
@@ -116,7 +116,7 @@ public class ProviderRepository {
      * Attempts to retrieve provider entity by the given identificator.
      *
      * @param id given identificator of the configuration.
-     * @return retrieved config entity.
+     * @return retrieved provider entity.
      * @throws RepositoryOperationFailureException if repository operation fails.
      */
     public ProviderEntity findById(Integer id) throws RepositoryOperationFailureException {

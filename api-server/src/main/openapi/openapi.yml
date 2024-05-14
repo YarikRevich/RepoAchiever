@@ -224,6 +224,12 @@ components:
           type: array
           items:
             type: string
+    Exporter:
+      required:
+        - host
+      properties:
+        host:
+          type: string
     ContentApplication:
       required:
         - locations
@@ -236,6 +242,8 @@ components:
             type: string
         provider:
           $ref: "#/components/schemas/Provider"
+        exporter:
+          $ref: "#/components/schemas/Exporter"
         credentials:
           $ref: "#/components/schemas/CredentialsFieldsFull"
     ContentWithdrawal:

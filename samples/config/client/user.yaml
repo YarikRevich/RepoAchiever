@@ -11,6 +11,11 @@ service:
   # and "git-github"
   provider: "git-github"
 
+  # Represents section used for RepoAchiever Exporter configuration.
+  exporter:
+    # Represents address for the host of RepoAchiever Exporter.
+    host: "http://localhost:10000"
+
   # Represents credentials used for the selected VCS provider. Can be left null, if the provider does not
   # require it.
   credentials:

@@ -35,6 +35,9 @@ public class PropertiesEntity {
     @ConfigProperty(name = "database.tables.provider.name")
     String databaseProviderTableName;
 
+    @ConfigProperty(name = "database.tables.exporter.name")
+    String databaseExporterTableName;
+
     @ConfigProperty(name = "database.tables.secret.name")
     String databaseSecretTableName;
 

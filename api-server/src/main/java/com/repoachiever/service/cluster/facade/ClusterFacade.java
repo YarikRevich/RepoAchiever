@@ -2,6 +2,7 @@ package com.repoachiever.service.cluster.facade;
 
 import com.repoachiever.converter.ClusterContextToJsonConverter;
 import com.repoachiever.converter.ContentCredentialsToClusterContextCredentialsConverter;
+import com.repoachiever.converter.ContentExporterToClusterContextExporterConverter;
 import com.repoachiever.converter.ContentProviderToClusterContextProviderConverter;
 import com.repoachiever.dto.ClusterAllocationDto;
 import com.repoachiever.entity.common.ClusterContextEntity;
@@ -102,6 +103,8 @@ public class ClusterFacade {
                             ClusterContextEntity.Service.of(
                                     ContentProviderToClusterContextProviderConverter.convert(
                                             contentApplication.getProvider()),
+                                    ContentExporterToClusterContextExporterConverter.convert(
+                                            contentApplication.getProvider(), contentApplication.getExporter()),
                                     ContentCredentialsToClusterContextCredentialsConverter.convert(
                                             contentApplication.getProvider(),
                                             contentApplication.getCredentials().getExternal())),

@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 import jakarta.validation.constraints.Pattern;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
@@ -70,6 +71,18 @@ public class ConfigEntity {
 
         @JsonProperty("provider")
         public Provider provider;
+
+        /**
+         * Represents configuration used for communication with RepoAchiever Exporter.
+         */
+        @Getter
+        public static class Exporter {
+            @JsonProperty("host")
+            public String host;
+        }
+
+        @JsonProperty("exporter")
+        public Exporter exporter;
 
         /**
          * Represents credentials used for external service communication by RepoAchiever Cluster allocation.

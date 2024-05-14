@@ -1,10 +1,7 @@
 package com.repoachiever.resource;
 
 import com.repoachiever.api.ContentResourceApi;
-import com.repoachiever.exception.CredentialsAreNotValidException;
-import com.repoachiever.exception.CredentialsFieldIsNotValidException;
-import com.repoachiever.exception.LocationsAreNotValidException;
-import com.repoachiever.exception.LocationsFieldIsNotValidException;
+import com.repoachiever.exception.*;
 import com.repoachiever.model.*;
 import com.repoachiever.repository.facade.RepositoryFacade;
 import com.repoachiever.resource.common.ResourceConfigurationHelper;
@@ -57,6 +54,11 @@ public class ContentResource implements ContentResourceApi {
     public void v1ContentApplyPost(ContentApplication contentApplication) {
         if (Objects.isNull(contentApplication)) {
             throw new BadRequestException();
+        }
+
+        if (!ResourceConfigurationHelper.isExporterFieldValid(
+                contentApplication.getProvider(), contentApplication.getExporter())) {
+            throw new ExporterFieldIsNotValidException();
         }
 
         if (!ResourceConfigurationHelper.isExternalCredentialsFieldValid(

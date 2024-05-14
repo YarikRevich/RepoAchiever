@@ -67,6 +67,18 @@ public class ClusterContextEntity {
         public Provider provider;
 
         /**
+         * Represents configuration used for communication with RepoAchiever Exporter.
+         */
+        @AllArgsConstructor(staticName = "of")
+        public static class Exporter {
+            @JsonProperty("host")
+            public String host;
+        }
+
+        @JsonProperty("exporter")
+        public Exporter exporter;
+
+        /**
          * Represents credentials used for external service communication by RepoAchiever Cluster allocation.
          */
         @AllArgsConstructor(staticName = "of")
