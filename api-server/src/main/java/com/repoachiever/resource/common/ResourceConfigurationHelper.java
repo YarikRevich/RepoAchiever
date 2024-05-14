@@ -20,8 +20,8 @@ public class ResourceConfigurationHelper {
     public static Boolean isExternalCredentialsFieldValid(
             Provider provider, CredentialsFieldsExternal credentialsFieldExternal) {
         return switch (provider) {
-            case LOCAL -> true;
-            case GITHUB -> Objects.nonNull(credentialsFieldExternal);
+            case EXPORTER -> true;
+            case GIT_GITHUB -> Objects.nonNull(credentialsFieldExternal);
         };
     }
 

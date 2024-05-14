@@ -49,8 +49,8 @@ public class ClusterContextEntity {
          * Represents all supported service providers, which can be used by RepoAchiever Cluster allocation.
          */
         public enum Provider {
-            LOCAL("git-local"),
-            GITHUB("git-github");
+            EXPORTER("exporter"),
+            GIT_GITHUB("git-github");
 
             private final String value;
 

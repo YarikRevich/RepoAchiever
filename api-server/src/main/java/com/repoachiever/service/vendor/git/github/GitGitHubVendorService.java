@@ -9,6 +9,11 @@ import jakarta.ws.rs.core.Response;
 import org.apache.http.HttpStatus;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
+import java.util.List;
+
+/**
+ * Service used to represent GitHub external service operations.
+ */
 @ApplicationScoped
 public class GitGitHubVendorService {
     @Inject
@@ -18,9 +23,10 @@ public class GitGitHubVendorService {
     /**
      * Checks if the given token is valid.
      *
+     * @param token given token to be validated.
      * @return result of the check.
      */
-    public boolean isTokenValid(String token) {
+    public Boolean isTokenValid(String token) {
         try {
             Response response = gitHubClientService
                     .getOctocat(VendorConfigurationHelper.getWrappedToken(token));
@@ -29,5 +35,29 @@ public class GitGitHubVendorService {
         } catch (WebApplicationException e) {
             return false;
         }
+    }
+
+    /**
+     * Checks if the given content locations are valid.
+     *
+     * @param token given authorization token.
+     * @param locations given location names.
+     * @return result of the check.
+     */
+    public Boolean areLocationsValid(String token, List<String> locations) {
+        for (String location : locations) {
+            try {
+                Response response = gitHubClientService
+                        .getRepository(
+                                VendorConfigurationHelper.getWrappedToken(token),
+                                location);
+
+                return response.getStatus() == HttpStatus.SC_OK;
+            } catch (WebApplicationException e) {
+                return false;
+            }
+        }
+
+        return false;
     }
 }

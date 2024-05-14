@@ -19,116 +19,138 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import picocli.CommandLine.Command;
 
-/** Represents general command management service. */
+/**
+ * Represents general command management service.
+ */
 @Service
 @Command(
-    name = "help",
-    mixinStandardHelpOptions = true,
-    description = "Cloud-based remote resource tracker",
-    version = "1.0")
+        name = "help",
+        mixinStandardHelpOptions = true,
+        description = "Cloud-based remote resource tracker",
+        version = "1.0")
 public class BaseCommandService {
-  private static final Logger logger = LogManager.getLogger(BaseCommandService.class);
+    private static final Logger logger = LogManager.getLogger(BaseCommandService.class);
 
-  @Autowired private StartExternalCommandService startCommandService;
+    @Autowired
+    private StartExternalCommandService startCommandService;
 
-  @Autowired private StateExternalCommandService stateCommandService;
+    @Autowired
+    private StateExternalCommandService stateCommandService;
 
-  @Autowired private StopExternalCommandService stopCommandService;
+    @Autowired
+    private StopExternalCommandService stopCommandService;
 
-  @Autowired private VersionExternalCommandService versionCommandService;
+    @Autowired
+    private VersionExternalCommandService versionCommandService;
 
-  @Autowired private HealthCheckInternalCommandService healthCheckInternalCommandService;
+    @Autowired
+    private HealthCheckInternalCommandService healthCheckInternalCommandService;
 
-  @Autowired private ReadinessCheckInternalCommandService readinessCheckInternalCommandService;
+    @Autowired
+    private ReadinessCheckInternalCommandService readinessCheckInternalCommandService;
 
-  @Autowired private StartCommandVisualizationLabel startCommandVisualizationLabel;
+    @Autowired
+    private StartCommandVisualizationLabel startCommandVisualizationLabel;
 
-  @Autowired private StopCommandVisualizationLabel stopCommandVisualizationLabel;
+    @Autowired
+    private StopCommandVisualizationLabel stopCommandVisualizationLabel;
 
-  @Autowired private StateCommandVisualizationLabel stateCommandVisualizationLabel;
+    @Autowired
+    private StateCommandVisualizationLabel stateCommandVisualizationLabel;
 
-  @Autowired private VersionCommandVisualizationLabel versionCommandVisualizationLabel;
+    @Autowired
+    private VersionCommandVisualizationLabel versionCommandVisualizationLabel;
 
-  @Autowired private VisualizationService visualizationService;
+    @Autowired
+    private VisualizationService visualizationService;
 
-  @Autowired private VisualizationState visualizationState;
+    @Autowired
+    private VisualizationState visualizationState;
 
-  /** Provides access to start command service. */
-  @Command(description = "Start remote requests execution")
-  private void start() {
-    visualizationState.setLabel(startCommandVisualizationLabel);
+    /**
+     * Provides access to start command service.
+     */
+    @Command(description = "Start remote requests execution")
+    private void start() {
+        visualizationState.setLabel(startCommandVisualizationLabel);
 
-    visualizationService.process();
+        visualizationService.process();
 
-    try {
-      healthCheckInternalCommandService.process();
+        try {
+            healthCheckInternalCommandService.process();
 
-      startCommandService.process();
-    } catch (ApiServerException e) {
-      logger.fatal(e.getMessage());
-      return;
+            startCommandService.process();
+        } catch (ApiServerException e) {
+            logger.fatal(e.getMessage());
+            return;
+        }
+
+        visualizationService.await();
     }
 
-    visualizationService.await();
-  }
+    /**
+     * Provides access to state command service.
+     */
+    @Command(description = "Retrieve state of remote requests executions")
+    private void state() {
+        visualizationState.setLabel(stateCommandVisualizationLabel);
 
-  /** Provides access to state command service. */
-  @Command(description = "Retrieve state of remote requests executions")
-  private void state() {
-    visualizationState.setLabel(stateCommandVisualizationLabel);
+        visualizationService.process();
 
-    visualizationService.process();
+        try {
+            healthCheckInternalCommandService.process();
+            readinessCheckInternalCommandService.process();
 
-    try {
-      healthCheckInternalCommandService.process();
-      readinessCheckInternalCommandService.process();
+            stateCommandService.process();
+        } catch (ApiServerException e) {
+            logger.fatal(e.getMessage());
+            return;
+        }
 
-      stateCommandService.process();
-    } catch (ApiServerException e) {
-      logger.fatal(e.getMessage());
-      return;
+        visualizationService.await();
     }
 
-    visualizationService.await();
-  }
+    /**
+     * Provides access to stop command service.
+     */
+    @Command(description = "Stop remote requests execution")
+    private void stop() {
+        visualizationState.setLabel(stopCommandVisualizationLabel);
 
-  /** Provides access to stop command service. */
-  @Command(description = "Stop remote requests execution")
-  private void stop() {
-    visualizationState.setLabel(stopCommandVisualizationLabel);
+        visualizationService.process();
 
-    visualizationService.process();
+        try {
+            healthCheckInternalCommandService.process();
 
-    try {
-      healthCheckInternalCommandService.process();
+            stopCommandService.process();
+        } catch (ApiServerException e) {
+            logger.fatal(e.getMessage());
+            return;
+        }
 
-      stopCommandService.process();
-    } catch (ApiServerException e) {
-      logger.fatal(e.getMessage());
-      return;
+        visualizationService.await();
     }
 
-    visualizationService.await();
-  }
+    /**
+     * Provides access to version command service.
+     */
+    @Command(
+            description =
+                    "Retrieve version of ResourceTracker CLI and ResourceTracker API Server(if available)")
+    private void version() {
+        visualizationState.setLabel(versionCommandVisualizationLabel);
 
-  /** Provides access to version command service. */
-  @Command(
-      description =
-          "Retrieve version of ResourceTracker CLI and ResourceTracker API Server(if available)")
-  private void version() {
-    visualizationState.setLabel(versionCommandVisualizationLabel);
+        visualizationService.process();
 
-    visualizationService.process();
+        try {
+            healthCheckInternalCommandService.process();
 
-    try {
-      healthCheckInternalCommandService.process();
+            versionCommandService.process();
+        } catch (ApiServerException e) {
+            logger.fatal(e.getMessage());
+            return;
+        }
 
-      versionCommandService.process();
-    } catch (ApiServerException e) {
-      logger.fatal(e.getMessage());
-      return;
+        visualizationService.await();
     }
-
-    visualizationService.await();
-  }
 }

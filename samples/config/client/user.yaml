@@ -7,9 +7,9 @@ content:
 # Represents section used for VCS provider configuration.
 service:
   # Represents the selected VCS provider for RepoAchiever. The first part divided by the hyphen represents
-  # selected VCS core type and the second part defines external provider. Supported providers are "git-local"
+  # selected VCS core type and the second part defines external provider. Supported providers are "exporter"
   # and "git-github"
-  provider: "git-local"
+  provider: "git-github"
 
   # Represents credentials used for the selected VCS provider. Can be left null, if the provider does not
   # require it.

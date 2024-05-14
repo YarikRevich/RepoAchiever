@@ -2,13 +2,11 @@ package com.repoachiever.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
 import jakarta.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
@@ -56,8 +54,8 @@ public class ConfigEntity {
          * Represents all supported service providers, which can be used by RepoAchiever Cluster allocation.
          */
         public enum Provider {
-            LOCAL("git-local"),
-            GITHUB("git-github");
+            EXPORTER("exporter"),
+            GIT_GITHUB("git-github");
 
             private final String value;
 

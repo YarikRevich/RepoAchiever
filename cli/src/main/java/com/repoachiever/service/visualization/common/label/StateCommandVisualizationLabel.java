@@ -36,7 +36,7 @@ public class StateCommandVisualizationLabel implements IVisualizationLabel {
    * @see IVisualizationLabel
    */
   @Override
-  public boolean isEmpty() {
+  public Boolean isEmpty() {
     return stepsQueue.isEmpty();
   }
 
@@ -44,7 +44,7 @@ public class StateCommandVisualizationLabel implements IVisualizationLabel {
    * @see IVisualizationLabel
    */
   @Override
-  public boolean isNext() {
+  public Boolean isNext() {
     mutex.lock();
 
     try {

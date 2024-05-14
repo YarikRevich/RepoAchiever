@@ -20,8 +20,8 @@ public class RepositoryConfigurationHelper {
     public static Optional<String> getExternalCredentials(
             Provider provider, CredentialsFieldsExternal credentialsFieldExternal) {
         return switch (provider) {
-            case LOCAL -> Optional.empty();
-            case GITHUB -> Optional.ofNullable(credentialsFieldExternal.getToken());
+            case EXPORTER -> Optional.empty();
+            case GIT_GITHUB -> Optional.ofNullable(credentialsFieldExternal.getToken());
         };
     }
 
@@ -46,10 +46,10 @@ public class RepositoryConfigurationHelper {
     public static CredentialsFieldsFull convertRawSecretsToContentCredentials(
             Provider provider, Integer session, Optional<String> credentials) {
         return switch (provider) {
-            case LOCAL -> CredentialsFieldsFull.of(
+            case EXPORTER -> CredentialsFieldsFull.of(
                     CredentialsFieldsInternal.of(session),
                     null);
-            case GITHUB -> CredentialsFieldsFull.of(
+            case GIT_GITHUB -> CredentialsFieldsFull.of(
                     CredentialsFieldsInternal.of(session),
                     CredentialsFieldsExternal.of(credentials.get()));
         };

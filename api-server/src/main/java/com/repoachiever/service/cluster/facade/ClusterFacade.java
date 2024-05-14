@@ -131,6 +131,8 @@ public class ClusterFacade {
                     try {
                         clusterService.destroy(candidate.getPid());
                     } catch (ClusterDestructionFailureException e2) {
+                        StateService.getTopologyStateGuard().unlock();
+
                         throw new ClusterApplicationFailureException(e1.getMessage(), e2.getMessage());
                     }
                 }
@@ -150,6 +152,8 @@ public class ClusterFacade {
 
                     telemetryService.increaseServingClustersAmount();
                 }
+
+                StateService.getTopologyStateGuard().unlock();
 
                 throw new ClusterApplicationFailureException(e1.getMessage());
             }
@@ -185,6 +189,8 @@ public class ClusterFacade {
                     telemetryService.increaseServingClustersAmount();
                 }
 
+                StateService.getTopologyStateGuard().unlock();
+
                 throw new ClusterApplicationFailureException(e1.getMessage());
             }
 
@@ -198,6 +204,8 @@ public class ClusterFacade {
             try {
                 clusterService.destroy(suspended.getPid());
             } catch (ClusterDestructionFailureException e) {
+                StateService.getTopologyStateGuard().unlock();
+
                 throw new ClusterApplicationFailureException(e.getMessage());
             }
 
@@ -232,6 +240,8 @@ public class ClusterFacade {
             try {
                 clusterCommunicationResource.performSuspend(clusterAllocation.getName());
             } catch (ClusterOperationFailureException e) {
+                StateService.getTopologyStateGuard().unlock();
+
                 throw new ClusterWithdrawalFailureException(e.getMessage());
             }
 
@@ -245,6 +255,8 @@ public class ClusterFacade {
             try {
                 clusterService.destroy(clusterAllocation.getPid());
             } catch (ClusterDestructionFailureException e) {
+                StateService.getTopologyStateGuard().unlock();
+
                 throw new ClusterWithdrawalFailureException(e.getMessage());
             }
 
@@ -253,15 +265,10 @@ public class ClusterFacade {
 
         StateService.removeClusterAllocationByNames(
                 clusterAllocations.stream().
-
                         map(ClusterAllocationDto::getName).
-
                         toList());
 
-        StateService.getTopologyStateGuard().
-
-                unlock();
-
+        StateService.getTopologyStateGuard().unlock();
     }
 
     /**

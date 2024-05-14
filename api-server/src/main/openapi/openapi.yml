@@ -184,7 +184,7 @@ components:
     Provider:
       type: string
       enum:
-        - git-local
+        - exporter
         - git-github
     CredentialsFieldsFull:
       required:

@@ -7,14 +7,14 @@ public interface IVisualizationLabel {
    *
    * @return result of the check.
    */
-  boolean isEmpty();
+  Boolean isEmpty();
 
   /**
    * Checks if there is next step in the specified label.
    *
    * @return result of the check.
    */
-  boolean isNext();
+  Boolean isNext();
 
   /** Pushes next step in the specified label. */
   void pushNext();

@@ -1,0 +1,444 @@
+openapi: 3.0.1
+info:
+  description: RepoAchiever API Server Open API documentation
+  title: OpenAPI document of RepoAchiever API Server
+  version: "1.0"
+servers:
+- url: /
+tags:
+- description: Contains all endpoints related to operations on processed content.
+  name: ContentResource
+- description: Contains all endpoints related to state processing.
+  name: StateResource
+- description: Contains all endpoints related to general info of API Server.
+  name: InfoResource
+- description: Contains all endpoints related to general API Server health information.
+  name: HealthResource
+paths:
+  /v1/content:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentRetrievalApplication'
+        description: Content retrieval application
+        required: true
+      responses:
+        "204":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentRetrievalResult'
+          description: A list of all available content
+      tags:
+      - ContentResource
+      x-content-type: application/json
+      x-accepts: application/json
+  /v1/content/apply:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentApplication'
+        description: Content configuration application
+        required: true
+      responses:
+        "204":
+          description: Given content configuration was successfully applied
+        "400":
+          description: Given content configuration was not applied
+      tags:
+      - ContentResource
+      x-content-type: application/json
+      x-accepts: application/json
+  /v1/content/withdraw:
+    delete:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentWithdrawal'
+        description: Content withdraw application. Does not remove persisted content.
+        required: true
+      responses:
+        "204":
+          description: Given content configuration was successfully withdrawn
+        "400":
+          description: Given content configuration was not withdrawn
+      tags:
+      - ContentResource
+      x-content-type: application/json
+      x-accepts: application/json
+  /v1/content/download:
+    get:
+      parameters:
+      - description: Name of content location to be downloaded
+        explode: true
+        in: query
+        name: location
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/octet-stream:
+              schema:
+                format: binary
+                type: string
+          description: A content was successfully retrieved
+      tags:
+      - ContentResource
+      x-accepts: application/octet-stream
+  /v1/content/clean:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentCleanup'
+        description: Content configuration application
+        required: true
+      responses:
+        "201":
+          description: Content with the given configuration was successfully deleted
+        "400":
+          description: Content with the given configuration was not deleted
+      tags:
+      - ContentResource
+      x-content-type: application/json
+      x-accepts: application/json
+  /v1/state/content:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentStateApplication'
+        description: Given content state key
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentStateApplicationResult'
+          description: Content state hash is retrieved successfully
+      tags:
+      - StateResource
+      x-content-type: application/json
+      x-accepts: application/json
+  /v1/info/version:
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VersionInfoResult'
+          description: General information about running API Server
+      tags:
+      - InfoResource
+      x-accepts: application/json
+  /v1/info/cluster:
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClusterInfoResult'
+          description: General information about running clusters
+      tags:
+      - InfoResource
+      x-accepts: application/json
+  /v1/info/telemetry:
+    get:
+      responses:
+        "200":
+          content:
+            text/plain:
+              schema:
+                type: string
+          description: A set of Prometheus samples used by Grafana instance
+      tags:
+      - InfoResource
+      x-accepts: text/plain
+  /v1/health:
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheckResult'
+          description: General health information about running API Server
+      tags:
+      - HealthResource
+      x-accepts: application/json
+  /v1/readiness:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReadinessCheckApplication'
+        description: Check if API Server is ready to serve for the given user
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessCheckResult'
+          description: General health information about running API Server
+      tags:
+      - HealthResource
+      x-content-type: application/json
+      x-accepts: application/json
+components:
+  schemas:
+    Provider:
+      enum:
+      - exporter
+      - git-github
+      type: string
+    CredentialsFieldsFull:
+      example:
+        internal:
+          id: 0
+        external: null
+      properties:
+        internal:
+          $ref: '#/components/schemas/CredentialsFieldsInternal'
+        external:
+          $ref: '#/components/schemas/CredentialsFieldsExternal'
+      required:
+      - internal
+    CredentialsFieldsInternal:
+      example:
+        id: 0
+      properties:
+        id:
+          type: integer
+    CredentialsFieldsExternal:
+      anyOf:
+      - $ref: '#/components/schemas/GitGitHubCredentials'
+    GitGitHubCredentials:
+      properties:
+        token:
+          type: string
+      required:
+      - token
+    ContentRetrievalApplication:
+      example:
+        provider: null
+        credentials:
+          internal:
+            id: 0
+          external: null
+      properties:
+        provider:
+          $ref: '#/components/schemas/Provider'
+        credentials:
+          $ref: '#/components/schemas/CredentialsFieldsFull'
+      required:
+      - credentials
+      - provider
+    ContentRetrievalResult:
+      example:
+        locations:
+        - locations
+        - locations
+      properties:
+        locations:
+          items:
+            type: string
+          type: array
+      required:
+      - locations
+    ContentApplication:
+      example:
+        provider: null
+        credentials:
+          internal:
+            id: 0
+          external: null
+        locations:
+        - locations
+        - locations
+      properties:
+        locations:
+          items:
+            type: string
+          type: array
+        provider:
+          $ref: '#/components/schemas/Provider'
+        credentials:
+          $ref: '#/components/schemas/CredentialsFieldsFull'
+      required:
+      - credentials
+      - locations
+      - provider
+    ContentWithdrawal:
+      example:
+        provider: null
+        credentials:
+          internal:
+            id: 0
+          external: null
+      properties:
+        provider:
+          $ref: '#/components/schemas/Provider'
+        credentials:
+          $ref: '#/components/schemas/CredentialsFieldsFull'
+      required:
+      - credentials
+      - provider
+    ContentCleanup:
+      example:
+        credentials:
+          internal:
+            id: 0
+          external: null
+      properties:
+        credentials:
+          $ref: '#/components/schemas/CredentialsFieldsFull'
+      required:
+      - credentials
+    ContentStateApplication:
+      example:
+        provider: null
+        credentials:
+          internal:
+            id: 0
+          external: null
+      properties:
+        provider:
+          $ref: '#/components/schemas/Provider'
+        credentials:
+          $ref: '#/components/schemas/CredentialsFieldsFull'
+      required:
+      - credentials
+      - provider
+    ContentStateApplicationResult:
+      example:
+        hash: hash
+      properties:
+        hash:
+          type: string
+      required:
+      - hash
+    VersionInfoResult:
+      example:
+        externalApi:
+          version: version
+          hash: hash
+      properties:
+        externalApi:
+          $ref: '#/components/schemas/VersionExternalApiInfoResult'
+    VersionExternalApiInfoResult:
+      example:
+        version: version
+        hash: hash
+      properties:
+        version:
+          type: string
+        hash:
+          type: string
+      required:
+      - hash
+      - version
+    ClusterInfoResult:
+      items:
+        $ref: '#/components/schemas/ClusterInfoUnit'
+      type: array
+    ClusterInfoUnit:
+      example:
+        name: name
+        health: true
+        workers: 0
+      properties:
+        name:
+          type: string
+        health:
+          type: boolean
+        workers:
+          type: integer
+      required:
+      - name
+    HealthCheckResult:
+      example:
+        checks:
+        - name: name
+          status: null
+        - name: name
+          status: null
+        status: null
+      properties:
+        status:
+          $ref: '#/components/schemas/HealthCheckStatus'
+        checks:
+          items:
+            $ref: '#/components/schemas/HealthCheckUnit'
+          type: array
+      required:
+      - checks
+      - status
+    HealthCheckUnit:
+      example:
+        name: name
+        status: null
+      properties:
+        name:
+          type: string
+        status:
+          $ref: '#/components/schemas/HealthCheckStatus'
+      required:
+      - name
+      - status
+    HealthCheckStatus:
+      enum:
+      - UP
+      - DOWN
+      type: string
+    ReadinessCheckApplication:
+      example:
+        test: "{}"
+      properties:
+        test:
+          type: object
+    ReadinessCheckResult:
+      example:
+        data: "{}"
+        name: name
+        status: null
+      properties:
+        name:
+          type: string
+        status:
+          $ref: '#/components/schemas/ReadinessCheckStatus'
+        data:
+          type: object
+      required:
+      - data
+      - name
+      - status
+    ReadinessCheckUnit:
+      properties:
+        name:
+          type: string
+        status:
+          $ref: '#/components/schemas/ReadinessCheckStatus'
+      required:
+      - name
+      - status
+    ReadinessCheckStatus:
+      enum:
+      - UP
+      - DOWN
+      type: string
+

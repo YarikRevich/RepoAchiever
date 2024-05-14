@@ -11,8 +11,8 @@ public class ContentCredentialsToClusterContextCredentialsConverter {
     public static ClusterContextEntity.Service.Credentials convert(
             Provider provider, CredentialsFieldsExternal credentialsFieldsExternal) {
         return switch (provider) {
-            case LOCAL -> null;
-            case GITHUB -> ClusterContextEntity.Service.Credentials.of(credentialsFieldsExternal.getToken());
+            case EXPORTER -> null;
+            case GIT_GITHUB -> ClusterContextEntity.Service.Credentials.of(credentialsFieldsExternal.getToken());
         };
     }
 }

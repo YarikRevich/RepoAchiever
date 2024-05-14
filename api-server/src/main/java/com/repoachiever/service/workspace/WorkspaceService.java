@@ -104,7 +104,7 @@ public class WorkspaceService {
      * @param key given workspace unit key.
      * @return result if workspace unit directory exists with the help of the given key.
      */
-    public boolean isUnitDirectoryExist(String key) {
+    public Boolean isUnitDirectoryExist(String key) {
         return Files.exists(Paths.get(properties.getWorkspaceDirectory(), key));
     }
 
@@ -251,7 +251,7 @@ public class WorkspaceService {
      * @param type                   given type of the metadata file.
      * @return result if metadata file exists in the given workspace unit directory.
      */
-    private boolean isMetadataFileExist(String workspaceUnitDirectory, String type) {
+    private Boolean isMetadataFileExist(String workspaceUnitDirectory, String type) {
         return Files.exists(
                 Paths.get(workspaceUnitDirectory, properties.getWorkspaceMetadataDirectory(), type));
     }
@@ -262,7 +262,7 @@ public class WorkspaceService {
      * @param workspaceUnitDirectory given workspace unit directory.
      * @return result if metadata file exists in the given workspace unit directory.
      */
-    private boolean isPRsMetadataFileExist(String workspaceUnitDirectory) {
+    private Boolean isPRsMetadataFileExist(String workspaceUnitDirectory) {
         return isMetadataFileExist(workspaceUnitDirectory, properties.getWorkspacePRsMetadataFileName());
     }
 
@@ -272,7 +272,7 @@ public class WorkspaceService {
      * @param workspaceUnitDirectory given workspace unit directory.
      * @return result if metadata file exists in the given workspace unit directory.
      */
-    private boolean isIssuesMetadataFileExist(String workspaceUnitDirectory) {
+    private Boolean isIssuesMetadataFileExist(String workspaceUnitDirectory) {
         return isMetadataFileExist(workspaceUnitDirectory, properties.getWorkspaceIssuesMetadataFileName());
     }
 
@@ -282,7 +282,7 @@ public class WorkspaceService {
      * @param workspaceUnitDirectory given workspace unit directory.
      * @return result if metadata file exists in the given workspace unit directory.
      */
-    private boolean isReleasesMetadataFileExist(String workspaceUnitDirectory) {
+    private Boolean isReleasesMetadataFileExist(String workspaceUnitDirectory) {
         return isMetadataFileExist(workspaceUnitDirectory, properties.getWorkspaceReleasesMetadataFileName());
     }
 
