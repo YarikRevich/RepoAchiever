@@ -28,13 +28,18 @@ public class ClusterCommunicationResource {
 
     private Registry registry;
 
+    /**
+     * Prepares RMI registry configuration.
+     *
+     * @throws CommunicationConfigurationFailureException if communication configuration fails.
+     */
     @PostConstruct
-    private void configure() {
+    private void configure() throws CommunicationConfigurationFailureException {
         try {
             this.registry = LocateRegistry.getRegistry(
                     configService.getConfig().getCommunication().getPort());
         } catch (RemoteException e) {
-            logger.fatal(new CommunicationConfigurationFailureException(e.getMessage()).getMessage());
+            throw new CommunicationConfigurationFailureException(e.getMessage());
         }
     }
 

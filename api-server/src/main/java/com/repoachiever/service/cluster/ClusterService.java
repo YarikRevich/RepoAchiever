@@ -43,8 +43,8 @@ public class ClusterService {
 
         Integer counter = 0;
 
-        for (Integer i = 0; i < locations.size(); i++) {
-            temp.add(locations.get(0));
+        for (String location : locations) {
+            temp.add(location);
 
             if (counter.equals(separator - 1)) {
                 result.add(new ArrayList<>(temp));

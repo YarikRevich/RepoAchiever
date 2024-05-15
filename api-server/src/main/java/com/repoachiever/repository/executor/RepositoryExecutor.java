@@ -42,12 +42,17 @@ public class RepositoryExecutor {
     private final ScheduledExecutorService scheduledExecutorService =
             Executors.newSingleThreadScheduledExecutor();
 
+    /**
+     * Configures remote database connection.
+     *
+     * @throws QueryExecutionFailureException if connection retrieval fails.
+     */
     @PostConstruct
-    public void configure() {
+    private void configure() throws QueryExecutionFailureException {
         try {
             this.connection = dataSource.getConnection();
         } catch (SQLException e) {
-            logger.fatal(new QueryExecutionFailureException(e.getMessage()).getMessage());
+            throw new QueryExecutionFailureException(e.getMessage());
         }
     }
 

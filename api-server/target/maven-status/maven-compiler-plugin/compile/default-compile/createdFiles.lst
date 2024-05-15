@@ -1,5 +1,6 @@
 com/repoachiever/converter/ContentExporterToClusterContextExporterConverter.class
 com/repoachiever/model/GitGitHubCredentials.class
+com/repoachiever/exception/ConfigFileClosureFailureException.class
 com/repoachiever/service/command/cluster/deploy/ClusterDeployCommandService.class
 com/repoachiever/repository/facade/RepositoryFacade.class
 com/repoachiever/model/ContentCleanup.class
@@ -187,6 +188,7 @@ com/repoachiever/exception/GrafanaDeploymentFailureException.class
 com/repoachiever/model/CredentialsFieldsExternal.class
 com/repoachiever/exception/ContentFileRemovalFailureException.class
 com/repoachiever/exception/ClusterApplicationFailureException.class
+com/repoachiever/exception/ConfigFileReadingFailureException.class
 com/repoachiever/model/ContentStateApplicationResult.class
 com/repoachiever/service/command/docker/availability/DockerAvailabilityCheckCommandService$1.class
 com/repoachiever/entity/common/ConfigEntity$Diagnostics$Metrics.class
@@ -213,6 +215,7 @@ com/repoachiever/service/command/cluster/deploy/ClusterDeployCommandService$1.cl
 com/repoachiever/exception/ClusterFullDestructionFailureException.class
 com/repoachiever/entity/common/ConfigEntity$Diagnostics$NodeExporter.class
 com/repoachiever/mapping/LocationsFieldIsNotValidExceptionMapper.class
+com/repoachiever/exception/ConfigFileNotFoundException.class
 com/repoachiever/service/communication/apiserver/IApiServerCommunicationService.class
 com/repoachiever/service/client/github/IGitHubClientService.class
 com/repoachiever/exception/WorkspaceUnitDirectoryCreationFailureException.class

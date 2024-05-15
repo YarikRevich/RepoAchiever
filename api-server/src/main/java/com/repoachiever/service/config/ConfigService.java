@@ -8,6 +8,9 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.repoachiever.entity.common.ConfigEntity;
 import com.repoachiever.entity.common.PropertiesEntity;
+import com.repoachiever.exception.ConfigFileClosureFailureException;
+import com.repoachiever.exception.ConfigFileNotFoundException;
+import com.repoachiever.exception.ConfigFileReadingFailureException;
 import com.repoachiever.exception.ConfigValidationException;
 import io.quarkus.runtime.Startup;
 import jakarta.annotation.PostConstruct;
@@ -34,8 +37,6 @@ import org.apache.logging.log4j.Logger;
 @Startup
 @ApplicationScoped
 public class ConfigService {
-    private static final Logger logger = LogManager.getLogger(ConfigService.class);
-
     @Inject
     PropertiesEntity properties;
 
@@ -44,9 +45,18 @@ public class ConfigService {
 
     /**
      * Reads configuration from the opened configuration file using mapping with a configuration entity.
+     *
+     * @throws ConfigFileNotFoundException if configuration file is not found.
+     * @throws ConfigValidationException if configuration file operation failed.
+     * @throws ConfigFileReadingFailureException if configuration file reading operation failed.
+     * @throws ConfigFileClosureFailureException if configuration file closure operation failed.
      */
     @PostConstruct
-    private void configure() {
+    private void configure() throws
+            ConfigFileNotFoundException,
+            ConfigValidationException,
+            ConfigFileReadingFailureException,
+            ConfigFileClosureFailureException {
         InputStream file = null;
 
         try {
@@ -54,8 +64,7 @@ public class ConfigService {
                 file = new FileInputStream(
                         Paths.get(properties.getConfigDirectory(), properties.getConfigName()).toString());
             } catch (FileNotFoundException e) {
-                logger.fatal(e.getMessage());
-                return;
+                throw new ConfigFileNotFoundException(e.getMessage());
             }
 
             ObjectMapper mapper =
@@ -75,8 +84,7 @@ public class ConfigService {
 
                 config = values.getFirst();
             } catch (IOException e) {
-                logger.fatal(e.getMessage());
-                return;
+                throw new ConfigFileReadingFailureException(e.getMessage());
             }
 
             try (ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory()) {
@@ -86,17 +94,17 @@ public class ConfigService {
                         validator.validate(config);
 
                 if (!validationResult.isEmpty()) {
-                    logger.fatal(new ConfigValidationException(
+                    throw new ConfigValidationException(
                             validationResult.stream()
                                     .map(ConstraintViolation::getMessage)
-                                    .collect(Collectors.joining(", "))).getMessage());
+                                    .collect(Collectors.joining(", ")));
                 }
             }
         } finally {
             try {
                 file.close();
             } catch (IOException e) {
-                logger.fatal(e.getMessage());
+                throw new ConfigFileClosureFailureException(e.getMessage());
             }
         }
     }

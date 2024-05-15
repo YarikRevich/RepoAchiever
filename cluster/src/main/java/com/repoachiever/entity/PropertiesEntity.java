@@ -19,6 +19,12 @@ public class PropertiesEntity {
     @Value(value = "${REPOACHIEVER_CLUSTER_CONTEXT:null}")
     private String clusterContext;
 
+    @Value(value = "${graphql-client.github.url}")
+    String graphQlClientGitHubUrl;
+
+    @Value(value = "${graphql-client.github.document.location}")
+    String graphQlClientGitHubDocumentLocation;
+
     @Value(value = "${communication.api-server.health-check.frequency}")
     private Integer communicationApiServerHealthCheckFrequency;
 

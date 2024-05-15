@@ -34,8 +34,6 @@ public class LoggingTransferService {
      */
     @PostConstruct
     private void process() {
-        logger.info(LoggingConfigurationHelper.getTransferableMessage("it works"));
-
         scheduledExecutorService.scheduleAtFixedRate(() -> {
             if (!StateService.getExit()) {
                 while (!StateService.getLogMessagesQueue().isEmpty()) {

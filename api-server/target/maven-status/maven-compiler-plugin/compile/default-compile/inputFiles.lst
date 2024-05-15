@@ -2,6 +2,7 @@
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/converter/HealthCheckResponseToReadinessCheckResult.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/DockerInspectRemovalFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/communication/apiserver/IApiServerCommunicationService.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ConfigFileReadingFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/CredentialsFieldsExternal.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/ContentWithdrawal.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/entity/repository/SecretEntity.java
@@ -54,6 +55,7 @@
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/mapping/LocationsAreNotValidExceptionMapper.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/entity/repository/ContentEntity.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/repository/ProviderRepository.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ConfigFileClosureFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/integration/communication/registry/RegistryCommunicationConfigService.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/converter/ContentProviderToClusterContextProviderConverter.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/workspace/WorkspaceService.java
@@ -158,6 +160,7 @@
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/CredentialsAreNotValidException.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/ReadinessCheckResult.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/ContentStateApplicationResult.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ConfigFileNotFoundException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ClusterApplicationFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/converter/ContentCredentialsToClusterContextCredentialsConverter.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/resource/ContentResource.java
