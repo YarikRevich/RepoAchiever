@@ -24,9 +24,19 @@ public interface IGitHubClientService {
     Response getPermissionScopes(@HeaderParam(HttpHeaders.AUTHORIZATION) String token);
 
     @GET
-    @Path("/repos/{location}")
+    @Path("/repos/{owner}/{name}}")
     @Produces(MediaType.APPLICATION_JSON)
     Response getRepository(
             @HeaderParam(HttpHeaders.AUTHORIZATION) String token,
-            @PathParam("location") String location);
+            @PathParam("owner") String owner,
+            @PathParam("name") String name);
+
+    @GET
+    @Path("/repos/{owner}/{name}/branches/{branch}")
+    @Produces(MediaType.APPLICATION_JSON)
+    Response getRepository(
+            @HeaderParam(HttpHeaders.AUTHORIZATION) String token,
+            @PathParam("owner") String owner,
+            @PathParam("name") String name,
+            @PathParam("branch") String branch);
 }

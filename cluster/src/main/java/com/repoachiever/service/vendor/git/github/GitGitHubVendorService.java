@@ -1,6 +1,8 @@
 package com.repoachiever.service.vendor.git.github;
 
 import com.repoachiever.dto.GitHubCommitAmountResponseDto;
+import com.repoachiever.dto.GitHubDefaultBranchResponseDto;
+import com.repoachiever.entity.ConfigEntity;
 import com.repoachiever.entity.PropertiesEntity;
 import com.repoachiever.exception.GitHubGraphQlClientContentRetrievalFailureException;
 import com.repoachiever.exception.GitHubGraphQlClientDocumentNotFoundException;
@@ -34,6 +36,9 @@ public class GitGitHubVendorService {
     @Autowired
     private ConfigService configService;
 
+    @Autowired
+    private VendorConfigurationHelper vendorConfigurationHelper;
+
     private HttpGraphQlClient graphQlClient;
 
     private String document;
@@ -45,49 +50,53 @@ public class GitGitHubVendorService {
      */
     @PostConstruct
     private void configure() throws GitHubGraphQlClientDocumentNotFoundException {
-        WebClient client = WebClient.builder()
-                .baseUrl(properties.getGraphQlClientGitHubUrl())
-                .defaultHeader(
-                        HttpHeaders.AUTHORIZATION,
-                        VendorConfigurationHelper.getWrappedToken(
-                                configService.getConfig().getService().getCredentials().getToken()))
-                .build();
+        if (configService.getConfig().getService().getProvider() == ConfigEntity.Service.Provider.GIT_GITHUB) {
+            WebClient client = WebClient.builder()
+                    .baseUrl(properties.getGraphQlClientGitHubUrl())
+                    .defaultHeader(
+                            HttpHeaders.AUTHORIZATION,
+                            vendorConfigurationHelper.getWrappedToken(
+                                    configService.getConfig().getService().getCredentials().getToken()))
+                    .build();
 
-        this.graphQlClient = HttpGraphQlClient.builder(client).build();
+            this.graphQlClient = HttpGraphQlClient.builder(client).build();
 
-        Resource resource = new ClassPathResource(properties.getGraphQlClientGitHubDocumentLocation());
+            Resource resource = new ClassPathResource(properties.getGraphQlClientGitHubDocumentLocation());
 
-        try {
-            resource.getContentAsString(Charset.defaultCharset());
-        } catch (IOException e) {
-            throw new GitHubGraphQlClientDocumentNotFoundException(e.getMessage());
+            try {
+                document = resource.getContentAsString(Charset.defaultCharset());
+            } catch (IOException e) {
+                throw new GitHubGraphQlClientDocumentNotFoundException(e.getMessage());
+            }
         }
     }
 
     /**
-     * Retrieves amount of commits for the repository with the given name and given branch.
+     * Retrieves default branch for the repository with the given name.
      *
-     * @param owner given repository owner.
-     * @param name given repository name.
-     * @param branch given repository branch.
+     * @param owner  given repository owner.
+     * @param name   given repository name.
+     * @return retrieved default branch of the repository with the given name.
      * @throws GitHubGraphQlClientContentRetrievalFailureException if GitHub GraphQL client content retrieval fails.
-     * @return retrieved amount of repository commits with the given name and given branch.
      */
-    public Integer getCommitAmount(String owner, String name, String branch) throws
+    public String getDefaultBranch(String owner, String name) throws
             GitHubGraphQlClientContentRetrievalFailureException {
-        GitHubCommitAmountResponseDto gitHubCommitAmountResponse;
+        GitHubDefaultBranchResponseDto gitHubCommitAmountResponse;
 
         try {
             gitHubCommitAmountResponse = graphQlClient
                     .document(document)
                     .variables(new HashMap<>() {
                         {
-                            put(port, 3000);
+                            put("owner", owner);
+                            put("name", name);
                         }
                     })
-                    .retrieve("CommitAmount")
-                    .toEntity(GitHubCommitAmountResponseDto.class)
+                    .operationName("DefaultBranch")
+                    .retrieve("repository")
+                    .toEntity(GitHubDefaultBranchResponseDto.class)
                     .block();
+
         } catch (WebClientResponseException e) {
             throw new GitHubGraphQlClientContentRetrievalFailureException(e.getResponseBodyAsString());
         } catch (WebClientRequestException e) {
@@ -99,8 +108,49 @@ public class GitGitHubVendorService {
         }
 
         return gitHubCommitAmountResponse
-                .getData()
-                .getRepository()
+                .getDefaultBranchRef()
+                .getName();
+    }
+
+    /**
+     * Retrieves amount of commits for the repository with the given name and given branch.
+     *
+     * @param owner  given repository owner.
+     * @param name   given repository name.
+     * @param branch given repository branch.
+     * @return retrieved amount of repository commits with the given name and given branch.
+     * @throws GitHubGraphQlClientContentRetrievalFailureException if GitHub GraphQL client content retrieval fails.
+     */
+    public Integer getCommitAmount(String owner, String name, String branch) throws
+            GitHubGraphQlClientContentRetrievalFailureException {
+        GitHubCommitAmountResponseDto gitHubCommitAmountResponse;
+
+        try {
+            gitHubCommitAmountResponse = graphQlClient
+                    .document(document)
+                    .variables(new HashMap<>() {
+                        {
+                            put("owner", owner);
+                            put("name", name);
+                            put("branch", branch);
+                        }
+                    })
+                    .operationName("CommitAmount")
+                    .retrieve("repository")
+                    .toEntity(GitHubCommitAmountResponseDto.class)
+                    .block();
+
+        } catch (WebClientResponseException e) {
+            throw new GitHubGraphQlClientContentRetrievalFailureException(e.getResponseBodyAsString());
+        } catch (WebClientRequestException e) {
+            throw new GitHubGraphQlClientContentRetrievalFailureException(e.getMessage());
+        }
+
+        if (Objects.isNull(gitHubCommitAmountResponse)) {
+            throw new GitHubGraphQlClientContentRetrievalFailureException();
+        }
+
+        return gitHubCommitAmountResponse
                 .getRef()
                 .getTarget()
                 .getHistory()

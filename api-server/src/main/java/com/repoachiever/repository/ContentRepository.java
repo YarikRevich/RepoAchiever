@@ -119,6 +119,7 @@ public class ContentRepository {
         Integer id;
         String location;
         Integer provider;
+        Integer exporterRaw;
         Optional<Integer> exporter;
         Integer secret;
 
@@ -127,7 +128,14 @@ public class ContentRepository {
                 id = resultSet.getInt("id");
                 location = resultSet.getString("location");
                 provider = resultSet.getInt("provider");
-                exporter = Optional.of(resultSet.getInt("exporter"));
+
+                exporterRaw = resultSet.getInt("exporter");
+                if (resultSet.wasNull()) {
+                    exporter = Optional.empty();
+                } else {
+                    exporter = Optional.of(exporterRaw);
+                }
+
                 secret = resultSet.getInt("secret");
 
                 result.add(ContentEntity.of(id, location, provider, exporter, secret));

@@ -35,6 +35,10 @@ public interface IApiServerCommunicationService extends Remote {
      */
     void performLogsTransfer(String name, String message) throws RemoteException;
 
+//    Boolean retrieveRegistration(String name) throws RemoteException;
+
+    // TODO: add 'retrieveRegistration' and 'performLock' 'retrieveLocked' methods
+
     /**
      * Retrieves latest RepoAchiever API Server health check states.
      *

@@ -46,5 +46,3 @@ public interface IClusterCommunicationService extends Remote {
      */
     Integer retrieveWorkerAmount() throws RemoteException;
 }
-
-// TODO: LOCATE ALL RMI RELATED CLASSES AT THE SAME PATH

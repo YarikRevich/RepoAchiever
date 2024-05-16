@@ -33,6 +33,6 @@ public class LoggingConfigurationHelper {
      * @return formatted transferable message.
      */
     public static String getTransferableMessage(String message) {
-        return String.format("%s %s", TRANSFERABLE_MESSAGE_PREFIX, message);
+        return String.format("%s%s", TRANSFERABLE_MESSAGE_PREFIX, message);
     }
 }

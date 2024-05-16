@@ -2,6 +2,8 @@ package com.repoachiever.service.integration.scheduler;
 
 import com.repoachiever.converter.CronExpressionConverter;
 import com.repoachiever.exception.CronExpressionException;
+import com.repoachiever.exception.GitHubGraphQlClientContentRetrievalFailureException;
+import com.repoachiever.exception.LocationDefinitionsAreNotValidException;
 import com.repoachiever.exception.SchedulerPeriodRetrievalFailureException;
 import com.repoachiever.logging.common.LoggingConfigurationHelper;
 import com.repoachiever.service.config.ConfigService;
@@ -12,9 +14,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * Service used to perform RepoAchiever Cluster worker configuration operations.
@@ -29,7 +29,10 @@ public class SchedulerConfigService {
     @Autowired
     private VendorFacade vendorFacade;
 
-    private final ScheduledExecutorService scheduledExecutorService =
+    private final ScheduledExecutorService starterScheduledExecutorService =
+            Executors.newScheduledThreadPool(0, Thread.ofVirtual().factory());
+
+    private final ScheduledExecutorService operationScheduledExecutorService =
             Executors.newScheduledThreadPool(0, Thread.ofVirtual().factory());
 
     /**
@@ -53,10 +56,46 @@ public class SchedulerConfigService {
                     LoggingConfigurationHelper.getTransferableMessage(
                             String.format("Starting worker for '%s' location", element)));
 
-            scheduledExecutorService.scheduleAtFixedRate(() -> {
+            starterScheduledExecutorService.execute(() -> {
+                CountDownLatch closable = new CountDownLatch(1);
 
+                ScheduledFuture<?> execution = operationScheduledExecutorService.scheduleAtFixedRate(() -> {
+                    Integer commitAmount;
 
-            }, 0, period, TimeUnit.MILLISECONDS);
+                    try {
+                        commitAmount = vendorFacade.getCommitAmount(element);
+                    } catch (LocationDefinitionsAreNotValidException e) {
+                        logger.info(
+                                LoggingConfigurationHelper.getTransferableMessage(
+                                        String.format(
+                                                "Skipping retrieval of content for '%s' location: %s",
+                                                element,
+                                                e.getMessage())));
+                        closable.countDown();
+
+                        return;
+                    } catch (GitHubGraphQlClientContentRetrievalFailureException e) {
+                        logger.info(
+                                LoggingConfigurationHelper.getTransferableMessage(
+                                        String.format(
+                                                "Failed to retrieve content for '%s' location: %s",
+                                                element,
+                                                e.getMessage())));
+                        return;
+                    }
+
+                    logger.info(
+                            LoggingConfigurationHelper.getTransferableMessage(String.valueOf(commitAmount)));
+                }, 0, period, TimeUnit.MILLISECONDS);
+
+                try {
+                    closable.await();
+                } catch (InterruptedException e) {
+                    logger.fatal(e.getMessage());
+                }
+
+                execution.cancel(true);
+            });
         });
     }
 }

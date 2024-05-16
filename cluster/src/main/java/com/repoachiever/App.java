@@ -11,6 +11,8 @@ import com.repoachiever.service.executor.CommandExecutorService;
 import com.repoachiever.service.integration.logging.transfer.LoggingTransferService;
 import com.repoachiever.service.integration.scheduler.SchedulerConfigService;
 import com.repoachiever.service.vendor.VendorFacade;
+import com.repoachiever.service.vendor.common.VendorConfigurationHelper;
+import com.repoachiever.service.vendor.git.github.GitGitHubVendorService;
 import com.repoachiever.service.waiter.WaiterHelper;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -25,6 +27,8 @@ import org.springframework.stereotype.Component;
         ConfigService.class,
         CommandExecutorService.class,
         PropertiesEntity.class,
+        VendorConfigurationHelper.class,
+        GitGitHubVendorService.class,
         VendorFacade.class,
         SchedulerConfigService.class,
         ApiServerHealthCheckCommunicationService.class,

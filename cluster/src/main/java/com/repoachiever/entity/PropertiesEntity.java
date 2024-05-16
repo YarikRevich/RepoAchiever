@@ -25,6 +25,9 @@ public class PropertiesEntity {
     @Value(value = "${graphql-client.github.document.location}")
     String graphQlClientGitHubDocumentLocation;
 
+    @Value(value = "${github.location.notation}")
+    String gitHubLocationNotation;
+
     @Value(value = "${communication.api-server.health-check.frequency}")
     private Integer communicationApiServerHealthCheckFrequency;
 

@@ -1,5 +1,6 @@
 package com.repoachiever.service.vendor.git.github;
 
+import com.repoachiever.dto.GitHubLocationNotationDto;
 import com.repoachiever.service.client.github.IGitHubClientService;
 import com.repoachiever.service.vendor.common.VendorConfigurationHelper;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -29,7 +30,7 @@ public class GitGitHubVendorService {
     public Boolean isTokenValid(String token) {
         try {
             Response response = gitHubClientService
-                    .getOctocat(VendorConfigurationHelper.getWrappedToken(token));
+                    .getOctocat(token);
 
             return response.getStatus() == HttpStatus.SC_OK;
         } catch (WebApplicationException e) {
@@ -41,25 +42,39 @@ public class GitGitHubVendorService {
      * Checks if the given content locations are valid.
      *
      * @param token     given authorization token.
-     * @param locations given location names.
+     * @param locations given location in GitHub notation.
      * @return result of the check.
      */
-    public Boolean areLocationsValid(String token, List<String> locations) {
-        for (String location : locations) {
-            try {
-                Response response = gitHubClientService
-                        .getRepository(
-                                VendorConfigurationHelper.getWrappedToken(token),
-                                location);
+    public Boolean areLocationsValid(String token, List<GitHubLocationNotationDto> locations) {
+        return locations
+                .stream()
+                .allMatch(element -> {
+                    try {
+                        Response response;
 
-                if (response.getStatus() != HttpStatus.SC_OK) {
-                    return false;
-                }
-            } catch (WebApplicationException e) {
-                return false;
-            }
-        }
+                        if (element.getBranch().isPresent()) {
+                            response = gitHubClientService
+                                    .getRepository(
+                                            token,
+                                            element.getOwner(),
+                                            element.getName(),
+                                            element.getBranch().get());
+                        } else {
+                            response = gitHubClientService
+                                    .getRepository(
+                                            token,
+                                            element.getOwner(),
+                                            element.getName());
+                        }
 
-        return true;
+                        if (response.getStatus() != HttpStatus.SC_OK) {
+                            return false;
+                        }
+                    } catch (WebApplicationException e) {
+                        return false;
+                    }
+
+                    return true;
+                });
     }
 }

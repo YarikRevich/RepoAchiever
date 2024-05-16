@@ -35,6 +35,7 @@
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/ClusterInfoUnit.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/QueryExecutionFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/Exporter.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/dto/GitHubLocationNotationDto.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/ContentRetrievalResult.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/resource/InfoResource.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/Provider.java
@@ -152,10 +153,12 @@
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/integration/state/StateConfigService.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/RunningStateFileCreationFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/vendor/git/github/GitGitHubVendorService.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/LocationDefinitionsAreNotValidException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/DockerNetworkCreateFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/logging/FatalAppender.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/api/StateResourceApi.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/service/command/grafana/common/GrafanaConfigurationHelper.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/mapping/LocationDefinitionsAreNotValidExceptionMapper.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/ApiServerInstanceIsAlreadyRunningException.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/CredentialsAreNotValidException.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/ReadinessCheckResult.java

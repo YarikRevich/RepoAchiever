@@ -1,6 +1,7 @@
 package com.repoachiever.resource;
 
 import com.repoachiever.api.ContentResourceApi;
+import com.repoachiever.entity.common.ConfigEntity;
 import com.repoachiever.exception.*;
 import com.repoachiever.model.*;
 import com.repoachiever.repository.facade.RepositoryFacade;
@@ -27,6 +28,9 @@ public class ContentResource implements ContentResourceApi {
 
     @Inject
     VendorFacade vendorFacade;
+
+    @Inject
+    ResourceConfigurationHelper resourceConfigurationHelper;
 
     /**
      * Implementation for declared in OpenAPI configuration v1ContentPost method.
@@ -56,18 +60,24 @@ public class ContentResource implements ContentResourceApi {
             throw new BadRequestException();
         }
 
-        if (!ResourceConfigurationHelper.isExporterFieldValid(
+        if (!resourceConfigurationHelper.isExporterFieldValid(
                 contentApplication.getProvider(), contentApplication.getExporter())) {
             throw new ExporterFieldIsNotValidException();
         }
 
-        if (!ResourceConfigurationHelper.isExternalCredentialsFieldValid(
+        if (!resourceConfigurationHelper.isExternalCredentialsFieldValid(
                 contentApplication.getProvider(), contentApplication.getCredentials().getExternal())) {
             throw new CredentialsFieldIsNotValidException();
         }
 
-        if (!ResourceConfigurationHelper.isLocationsDuplicate(contentApplication.getLocations())) {
+        if (!resourceConfigurationHelper.isLocationsDuplicate(contentApplication.getLocations())) {
             throw new LocationsFieldIsNotValidException();
+        }
+
+        if (!resourceConfigurationHelper.areLocationDefinitionsValid(
+                contentApplication.getProvider(),
+                contentApplication.getLocations())) {
+            throw new LocationDefinitionsAreNotValidException();
         }
 
         if (!vendorFacade.isExternalCredentialsValid(
@@ -75,7 +85,7 @@ public class ContentResource implements ContentResourceApi {
             throw new CredentialsAreNotValidException();
         }
 
-        if (!vendorFacade.areLocationValid(
+        if (!vendorFacade.areLocationsValid(
                 contentApplication.getProvider(),
                 contentApplication.getCredentials().getExternal(),
                 contentApplication.getLocations())) {
@@ -99,7 +109,7 @@ public class ContentResource implements ContentResourceApi {
             throw new BadRequestException();
         }
 
-        if (!ResourceConfigurationHelper.isExternalCredentialsFieldValid(
+        if (!resourceConfigurationHelper.isExternalCredentialsFieldValid(
                 contentWithdrawal.getProvider(), contentWithdrawal.getCredentials().getExternal())) {
             throw new CredentialsFieldIsNotValidException();
         }
