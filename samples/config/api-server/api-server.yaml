@@ -50,6 +50,9 @@ resource:
     # Represents the highest amount of allocated workers per cluster.
     max-workers: 5
 
+    # Represents the highest amount of downloaded content versions per each.
+    max-versions: 5
+
   # Represents a set of options used for RepoAchiever Worker configuration.
   worker:
     # Represents frequency of requests to selected VCS provider resources.

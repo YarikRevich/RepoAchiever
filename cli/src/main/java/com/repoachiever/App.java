@@ -2,14 +2,15 @@ package com.repoachiever;
 
 import com.repoachiever.entity.PropertiesEntity;
 import com.repoachiever.service.client.command.*;
+import com.repoachiever.service.client.info.version.VersionInfoClientService;
 import com.repoachiever.service.command.BaseCommandService;
 // import com.repoachiever.service.KafkaConsumerWrapper;
 import com.repoachiever.service.command.external.start.StartExternalCommandService;
-import com.repoachiever.service.command.external.start.provider.aws.AWSStartExternalCommandService;
+import com.repoachiever.service.command.external.apply.ApplyExternalCommandService;
 import com.repoachiever.service.command.external.state.StateExternalCommandService;
 import com.repoachiever.service.command.external.state.provider.aws.AWSStateExternalCommandService;
-import com.repoachiever.service.command.external.stop.StopExternalCommandService;
-import com.repoachiever.service.command.external.stop.provider.aws.AWSStopExternalCommandService;
+import com.repoachiever.service.command.external.withdraw.StopExternalCommandService;
+import com.repoachiever.service.command.external.withdraw.AWSStopExternalCommandService;
 import com.repoachiever.service.command.external.version.VersionExternalCommandService;
 import com.repoachiever.service.command.internal.health.HealthCheckInternalCommandService;
 import com.repoachiever.service.command.internal.readiness.ReadinessCheckInternalCommandService;
@@ -51,8 +52,8 @@ import picocli.CommandLine;
   LogsClientCommandService.class,
   ScriptAcquireClientCommandService.class,
   SecretsAcquireClientCommandService.class,
-  VersionClientCommandService.class,
-  AWSStartExternalCommandService.class,
+  VersionInfoClientService.class,
+  ApplyExternalCommandService.class,
   AWSStopExternalCommandService.class,
   ConfigService.class,
   ValidConfigService.class,

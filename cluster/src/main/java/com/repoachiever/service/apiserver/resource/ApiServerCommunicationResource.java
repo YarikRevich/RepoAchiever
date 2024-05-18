@@ -61,15 +61,40 @@ public class ApiServerCommunicationResource {
      * Performs raw content upload operation.
      *
      * @param content given content to be uploaded.
+     * @param location given content location.
+     * @param name given content name.
      * @throws ApiServerOperationFailureException if RepoAchiever API Server operation fails.
      */
-    public void performRawContentUpload(InputStream content) throws ApiServerOperationFailureException {
+    public void performRawContentUpload(String location, String name, InputStream content) throws ApiServerOperationFailureException {
         IApiServerCommunicationService allocation = retrieveAllocation();
 
         try {
             allocation.performRawContentUpload(
                     configService.getConfig().getMetadata().getWorkspaceUnitKey(),
+                    location,
+                    name,
                     content);
+        } catch (RemoteException e) {
+            throw new ApiServerOperationFailureException(e.getMessage());
+        }
+    }
+
+    /**
+     * Checks if raw content with the given value at the given location is already present.
+     *
+     * @param location given content location.
+     * @param name given content name.
+     * @return result of the check.
+     * @throws ApiServerOperationFailureException if RepoAchiever API Server operation fails.
+     */
+    public Boolean retrieveRawContentPresent(String location, String name) throws ApiServerOperationFailureException {
+        IApiServerCommunicationService allocation = retrieveAllocation();
+
+        try {
+            return allocation.retrieveRawContentPresent(
+                    configService.getConfig().getMetadata().getWorkspaceUnitKey(),
+                    location,
+                    name);
         } catch (RemoteException e) {
             throw new ApiServerOperationFailureException(e.getMessage());
         }
@@ -79,15 +104,40 @@ public class ApiServerCommunicationResource {
      * Performs additional content(issues, prs, releases) upload operation, initiated by RepoAchiever Cluster.
      *
      * @param content given content to be uploaded.
+     * @param location given content location.
+     * @param name given content name.
      * @throws ApiServerOperationFailureException if RepoAchiever API Server operation fails.
      */
-    public void performAdditionalContentUpload(String content) throws ApiServerOperationFailureException {
+    public void performAdditionalContentUpload(String location, String name, String content) throws ApiServerOperationFailureException {
         IApiServerCommunicationService allocation = retrieveAllocation();
 
         try {
             allocation.performAdditionalContentUpload(
                     configService.getConfig().getMetadata().getWorkspaceUnitKey(),
+                    location,
+                    name,
                     content);
+        } catch (RemoteException e) {
+            throw new ApiServerOperationFailureException(e.getMessage());
+        }
+    }
+
+    /**
+     * Checks if additional content with the given value at the given location is already present.
+     *
+     * @param location given content location.
+     * @param name given content name.
+     * @return result of the check.
+     * @throws ApiServerOperationFailureException if RepoAchiever API Server operation fails.
+     */
+    public Boolean retrieveAdditionalContentPresent(String location, String name) throws ApiServerOperationFailureException {
+        IApiServerCommunicationService allocation = retrieveAllocation();
+
+        try {
+            return allocation.retrieveAdditionalContentPresent(
+                    configService.getConfig().getMetadata().getWorkspaceUnitKey(),
+                    location,
+                    name);
         } catch (RemoteException e) {
             throw new ApiServerOperationFailureException(e.getMessage());
         }

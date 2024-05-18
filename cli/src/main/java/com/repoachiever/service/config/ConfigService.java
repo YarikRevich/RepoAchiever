@@ -1,89 +1,104 @@
 package com.repoachiever.service.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.repoachiever.entity.ConfigEntity;
 import com.repoachiever.entity.PropertiesEntity;
+import com.repoachiever.exception.ConfigFileClosureFailureException;
+import com.repoachiever.exception.ConfigFileNotFoundException;
+import com.repoachiever.exception.ConfigFileReadingFailureException;
+import com.repoachiever.exception.ConfigValidationException;
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
-
-import java.io.*;
-import java.nio.file.Paths;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Paths;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
- * Service for processing configuration file.
+ * Service used to perform RepoAchiever Cluster configuration processing operation.
  */
-@Service
+@Component
 public class ConfigService {
-    private static final Logger logger = LogManager.getLogger(ConfigService.class);
+    @Autowired
+    private PropertiesEntity properties;
 
-    private InputStream configFile;
-
-    private ConfigEntity parsedConfigFile;
+    @Getter
+    private ConfigEntity config;
 
     /**
-     * Default constructor, which opens configuration file at the given path.
+     * Performs configuration file parsing operation.
      *
-     * @param properties common application properties
-     */
-    public ConfigService(@Autowired PropertiesEntity properties) {
-        try {
-            configFile =
-                    new FileInputStream(
-                            Paths.get(
-                                            System.getProperty("user.home"),
-                                            properties.getConfigRootPath(),
-                                            properties.getConfigUserFilePath())
-                                    .toString());
-        } catch (FileNotFoundException e) {
-            logger.fatal(e.getMessage());
-        }
-    }
-
-    /**
-     * Reads configuration from the opened configuration file using mapping with a configuration
-     * entity.
+     * @throws ConfigFileNotFoundException if configuration file is not found.
+     * @throws ConfigValidationException if configuration file operation failed.
+     * @throws ConfigFileReadingFailureException if configuration file reading operation failed.
+     * @throws ConfigFileClosureFailureException if configuration file closure operation failed.
      */
     @PostConstruct
-    private void configure() {
-        ObjectMapper mapper =
-                new ObjectMapper(new YAMLFactory())
-                        .configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true)
-                        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-                        .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        ObjectReader reader = mapper.reader().forType(new TypeReference<ConfigEntity>() {
-        });
+    private void configure() throws
+            ConfigFileNotFoundException,
+            ConfigFileReadingFailureException,
+            ConfigValidationException,
+            ConfigFileClosureFailureException {
+        InputStream file = null;
 
         try {
-            parsedConfigFile = reader.<ConfigEntity>readValues(configFile).readAll().getFirst();
-        } catch (IOException e) {
-            logger.fatal(e.getMessage());
-        }
-    }
+            try {
+                file = new FileInputStream(
+                        Paths.get(
+                                properties.getConfigDefaultDirectory(), properties.getConfigDefaultName()).toString());
+            } catch (FileNotFoundException e) {
+                throw new ConfigFileNotFoundException(e.getMessage());
+            }
 
-    /**
-     * @return Parsed configuration entity
-     */
-    public ConfigEntity getConfig() {
-        return parsedConfigFile;
-    }
+            ObjectMapper mapper =
+                    new ObjectMapper(new JsonFactory())
+                            .configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true)
+                            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+                            .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            ObjectReader reader = mapper.reader().forType(new TypeReference<ConfigEntity>() {
+            });
 
-    @PreDestroy
-    private void close() {
-        try {
-            configFile.close();
-        } catch (IOException e) {
-            logger.fatal(e.getMessage());
+            try {
+                config = reader.<ConfigEntity>readValues(file).readAll().getFirst();
+            } catch (IOException e) {
+                throw new ConfigFileReadingFailureException(e.getMessage());
+            }
+
+            try (ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory()) {
+                Validator validator = validatorFactory.getValidator();
+
+                Set<ConstraintViolation<ConfigEntity>> validationResult =
+                        validator.validate(config);
+
+                if (!validationResult.isEmpty()) {
+                    throw new ConfigValidationException(
+                            validationResult.stream()
+                                    .map(ConstraintViolation::getMessage)
+                                    .collect(Collectors.joining(", ")));
+                }
+            }
+        } finally {
+            try {
+                file.close();
+            } catch (IOException e) {
+                throw new ConfigFileClosureFailureException(e.getMessage());
+            }
         }
     }
 }

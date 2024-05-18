@@ -1,11 +1,18 @@
 package com.repoachiever.resource.communication;
 
 import com.fasterxml.jackson.databind.annotation.JsonAppend;
+import com.repoachiever.entity.common.AdditionalContentFileEntity;
 import com.repoachiever.entity.common.PropertiesEntity;
+import com.repoachiever.exception.AdditionalContentCreationFailureException;
+import com.repoachiever.exception.AdditionalContentRetrievalFailureException;
+import com.repoachiever.exception.RawContentCreationFailureException;
+import com.repoachiever.exception.RawContentRetrievalFailureException;
 import com.repoachiever.service.communication.apiserver.IApiServerCommunicationService;
 import com.repoachiever.service.config.ConfigService;
 import com.repoachiever.service.integration.diagnostics.DiagnosticsConfigService;
+import com.repoachiever.service.state.StateService;
 import com.repoachiever.service.telemetry.TelemetryService;
+import com.repoachiever.service.workspace.facade.WorkspaceFacade;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.apache.logging.log4j.LogManager;
@@ -26,6 +33,9 @@ public class ApiServerCommunicationResource extends UnicastRemoteObject implemen
     private static final Logger logger = LogManager.getLogger(ApiServerCommunicationResource.class);
 
     @Inject
+    WorkspaceFacade workspaceFacade;
+
+    @Inject
     TelemetryService telemetryService;
 
     public ApiServerCommunicationResource() throws RemoteException {
@@ -35,16 +45,77 @@ public class ApiServerCommunicationResource extends UnicastRemoteObject implemen
      * @see IApiServerCommunicationService
      */
     @Override
-    public void performRawContentUpload(String workspaceUnitKey, InputStream content) throws RemoteException {
+    public void performRawContentUpload(String workspaceUnitKey, String location, String name, InputStream content)
+            throws RemoteException {
+        StateService.getCommunicationGuard().lock();
 
+        try {
+            workspaceFacade.addRawContent(workspaceUnitKey, location, name, content);
+        } catch (RawContentCreationFailureException e) {
+            throw new RemoteException(e.getMessage());
+        }
+
+        StateService.getCommunicationGuard().unlock();
     }
 
     /**
      * @see IApiServerCommunicationService
      */
     @Override
-    public void performAdditionalContentUpload(String workspaceUnitKey, String content) throws RemoteException {
+    public Boolean retrieveRawContentPresent(String workspaceUnitKey, String location, String value)
+            throws RemoteException {
+        StateService.getCommunicationGuard().lock();
 
+        Boolean result;
+
+        try {
+            result = workspaceFacade.isRawContentPresent(workspaceUnitKey, location, value);
+        } catch (RawContentRetrievalFailureException e) {
+            throw new RemoteException(e.getMessage());
+        }
+
+        StateService.getCommunicationGuard().unlock();
+
+        return result;
+    }
+
+    /**
+     * @see IApiServerCommunicationService
+     */
+    @Override
+    public void performAdditionalContentUpload(String workspaceUnitKey, String location, String name, String content)
+            throws RemoteException {
+        StateService.getCommunicationGuard().lock();
+
+        try {
+            workspaceFacade.addAdditionalContent(
+                    workspaceUnitKey, location, name, AdditionalContentFileEntity.of(content));
+        } catch (AdditionalContentCreationFailureException e) {
+            throw new RemoteException(e.getMessage());
+        }
+
+        StateService.getCommunicationGuard().unlock();
+    }
+
+    /**
+     * @see IApiServerCommunicationService
+     */
+    @Override
+    public Boolean retrieveAdditionalContentPresent(String workspaceUnitKey, String location, String value)
+            throws RemoteException {
+        StateService.getCommunicationGuard().lock();
+
+        Boolean result;
+
+        try {
+            result = workspaceFacade.isAdditionalContentPresent(workspaceUnitKey, location, value);
+        } catch (AdditionalContentRetrievalFailureException e) {
+            throw new RemoteException(e.getMessage());
+        }
+
+        StateService.getCommunicationGuard().unlock();
+
+        return result;
     }
 
     /**

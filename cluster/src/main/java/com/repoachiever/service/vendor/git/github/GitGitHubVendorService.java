@@ -2,10 +2,12 @@ package com.repoachiever.service.vendor.git.github;
 
 import com.repoachiever.dto.GitHubCommitAmountResponseDto;
 import com.repoachiever.dto.GitHubDefaultBranchResponseDto;
+import com.repoachiever.dto.GitHubLatestCommitHashResponseDto;
 import com.repoachiever.entity.ConfigEntity;
 import com.repoachiever.entity.PropertiesEntity;
-import com.repoachiever.exception.GitHubGraphQlClientContentRetrievalFailureException;
+import com.repoachiever.exception.GitHubContentRetrievalFailureException;
 import com.repoachiever.exception.GitHubGraphQlClientDocumentNotFoundException;
+import com.repoachiever.exception.GitHubServiceNotAvailableException;
 import com.repoachiever.service.config.ConfigService;
 import com.repoachiever.service.vendor.common.VendorConfigurationHelper;
 import jakarta.annotation.PostConstruct;
@@ -18,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -72,19 +73,67 @@ public class GitGitHubVendorService {
     }
 
     /**
-     * Retrieves default branch for the repository with the given name.
+     * Retrieves latest commit hash for the repository with the given name and given branch.
      *
      * @param owner  given repository owner.
      * @param name   given repository name.
-     * @return retrieved default branch of the repository with the given name.
-     * @throws GitHubGraphQlClientContentRetrievalFailureException if GitHub GraphQL client content retrieval fails.
+     * @param branch given repository branch.
+     * @return retrieved latest commit hash of the repository with the given name and given branch.
+     * @throws GitHubContentRetrievalFailureException if GitHub GraphQL client content retrieval fails.
      */
-    public String getDefaultBranch(String owner, String name) throws
-            GitHubGraphQlClientContentRetrievalFailureException {
-        GitHubDefaultBranchResponseDto gitHubCommitAmountResponse;
+    public String getLatestCommitHash(String owner, String name, String branch) throws
+            GitHubContentRetrievalFailureException {
+        GitHubLatestCommitHashResponseDto gitHubLatestCommitHashResponse;
 
         try {
-            gitHubCommitAmountResponse = graphQlClient
+            gitHubLatestCommitHashResponse = graphQlClient
+                    .document(document)
+                    .variables(new HashMap<>() {
+                        {
+                            put("owner", owner);
+                            put("name", name);
+                            put("branch", branch);
+                        }
+                    })
+                    .operationName("LatestCommitHash")
+                    .retrieve("repository")
+                    .toEntity(GitHubLatestCommitHashResponseDto.class)
+                    .block();
+
+        } catch (WebClientResponseException e) {
+            throw new GitHubContentRetrievalFailureException(e.getResponseBodyAsString());
+        } catch (WebClientRequestException e) {
+            throw new GitHubContentRetrievalFailureException(
+                    new GitHubServiceNotAvailableException(e.getMessage()).getMessage());
+        }
+
+        if (Objects.isNull(gitHubLatestCommitHashResponse)) {
+            throw new GitHubContentRetrievalFailureException();
+        }
+
+        return gitHubLatestCommitHashResponse
+                .getRef()
+                .getTarget()
+                .getHistory()
+                .getNodes()
+                .getFirst()
+                .getOid();
+    }
+
+    /**
+     * Retrieves default branch for the repository with the given name.
+     *
+     * @param owner given repository owner.
+     * @param name  given repository name.
+     * @return retrieved default branch of the repository with the given name.
+     * @throws GitHubContentRetrievalFailureException if GitHub GraphQL client content retrieval fails.
+     */
+    public String getDefaultBranch(String owner, String name) throws
+            GitHubContentRetrievalFailureException {
+        GitHubDefaultBranchResponseDto gitHubDefaultBranchResponse;
+
+        try {
+            gitHubDefaultBranchResponse = graphQlClient
                     .document(document)
                     .variables(new HashMap<>() {
                         {
@@ -98,16 +147,17 @@ public class GitGitHubVendorService {
                     .block();
 
         } catch (WebClientResponseException e) {
-            throw new GitHubGraphQlClientContentRetrievalFailureException(e.getResponseBodyAsString());
+            throw new GitHubContentRetrievalFailureException(e.getResponseBodyAsString());
         } catch (WebClientRequestException e) {
-            throw new GitHubGraphQlClientContentRetrievalFailureException(e.getMessage());
+            throw new GitHubContentRetrievalFailureException(
+                    new GitHubServiceNotAvailableException(e.getMessage()).getMessage());
         }
 
-        if (Objects.isNull(gitHubCommitAmountResponse)) {
-            throw new GitHubGraphQlClientContentRetrievalFailureException();
+        if (Objects.isNull(gitHubDefaultBranchResponse)) {
+            throw new GitHubContentRetrievalFailureException();
         }
 
-        return gitHubCommitAmountResponse
+        return gitHubDefaultBranchResponse
                 .getDefaultBranchRef()
                 .getName();
     }
@@ -119,10 +169,10 @@ public class GitGitHubVendorService {
      * @param name   given repository name.
      * @param branch given repository branch.
      * @return retrieved amount of repository commits with the given name and given branch.
-     * @throws GitHubGraphQlClientContentRetrievalFailureException if GitHub GraphQL client content retrieval fails.
+     * @throws GitHubContentRetrievalFailureException if GitHub GraphQL client content retrieval fails.
      */
     public Integer getCommitAmount(String owner, String name, String branch) throws
-            GitHubGraphQlClientContentRetrievalFailureException {
+            GitHubContentRetrievalFailureException {
         GitHubCommitAmountResponseDto gitHubCommitAmountResponse;
 
         try {
@@ -141,13 +191,14 @@ public class GitGitHubVendorService {
                     .block();
 
         } catch (WebClientResponseException e) {
-            throw new GitHubGraphQlClientContentRetrievalFailureException(e.getResponseBodyAsString());
+            throw new GitHubContentRetrievalFailureException(e.getResponseBodyAsString());
         } catch (WebClientRequestException e) {
-            throw new GitHubGraphQlClientContentRetrievalFailureException(e.getMessage());
+            throw new GitHubContentRetrievalFailureException(
+                    new GitHubServiceNotAvailableException(e.getMessage()).getMessage());
         }
 
         if (Objects.isNull(gitHubCommitAmountResponse)) {
-            throw new GitHubGraphQlClientContentRetrievalFailureException();
+            throw new GitHubContentRetrievalFailureException();
         }
 
         return gitHubCommitAmountResponse

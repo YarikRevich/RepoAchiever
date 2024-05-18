@@ -1,7 +1,6 @@
 package com.repoachiever.service.client.command;
 
 import com.repoachiever.ApiClient;
-import com.repoachiever.api.ValidationResourceApi;
 import com.repoachiever.dto.ValidationSecretsApplicationDto;
 import com.repoachiever.exception.ApiServerException;
 import com.repoachiever.exception.ApiServerNotAvailableException;
@@ -9,7 +8,7 @@ import com.repoachiever.exception.CloudCredentialsFileNotFoundException;
 import com.repoachiever.model.Provider;
 import com.repoachiever.model.ValidationSecretsApplication;
 import com.repoachiever.model.ValidationSecretsApplicationResult;
-import com.repoachiever.service.client.IClientCommand;
+import com.repoachiever.service.client.common.IClient;
 import com.repoachiever.service.config.ConfigService;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,7 +22,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 /** Represents secrets validation client command service. */
 @Service
 public class SecretsAcquireClientCommandService
-    implements IClientCommand<ValidationSecretsApplicationResult, ValidationSecretsApplicationDto> {
+    implements IClient<ValidationSecretsApplicationResult, ValidationSecretsApplicationDto> {
   private final ValidationResourceApi validationResourceApi;
 
   public SecretsAcquireClientCommandService(@Autowired ConfigService configService) {
@@ -34,7 +33,7 @@ public class SecretsAcquireClientCommandService
   }
 
   /**
-   * @see IClientCommand
+   * @see IClient
    */
   @Override
   public ValidationSecretsApplicationResult process(ValidationSecretsApplicationDto input)

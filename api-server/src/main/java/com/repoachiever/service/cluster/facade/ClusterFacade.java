@@ -99,7 +99,6 @@ public class ClusterFacade {
             String context = ClusterContextToJsonConverter.convert(
                     ClusterContextEntity.of(
                             ClusterContextEntity.Metadata.of(name, workspaceUnitKey),
-                            ClusterContextEntity.Filter.of(locations),
                             ClusterContextEntity.Service.of(
                                     ContentProviderToClusterContextProviderConverter.convert(
                                             contentApplication.getProvider()),
@@ -112,10 +111,9 @@ public class ClusterFacade {
                                     properties.getCommunicationApiServerName(),
                                     configService.getConfig().getCommunication().getPort()),
                             ClusterContextEntity.Content.of(
+                                    locations,
                                     configService.getConfig().getContent().getFormat()),
                             ClusterContextEntity.Resource.of(
-                                    ClusterContextEntity.Resource.Cluster.of(
-                                            configService.getConfig().getResource().getCluster().getMaxWorkers()),
                                     ClusterContextEntity.Resource.Worker.of(
                                             configService.getConfig().getResource().getWorker().getFrequency()))));
 

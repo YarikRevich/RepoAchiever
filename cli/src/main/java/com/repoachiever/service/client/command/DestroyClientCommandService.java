@@ -5,7 +5,7 @@ import com.repoachiever.api.TerraformResourceApi;
 import com.repoachiever.exception.ApiServerException;
 import com.repoachiever.exception.ApiServerNotAvailableException;
 import com.repoachiever.model.TerraformDestructionApplication;
-import com.repoachiever.service.client.IClientCommand;
+import com.repoachiever.service.client.common.IClient;
 import com.repoachiever.service.config.ConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 /** Represents destroy client command service. */
 @Service
 public class DestroyClientCommandService
-    implements IClientCommand<Void, TerraformDestructionApplication> {
+    implements IClient<Void, TerraformDestructionApplication> {
   private final TerraformResourceApi terraformResourceApi;
 
   public DestroyClientCommandService(@Autowired ConfigService configService) {
@@ -26,7 +26,7 @@ public class DestroyClientCommandService
   }
 
   /**
-   * @see IClientCommand
+   * @see IClient
    */
   public Void process(TerraformDestructionApplication input) throws ApiServerException {
     try {

@@ -1,14 +1,17 @@
 # Represents section used to declare desired content.
 content:
   # Represents locations of VCS provider repositories, which are intended to be used for requested operations.
-  # If all the repositories in previously defined scoped are needed to be affected, then place "*" as the value.
   locations: ["*"]
+
+  # Enables additional content download of repositories of VCS provider repositories.
+  additional: true
 
 # Represents section used for VCS provider configuration.
 service:
   # Represents the selected VCS provider for RepoAchiever. The first part divided by the hyphen represents
-  # selected VCS core type and the second part defines external provider. Supported providers are "exporter"
-  # and "git-github"
+  # selected VCS core type and the second part defines external provider.
+  #
+  # Supported providers are "exporter" and "git-github".
   provider: "git-github"
 
   # Represents section used for RepoAchiever Exporter configuration.

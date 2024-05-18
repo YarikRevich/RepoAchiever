@@ -1,12 +1,11 @@
 package com.repoachiever.service.integration.scheduler;
 
 import com.repoachiever.converter.CronExpressionConverter;
-import com.repoachiever.exception.CronExpressionException;
-import com.repoachiever.exception.GitHubGraphQlClientContentRetrievalFailureException;
-import com.repoachiever.exception.LocationDefinitionsAreNotValidException;
-import com.repoachiever.exception.SchedulerPeriodRetrievalFailureException;
+import com.repoachiever.exception.*;
 import com.repoachiever.logging.common.LoggingConfigurationHelper;
+import com.repoachiever.service.apiserver.resource.ApiServerCommunicationResource;
 import com.repoachiever.service.config.ConfigService;
+import com.repoachiever.service.state.StateService;
 import com.repoachiever.service.vendor.VendorFacade;
 import jakarta.annotation.PostConstruct;
 import org.apache.logging.log4j.LogManager;
@@ -28,6 +27,9 @@ public class SchedulerConfigService {
 
     @Autowired
     private VendorFacade vendorFacade;
+
+    @Autowired
+    private ApiServerCommunicationResource apiServerCommunicationResource;
 
     private final ScheduledExecutorService starterScheduledExecutorService =
             Executors.newScheduledThreadPool(0, Thread.ofVirtual().factory());
@@ -74,7 +76,7 @@ public class SchedulerConfigService {
                         closable.countDown();
 
                         return;
-                    } catch (GitHubGraphQlClientContentRetrievalFailureException e) {
+                    } catch (GitHubContentRetrievalFailureException e) {
                         logger.info(
                                 LoggingConfigurationHelper.getTransferableMessage(
                                         String.format(
@@ -84,8 +86,44 @@ public class SchedulerConfigService {
                         return;
                     }
 
-                    logger.info(
-                            LoggingConfigurationHelper.getTransferableMessage(String.valueOf(commitAmount)));
+                    if (StateService.isContentUpdateHeadCounterBelow(element, commitAmount)) {
+                        String commitHash;
+
+                        try {
+                            commitHash = vendorFacade.getLatestCommitHash(element);
+                        } catch (LocationDefinitionsAreNotValidException ignored) {
+                            return;
+                        } catch (GitHubContentRetrievalFailureException e) {
+                            logger.info(
+                                    LoggingConfigurationHelper.getTransferableMessage(
+                                            String.format(
+                                                    "Failed to retrieve content for '%s' location: %s",
+                                                    element,
+                                                    e.getMessage())));
+                            return;
+                        }
+
+                        StateService.getContentUpdatesHeadCounterSet().put(element, commitAmount);
+
+                        Boolean contentPresent;
+
+                        try {
+                            contentPresent =
+                                    apiServerCommunicationResource.retrieveRawContentPresent(element, commitHash);
+                        } catch (ApiServerOperationFailureException e) {
+                            logger.info(
+                                    LoggingConfigurationHelper.getTransferableMessage(
+                                            String.format(
+                                                    "Failed to retrieve state for '%s' location: %s",
+                                                    element,
+                                                    e.getMessage())));
+                            return;
+                        }
+
+                        if (!contentPresent) {
+
+                        }
+                    }
                 }, 0, period, TimeUnit.MILLISECONDS);
 
                 try {

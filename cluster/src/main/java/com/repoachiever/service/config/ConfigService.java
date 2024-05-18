@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.repoachiever.entity.ConfigEntity;
 import com.repoachiever.entity.PropertiesEntity;
+import com.repoachiever.exception.ConfigFileClosureFailureException;
+import com.repoachiever.exception.ConfigFileReadingFailureException;
 import com.repoachiever.exception.ConfigNotGivenException;
 import com.repoachiever.exception.ConfigValidationException;
 import jakarta.annotation.PostConstruct;
@@ -22,6 +24,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import lombok.Getter;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,23 +36,30 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ConfigService {
-    private static final Logger logger = LogManager.getLogger(ConfigService.class);
-
     @Autowired
     private PropertiesEntity properties;
 
-    private ConfigEntity parsedConfigFile;
+    @Getter
+    private ConfigEntity config;
 
     /**
      * Performs configuration file parsing operation.
+     *
+     * @throws ConfigNotGivenException if configuration file content is not given.
+     * @throws ConfigValidationException if configuration file operation failed.
+     * @throws ConfigFileReadingFailureException if configuration file reading operation failed.
+     * @throws ConfigFileClosureFailureException if configuration file closure operation failed.
      */
     @PostConstruct
-    private void configure() {
+    private void configure() throws
+            ConfigNotGivenException,
+            ConfigFileReadingFailureException,
+            ConfigValidationException,
+            ConfigFileClosureFailureException {
         String clusterContext = properties.getClusterContext();
 
         if (Objects.equals(clusterContext, "null")) {
-            logger.fatal(new ConfigNotGivenException().getMessage());
-            return;
+            throw new ConfigNotGivenException();
         }
 
         InputStream configFile = null;
@@ -67,40 +77,30 @@ public class ConfigService {
             });
 
             try {
-                parsedConfigFile = reader.<ConfigEntity>readValues(configFile).readAll().getFirst();
+                config = reader.<ConfigEntity>readValues(configFile).readAll().getFirst();
             } catch (IOException e) {
-                logger.fatal(e.getMessage());
-                return;
+                throw new ConfigFileReadingFailureException(e.getMessage());
             }
 
             try (ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory()) {
                 Validator validator = validatorFactory.getValidator();
 
                 Set<ConstraintViolation<ConfigEntity>> validationResult =
-                        validator.validate(parsedConfigFile);
+                        validator.validate(config);
 
                 if (!validationResult.isEmpty()) {
-                    logger.fatal(new ConfigValidationException(
+                    throw new ConfigValidationException(
                             validationResult.stream()
                                     .map(ConstraintViolation::getMessage)
-                                    .collect(Collectors.joining(", "))).getMessage());
+                                    .collect(Collectors.joining(", ")));
                 }
             }
         } finally {
             try {
                 configFile.close();
             } catch (IOException e) {
-                logger.fatal(e.getMessage());
+                throw new ConfigFileClosureFailureException(e.getMessage());
             }
         }
-    }
-
-    /**
-     * Retrieves parsed configuration file entity.
-     *
-     * @return retrieved parsed configuration file entity.
-     */
-    public ConfigEntity getConfig() {
-        return parsedConfigFile;
     }
 }

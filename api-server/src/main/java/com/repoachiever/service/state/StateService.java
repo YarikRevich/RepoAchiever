@@ -23,12 +23,6 @@ public class StateService {
     private static Boolean started = false;
 
     /**
-     * Represents RepoAchiever API Server healthcheck telemetry guard.
-     */
-    @Getter
-    private static ReentrantLock telemetryApiServerHealthCheckGuard = new ReentrantLock();
-
-    /**
      * Represents RepoAchiever API Server application startup guard.
      */
     @Getter
@@ -40,6 +34,11 @@ public class StateService {
     @Getter
     private final static ReentrantLock topologyStateGuard = new ReentrantLock();
 
+    /**
+     * Represents RepoAchiever Cluster communication guard.
+     */
+    @Getter
+    private final static ReentrantLock communicationGuard = new ReentrantLock();
 
     /**
      * Represents a set of all available RepoAchiever Cluster allocations.

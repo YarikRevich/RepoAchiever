@@ -32,19 +32,23 @@ public class ConfigEntity {
     @JsonProperty("metadata")
     public Metadata metadata;
 
-    /**
-     * Represents filter section elected for a specific RepoAchiever Cluster allocation.
-     */
+    /** Represents RepoAchiever Cluster configuration used for content management. */
     @Getter
-    public static class Filter {
+    public static class Content {
+        @NotNull
+        @Pattern(regexp = "(^zip$)|(^tar$)")
+        @JsonProperty("format")
+        public String format;
+
+        @NotNull
         @JsonProperty("locations")
         public List<String> locations;
     }
 
     @Valid
     @NotNull
-    @JsonProperty("filter")
-    public Filter filter;
+    @JsonProperty("content")
+    public Content content;
 
     /**
      * Represents external service configurations for RepoAchiever Cluster allocation used to retrieve content.
@@ -119,40 +123,11 @@ public class ConfigEntity {
     @JsonProperty("communication")
     public Communication communication;
 
-    /** Represents RepoAchiever Cluster configuration used for content management. */
-    @Getter
-    public static class Content {
-        @NotNull
-        @Pattern(regexp = "(^zip$)|(^tar$)")
-        @JsonProperty("format")
-        public String format;
-    }
-
-    @Valid
-    @NotNull
-    @JsonProperty("content")
-    public Content content;
-
     /**
      * Represents RepoAchiever API Server resources configuration section.
      */
     @Getter
     public static class Resource {
-        /**
-         * Represents RepoAchiever API Server configuration used for RepoAchiever Cluster.
-         */
-        @Getter
-        public static class Cluster {
-            @NotNull
-            @JsonProperty("max-workers")
-            public Integer maxWorkers;
-        }
-
-        @Valid
-        @NotNull
-        @JsonProperty("cluster")
-        public Cluster cluster;
-
         /**
          * Represents RepoAchiever API Server configuration used for RepoAchiever Worker.
          */

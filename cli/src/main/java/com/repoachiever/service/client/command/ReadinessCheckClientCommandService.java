@@ -6,7 +6,7 @@ import com.repoachiever.exception.ApiServerException;
 import com.repoachiever.exception.ApiServerNotAvailableException;
 import com.repoachiever.model.ReadinessCheckApplication;
 import com.repoachiever.model.ReadinessCheckResult;
-import com.repoachiever.service.client.IClientCommand;
+import com.repoachiever.service.client.common.IClient;
 import com.repoachiever.service.config.ConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 /** Represents readiness check client command service. */
 @Service
 public class ReadinessCheckClientCommandService
-    implements IClientCommand<ReadinessCheckResult, ReadinessCheckApplication> {
+    implements IClient<ReadinessCheckResult, ReadinessCheckApplication> {
   private final HealthResourceApi healthResourceApi;
 
   public ReadinessCheckClientCommandService(@Autowired ConfigService configService) {
@@ -27,7 +27,7 @@ public class ReadinessCheckClientCommandService
   }
 
   /**
-   * @see IClientCommand
+   * @see IClient
    */
   public ReadinessCheckResult process(ReadinessCheckApplication input) throws ApiServerException {
     try {

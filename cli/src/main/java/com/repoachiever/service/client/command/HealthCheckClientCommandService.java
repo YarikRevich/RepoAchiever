@@ -5,7 +5,7 @@ import com.repoachiever.api.HealthResourceApi;
 import com.repoachiever.exception.ApiServerException;
 import com.repoachiever.exception.ApiServerNotAvailableException;
 import com.repoachiever.model.HealthCheckResult;
-import com.repoachiever.service.client.IClientCommand;
+import com.repoachiever.service.client.common.IClient;
 import com.repoachiever.service.config.ConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,7 +14,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 
 /** Represents health check client command service. */
 @Service
-public class HealthCheckClientCommandService implements IClientCommand<HealthCheckResult, Void> {
+public class HealthCheckClientCommandService implements IClient<HealthCheckResult, Void> {
   private final HealthResourceApi healthResourceApi;
 
   public HealthCheckClientCommandService(@Autowired ConfigService configService) {
@@ -25,7 +25,7 @@ public class HealthCheckClientCommandService implements IClientCommand<HealthChe
   }
 
   /**
-   * @see IClientCommand
+   * @see IClient
    */
   public HealthCheckResult process(Void input) throws ApiServerException {
     try {

@@ -162,6 +162,10 @@ public class ConfigEntity {
             @NotNull
             @JsonProperty("max-workers")
             public Integer maxWorkers;
+
+            @NotNull
+            @JsonProperty("max-versions")
+            public Integer maxVersions;
         }
 
         @Valid

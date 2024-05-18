@@ -4,7 +4,7 @@ import com.repoachiever.entity.PropertiesEntity;
 import com.repoachiever.exception.ApiServerException;
 import com.repoachiever.model.ApplicationInfoResult;
 import com.repoachiever.service.client.command.HealthCheckClientCommandService;
-import com.repoachiever.service.client.command.VersionClientCommandService;
+import com.repoachiever.service.client.info.version.VersionInfoClientService;
 import com.repoachiever.service.command.common.ICommand;
 import com.repoachiever.service.visualization.state.VisualizationState;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 public class VersionExternalCommandService implements ICommand {
   @Autowired PropertiesEntity properties;
 
-  @Autowired private VersionClientCommandService versionClientCommandService;
+  @Autowired private VersionInfoClientService versionClientCommandService;
 
   @Autowired private HealthCheckClientCommandService healthCheckClientCommandService;
 

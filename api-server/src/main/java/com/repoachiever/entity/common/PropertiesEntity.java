@@ -62,14 +62,11 @@ public class PropertiesEntity {
     @ConfigProperty(name = "workspace.directory")
     String workspaceDirectory;
 
-    @ConfigProperty(name = "workspace.content.directory")
-    String workspaceContentDirectory;
+    @ConfigProperty(name = "workspace.content.raw.directory")
+    String workspaceRawContentDirectory;
 
-    @ConfigProperty(name = "workspace.content.version-amount")
-    Integer workspaceContentVersionAmount;
-
-    @ConfigProperty(name = "workspace.metadata.directory")
-    String workspaceMetadataDirectory;
+    @ConfigProperty(name = "workspace.content.additional.directory")
+    String workspaceAdditionalContentDirectory;
 
     @ConfigProperty(name = "workspace.prs-metadata-file.name")
     String workspacePRsMetadataFileName;

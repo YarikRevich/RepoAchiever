@@ -29,16 +29,19 @@ public class ClusterContextEntity {
     public Metadata metadata;
 
     /**
-     * Represents filter section elected for a specific RepoAchiever Cluster allocation.
+     * Represents RepoAchiever Cluster configuration used for content management.
      */
     @AllArgsConstructor(staticName = "of")
-    public static class Filter {
+    public static class Content {
         @JsonProperty("locations")
         public List<String> locations;
+
+        @JsonProperty("format")
+        public String format;
     }
 
-    @JsonProperty("filter")
-    public Filter filter;
+    @JsonProperty("content")
+    public Content content;
 
     /**
      * Represents external service configurations for RepoAchiever Cluster allocation used to retrieve content.
@@ -111,34 +114,10 @@ public class ClusterContextEntity {
     public Communication communication;
 
     /**
-     * Represents RepoAchiever Cluster configuration used for content management.
-     */
-    @AllArgsConstructor(staticName = "of")
-    public static class Content {
-        @JsonProperty("format")
-        public String format;
-    }
-
-    @JsonProperty("content")
-    public Content content;
-
-    /**
      * Represents RepoAchiever API Server resources configuration section.
      */
     @AllArgsConstructor(staticName = "of")
     public static class Resource {
-        /**
-         * Represents RepoAchiever API Server configuration used for RepoAchiever Cluster.
-         */
-        @AllArgsConstructor(staticName = "of")
-        public static class Cluster {
-            @JsonProperty("max-workers")
-            public Integer maxWorkers;
-        }
-
-        @JsonProperty("cluster")
-        public Cluster cluster;
-
         /**
          * Represents RepoAchiever API Server configuration used for RepoAchiever Worker.
          */

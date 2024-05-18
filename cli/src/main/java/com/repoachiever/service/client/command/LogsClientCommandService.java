@@ -6,7 +6,7 @@ import com.repoachiever.exception.ApiServerException;
 import com.repoachiever.exception.ApiServerNotAvailableException;
 import com.repoachiever.model.TopicLogsApplication;
 import com.repoachiever.model.TopicLogsResult;
-import com.repoachiever.service.client.IClientCommand;
+import com.repoachiever.service.client.common.IClient;
 import com.repoachiever.service.config.ConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 /** Represents logs topic client command service. */
 @Service
 public class LogsClientCommandService
-    implements IClientCommand<TopicLogsResult, TopicLogsApplication> {
+    implements IClient<TopicLogsResult, TopicLogsApplication> {
   private final TopicResourceApi topicResourceApi;
 
   public LogsClientCommandService(@Autowired ConfigService configService) {
@@ -27,7 +27,7 @@ public class LogsClientCommandService
   }
 
   /**
-   * @see IClientCommand
+   * @see IClient
    */
   @Override
   public TopicLogsResult process(TopicLogsApplication input) throws ApiServerException {

@@ -128,28 +128,17 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/VersionInfoResult"
-  /v1/info/cluster:
+  /v1/info/topology:
     get:
       tags:
         - InfoResource
       responses:
         200:
-          description: General information about running clusters
+          description: General information about deployed topology
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ClusterInfoResult"
-  /v1/info/telemetry:
-    get:
-      tags:
-        - InfoResource
-      responses:
-        200:
-          description: A set of Prometheus samples used by Grafana instance
-          content:
-            text/plain:
-              schema:
-                type: string
+                $ref: "#/components/schemas/TopologyInfoResult"
   /v1/health:
     get:
       tags:
@@ -232,14 +221,13 @@ components:
           type: string
     ContentApplication:
       required:
+        - filter
         - locations
         - provider
         - credentials
       properties:
-        locations:
-          type: array
-          items:
-            type: string
+        filter:
+          $ref: "#/components/schemas/Filter"
         provider:
           $ref: "#/components/schemas/Provider"
         exporter:
@@ -289,11 +277,11 @@ components:
           type: string
         hash:
           type: string
-    ClusterInfoResult:
+    TopologyInfoResult:
       type: array
       items:
-        $ref: "#/components/schemas/ClusterInfoUnit"
-    ClusterInfoUnit:
+        $ref: "#/components/schemas/TopologyInfoUnit"
+    TopologyInfoUnit:
       required:
         - name
       properties:

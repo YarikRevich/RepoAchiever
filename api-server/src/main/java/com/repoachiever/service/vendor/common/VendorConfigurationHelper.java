@@ -5,6 +5,8 @@ import com.repoachiever.entity.common.PropertiesEntity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,6 +41,14 @@ public class VendorConfigurationHelper {
         Matcher matcher = pattern.matcher(location);
 
         matcher.find();
+
+        List<String> additional = new ArrayList<>();
+
+//        for (Integer i = 5; i <= matcher.groupCount(); i++) {
+//            additional.add(matcher.group(i)) {
+//
+//            }
+//        }
 
         if (matcher.groupCount() == 4) {
             return GitHubLocationNotationDto.of(

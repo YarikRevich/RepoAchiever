@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Formatter;
 
 /**
- * Represents exception used when configuration file content removal operation fails.
+ * Represents exception used when file removal operation fails.
  */
 public class ContentFileRemovalFailureException extends IOException {
     public ContentFileRemovalFailureException() {
@@ -15,7 +15,7 @@ public class ContentFileRemovalFailureException extends IOException {
     public ContentFileRemovalFailureException(Object... message) {
         super(
                 new Formatter()
-                        .format("Content file removal failed: %s", Arrays.stream(message).toArray())
+                        .format("File removal failed: %s", Arrays.stream(message).toArray())
                         .toString());
     }
 }
