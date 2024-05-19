@@ -48,8 +48,29 @@ public class ClusterContextEntity {
         @JsonProperty("locations")
         public List<Location> locations;
 
+        /**
+         * Represents all supported content formats, which can be used by RepoAchiever Cluster allocation.
+         */
+        public enum Format {
+            @JsonProperty("zip")
+            ZIP("zip"),
+
+            @JsonProperty("tar")
+            TAR("tar");
+
+            private final String value;
+
+            Format(String value) {
+                this.value = value;
+            }
+
+            public String toString() {
+                return value;
+            }
+        }
+
         @JsonProperty("format")
-        public String format;
+        public Format format;
     }
 
     @JsonProperty("content")
@@ -64,7 +85,10 @@ public class ClusterContextEntity {
          * Represents all supported service providers, which can be used by RepoAchiever Cluster allocation.
          */
         public enum Provider {
+            @JsonProperty("exporter")
             EXPORTER("exporter"),
+
+            @JsonProperty("git-github")
             GIT_GITHUB("git-github");
 
             private final String value;

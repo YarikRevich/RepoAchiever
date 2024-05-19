@@ -39,12 +39,14 @@ com/repoachiever/entity/common/ConfigEntity$Diagnostics.class
 com/repoachiever/exception/RawContentFileWriteFailureException.class
 com/repoachiever/entity/repository/ProviderEntity.class
 com/repoachiever/entity/common/ConfigEntity.class
+com/repoachiever/entity/common/ClusterContextEntity$Content$Format.class
 com/repoachiever/service/integration/diagnostics/template/TemplateConfigService$3.class
 com/repoachiever/service/command/cluster/common/ClusterConfigurationHelper.class
 com/repoachiever/exception/ClusterApplicationTimeoutException.class
 com/repoachiever/converter/ContentCredentialsToClusterContextCredentialsConverter$1.class
 com/repoachiever/service/command/prometheus/common/PrometheusConfigurationHelper$2.class
 com/repoachiever/entity/common/ClusterContextEntity$Communication.class
+com/repoachiever/entity/common/ConfigEntity$Content$Format.class
 com/repoachiever/model/CredentialsFieldsFull.class
 com/repoachiever/exception/RepositoryOperationFailureException.class
 com/repoachiever/model/ReadinessCheckUnit.class
@@ -134,6 +136,7 @@ com/repoachiever/exception/WorkspaceUnitDirectoryRemovalFailureException.class
 com/repoachiever/exception/ExporterFieldIsNotValidException.class
 com/repoachiever/entity/common/ClusterContextEntity$Service$Credentials.class
 com/repoachiever/service/client/smallrye/ISmallRyeHealthCheckClientService.class
+com/repoachiever/converter/ContentFormatToClusterContextFormatConverter.class
 com/repoachiever/exception/DiagnosticsTemplateProcessingFailureException.class
 com/repoachiever/exception/LocationsFieldIsNotValidException.class
 com/repoachiever/service/command/common/CommandConfigurationHelper.class

@@ -99,7 +99,8 @@ public class ClusterFacade {
                             ClusterContextEntity.Metadata.of(name, workspaceUnitKey),
                             ClusterContextEntity.Content.of(
                                     ContentLocationsToClusterContextLocationsConverter.convert(locations),
-                                    configService.getConfig().getContent().getFormat()),
+                                    ContentFormatToClusterContextFormatConverter.convert(
+                                            configService.getConfig().getContent().getFormat())),
                             ClusterContextEntity.Service.of(
                                     ContentProviderToClusterContextProviderConverter.convert(
                                             contentApplication.getProvider()),

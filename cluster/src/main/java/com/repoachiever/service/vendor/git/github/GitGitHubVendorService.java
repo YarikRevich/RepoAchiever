@@ -237,19 +237,17 @@ public class GitGitHubVendorService {
      * @param owner  given repository owner.
      * @param name   given repository name.
      * @param commitHash given commit hash.
+     * @param format given content format type.
      * @return retrieved content from the repository with the given name and given commit hash as an input stream.
      * @throws GitHubContentRetrievalFailureException if GitHub REST API client content retrieval fails.
      */
-    public InputStream getCommitContent(String owner, String name, String commitHash) throws
+    public InputStream getCommitContent(String owner, String name, String format, String commitHash) throws
             GitHubContentRetrievalFailureException {
         ResponseEntity<Resource> resource = restClient
                 .get()
-                .uri(String.format("/repos/%s/%s/tarball/%s", owner, name, commitHash))
+                .uri(String.format("/repos/%s/%s/%s/%s", owner, name, format, commitHash))
                 .retrieve()
                 .toEntity(Resource.class);
-
-        System.out.println("after");
-
 
         if (Objects.isNull(resource.getBody())) {
             throw new GitHubContentRetrievalFailureException(new GitHubContentIsEmptyException().getMessage());
@@ -260,5 +258,33 @@ public class GitGitHubVendorService {
         } catch (IOException e) {
             throw new GitHubContentRetrievalFailureException(e.getMessage());
         }
+    }
+
+    /**
+     * Retrieves content from the repository with the given name and given commit hash in zip format.
+     *
+     * @param owner  given repository owner.
+     * @param name   given repository name.
+     * @param commitHash given commit hash.
+     * @return retrieved content from the repository with the given name and given commit hash as an input stream.
+     * @throws GitHubContentRetrievalFailureException if GitHub REST API client content retrieval fails.
+     */
+    public InputStream getCommitContentAsZip(String owner, String name, String commitHash) throws
+            GitHubContentRetrievalFailureException {
+        return getCommitContent(owner, name, "zipball", commitHash);
+    }
+
+    /**
+     * Retrieves content from the repository with the given name and given commit hash in tar format.
+     *
+     * @param owner  given repository owner.
+     * @param name   given repository name.
+     * @param commitHash given commit hash.
+     * @return retrieved content from the repository with the given name and given commit hash as an input stream.
+     * @throws GitHubContentRetrievalFailureException if GitHub REST API client content retrieval fails.
+     */
+    public InputStream getCommitContentAsTar(String owner, String name, String commitHash) throws
+            GitHubContentRetrievalFailureException {
+        return getCommitContent(owner, name, "tarball", commitHash);
     }
 }

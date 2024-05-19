@@ -112,12 +112,16 @@ public class VendorFacade {
                 GitHubLocationNotationDto locationGitHubNotation =
                         vendorConfigurationHelper.parseLocationGitHubNotation(location);
 
-                System.out.println("before");
-
-                yield gitGitHubVendorService.getCommitContent(
-                        locationGitHubNotation.getOwner(),
-                        locationGitHubNotation.getName(),
-                        record);
+                yield switch (configService.getConfig().getContent().getFormat()) {
+                    case ZIP -> gitGitHubVendorService.getCommitContentAsZip(
+                            locationGitHubNotation.getOwner(),
+                            locationGitHubNotation.getName(),
+                            record);
+                    case TAR -> gitGitHubVendorService.getCommitContentAsTar(
+                            locationGitHubNotation.getOwner(),
+                            locationGitHubNotation.getName(),
+                            record);
+                };
             }
         };
     }

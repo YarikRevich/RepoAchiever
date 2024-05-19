@@ -180,3 +180,4 @@
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/exception/AdditionalContentCreationFailureException.java
 /Volumes/Files/java/RepoAchiever/api-server/target/generated-sources/openapi/src/main/java/com/repoachiever/model/HealthCheckResult.java
 /Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/mapping/CredentialsAreNotValidExceptionMapper.java
+/Volumes/Files/java/RepoAchiever/api-server/src/main/java/com/repoachiever/converter/ContentFormatToClusterContextFormatConverter.java

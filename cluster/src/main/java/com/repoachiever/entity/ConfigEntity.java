@@ -53,10 +53,30 @@ public class ConfigEntity {
         @JsonProperty("locations")
         public List<Location> locations;
 
+        /**
+         * Represents all supported content formats, which can be used by RepoAchiever Cluster allocation.
+         */
+        public enum Format {
+            @JsonProperty("zip")
+            ZIP("zip"),
+
+            @JsonProperty("tar")
+            TAR("tar");
+
+            private final String value;
+
+            Format(String value) {
+                this.value = value;
+            }
+
+            public String toString() {
+                return value;
+            }
+        }
+
         @NotNull
-        @Pattern(regexp = "(^zip$)|(^tar$)")
         @JsonProperty("format")
-        public String format;
+        public Format format;
     }
 
     @Valid
@@ -73,7 +93,10 @@ public class ConfigEntity {
          * Represents all supported service providers, which can be used by RepoAchiever Cluster allocation.
          */
         public enum Provider {
+            @JsonProperty("exporter")
             EXPORTER("exporter"),
+
+            @JsonProperty("git-github")
             GIT_GITHUB("git-github");
 
             private final String value;

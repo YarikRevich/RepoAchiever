@@ -49,10 +49,32 @@ public class ConfigEntity {
      */
     @Getter
     public static class Content {
+        /**
+         * Represents all supported content formats, which can be used by RepoAchiever Cluster allocation.
+         */
+        @Getter
+        public enum Format {
+            @JsonProperty("zip")
+            ZIP("zip"),
+
+            @JsonProperty("tar")
+            TAR("tar");
+
+            private final String value;
+
+            Format(String value) {
+                this.value = value;
+            }
+
+            public String toString() {
+                return value;
+            }
+        }
+
+        @Valid
         @NotNull
-        @Pattern(regexp = "(^zip$)|(^tar$)")
         @JsonProperty("format")
-        public String format;
+        public Format format;
     }
 
     @Valid
