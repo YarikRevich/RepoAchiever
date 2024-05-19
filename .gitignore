@@ -1,3 +1,11 @@
+# Binary files
+
+**/bin/
+
+# Build files
+
+**/target/
+
 # Compiled class file
 *.class
 
