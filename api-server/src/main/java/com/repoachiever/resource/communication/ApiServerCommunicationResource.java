@@ -50,8 +50,7 @@ public class ApiServerCommunicationResource extends UnicastRemoteObject implemen
      */
     @Override
     public void performRawContentUpload(
-            String workspaceUnitKey, String location, String name, RemoteInputStream content)
-            throws RemoteException {
+            String workspaceUnitKey, String location, String name, RemoteInputStream content) throws RemoteException {
         StateService.getCommunicationGuard().lock();
 
         InputStream contentRaw;

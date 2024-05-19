@@ -170,7 +170,7 @@ public class SchedulerConfigService {
                                     LoggingConfigurationHelper.getTransferableMessage(
                                             String.format(
                                                     "Record content transfer finished for '%s' location and '%s' record",
-                                                    element,
+                                                    element.getName(),
                                                     record)));
                         }
                     }

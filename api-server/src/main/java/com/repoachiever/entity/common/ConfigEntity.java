@@ -3,6 +3,7 @@ package com.repoachiever.entity.common;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
@@ -160,10 +161,12 @@ public class ConfigEntity {
         @Getter
         public static class Cluster {
             @NotNull
+            @Min(1)
             @JsonProperty("max-workers")
             public Integer maxWorkers;
 
             @NotNull
+            @Min(1)
             @JsonProperty("max-versions")
             public Integer maxVersions;
         }

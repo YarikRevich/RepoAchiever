@@ -48,15 +48,16 @@ public class WorkspaceService {
     }
 
     /**
-     * Creates raw content directory in the given workspace unit directory.
+     * Creates raw content directory in the given workspace unit directory and location.
      *
      * @param workspaceUnitDirectory given workspace unit directory.
+     * @param location               given raw content location.
      * @throws WorkspaceContentDirectoryCreationFailureException if workspace raw content directory creation operation
      *                                                           failed.
      */
-    public void createRawContentDirectory(String workspaceUnitDirectory) throws
+    public void createRawContentDirectory(String workspaceUnitDirectory, String location) throws
             WorkspaceContentDirectoryCreationFailureException {
-        Path unitDirectoryPath = Path.of(workspaceUnitDirectory, properties.getWorkspaceRawContentDirectory());
+        Path unitDirectoryPath = Path.of(workspaceUnitDirectory, location, properties.getWorkspaceRawContentDirectory());
 
         if (Files.notExists(unitDirectoryPath)) {
             try {
@@ -78,7 +79,7 @@ public class WorkspaceService {
     public void createRawContentUnitDirectory(String workspaceUnitDirectory, String location) throws
             WorkspaceContentDirectoryCreationFailureException {
         Path unitDirectoryPath = Path.of(
-                workspaceUnitDirectory, properties.getWorkspaceRawContentDirectory(), location);
+                workspaceUnitDirectory, location);
 
         if (Files.notExists(unitDirectoryPath)) {
             try {
@@ -90,15 +91,17 @@ public class WorkspaceService {
     }
 
     /**
-     * Creates additional content directory in the given workspace unit directory.
+     * Creates additional content directory in the given workspace unit directory and location.
      *
      * @param workspaceUnitDirectory given workspace unit directory.
+     * @param location               given additional content location.
      * @throws WorkspaceContentDirectoryCreationFailureException if workspace additional content directory creation
      *                                                           operation failed.
      */
-    public void createAdditionalContentDirectory(String workspaceUnitDirectory) throws
+    public void createAdditionalContentDirectory(String workspaceUnitDirectory, String location) throws
             WorkspaceContentDirectoryCreationFailureException {
-        Path unitDirectoryPath = Path.of(workspaceUnitDirectory, properties.getWorkspaceAdditionalContentDirectory());
+        Path unitDirectoryPath = Path.of(
+                workspaceUnitDirectory, location, properties.getWorkspaceAdditionalContentDirectory());
 
         if (Files.notExists(unitDirectoryPath)) {
             try {
@@ -119,8 +122,7 @@ public class WorkspaceService {
      */
     public void createAdditionalContentUnitDirectory(String workspaceUnitDirectory, String location) throws
             WorkspaceContentDirectoryCreationFailureException {
-        Path unitDirectoryPath = Path.of(
-                workspaceUnitDirectory, properties.getWorkspaceAdditionalContentDirectory(), location);
+        Path unitDirectoryPath = Path.of(workspaceUnitDirectory, location);
 
         if (Files.notExists(unitDirectoryPath)) {
             try {
@@ -175,14 +177,15 @@ public class WorkspaceService {
     }
 
     /**
-     * Checks if raw content directory exists with the help of the given key.
+     * Checks if raw content directory exists with the help of the given key and location.
      *
      * @param workspaceUnitDirectory given workspace unit directory.
-     * @return result if raw content directory exists with the help of the given key.
+     * @param location               given raw content location.
+     * @return result if raw content directory exists with the help of the given key and location.
      */
-    public Boolean isRawContentDirectoryExist(String workspaceUnitDirectory) {
+    public Boolean isRawContentDirectoryExist(String workspaceUnitDirectory, String location) {
         return Files.exists(
-                Paths.get(workspaceUnitDirectory, properties.getWorkspaceRawContentDirectory()));
+                Paths.get(workspaceUnitDirectory, location, properties.getWorkspaceRawContentDirectory()));
     }
 
     /**
@@ -190,22 +193,23 @@ public class WorkspaceService {
      *
      * @param workspaceUnitDirectory given workspace unit directory.
      * @param location               given raw content location.
-     * @return result if raw content directory exists with the help of the given key.
+     * @return result if raw content directory exists with the help of the given key and location.
      */
     public Boolean isRawContentUnitExist(String workspaceUnitDirectory, String location) {
         return Files.exists(
-                Paths.get(workspaceUnitDirectory, properties.getWorkspaceRawContentDirectory(), location));
+                Paths.get(workspaceUnitDirectory, location));
     }
 
     /**
-     * Checks if additional content directory exists with the help of the given key.
+     * Checks if additional content directory exists with the help of the given key and location.
      *
      * @param workspaceUnitDirectory given workspace unit directory.
-     * @return result if additional content directory exists with the help of the given key.
+     * @param location               given additional content location.
+     * @return result if additional content directory exists with the help of the given key and location.
      */
-    public Boolean isAdditionalContentDirectoryExist(String workspaceUnitDirectory) {
+    public Boolean isAdditionalContentDirectoryExist(String workspaceUnitDirectory, String location) {
         return Files.exists(
-                Paths.get(workspaceUnitDirectory, properties.getWorkspaceAdditionalContentDirectory()));
+                Paths.get(workspaceUnitDirectory, location, properties.getWorkspaceAdditionalContentDirectory()));
     }
 
     /**
@@ -213,11 +217,11 @@ public class WorkspaceService {
      *
      * @param workspaceUnitDirectory given workspace unit directory.
      * @param location               given additional content location.
-     * @return result if additional content directory exists with the help of the given key.
+     * @return result if additional content directory exists with the help of the given key and location.
      */
     public Boolean isAdditionalContentUnitExist(String workspaceUnitDirectory, String location) {
         return Files.exists(
-                Paths.get(workspaceUnitDirectory, properties.getWorkspaceAdditionalContentDirectory(), location));
+                Paths.get(workspaceUnitDirectory, location));
     }
 
     /**
@@ -241,15 +245,13 @@ public class WorkspaceService {
      * Retrieves amount of files of the given type in the given workspace unit.
      *
      * @param workspaceUnitDirectory given workspace unit directory.
-     * @param type                   given file type.
      * @param location               given raw content file location.
+     * @param type                   given file type.
      * @throws ContentFilesAmountRetrievalFailureException if files amount retrieval failed.
      */
-    private Integer getFilesAmount(String workspaceUnitDirectory, String type, String location) throws
+    private Integer getFilesAmount(String workspaceUnitDirectory, String location, String type) throws
             ContentFilesAmountRetrievalFailureException {
-        try (Stream<Path> stream = Files.list(
-                Path.of(
-                        workspaceUnitDirectory, type, location))) {
+        try (Stream<Path> stream = Files.list(Path.of(workspaceUnitDirectory, location, type))) {
             return (int) stream.count();
         } catch (IOException e) {
             throw new ContentFilesAmountRetrievalFailureException(e.getMessage());
@@ -260,18 +262,15 @@ public class WorkspaceService {
      * Removes earliest file of the given type in the given workspace unit according to the creation timestamp.
      *
      * @param workspaceUnitDirectory given workspace unit directory.
-     * @param type                   given file type.
      * @param location               given file location.
+     * @param type                   given file type.
      * @throws ContentFileRemovalFailureException if earliest file removal operation failed. .
      */
-    private void removeEarliestFile(String workspaceUnitDirectory, String type, String location) throws
+    private void removeEarliestFile(String workspaceUnitDirectory, String location, String type) throws
             ContentFileRemovalFailureException {
         Path target = null;
 
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(
-                Path.of(
-                        workspaceUnitDirectory, type, location))) {
-
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Path.of(workspaceUnitDirectory, location, type))) {
             Instant earliestTimestamp = null;
 
             for (Path file : stream) {
@@ -283,12 +282,8 @@ public class WorkspaceService {
                     throw new RawContentFileRemovalFailureException(e.getMessage());
                 }
 
-                if (Objects.isNull(earliestTimestamp)) {
-                    earliestTimestamp = attributes.creationTime().toInstant();
-                    continue;
-                }
-
-                if (attributes.creationTime().toInstant().isBefore(earliestTimestamp)) {
+                if (Objects.isNull(earliestTimestamp) ||
+                        attributes.creationTime().toInstant().isBefore(earliestTimestamp)) {
                     earliestTimestamp = attributes.creationTime().toInstant();
                     target = file;
                 }
@@ -319,7 +314,7 @@ public class WorkspaceService {
             String workspaceUnitDirectory, String location, String name, InputStream input) throws
             RawContentFileWriteFailureException {
         Path contentDirectoryPath = Path.of(
-                workspaceUnitDirectory, properties.getWorkspaceRawContentDirectory(), location, name);
+                workspaceUnitDirectory, location, properties.getWorkspaceRawContentDirectory(), name);
 
         File file = new File(contentDirectoryPath.toString());
 
@@ -340,7 +335,7 @@ public class WorkspaceService {
     public Integer getRawContentFilesAmount(String workspaceUnitDirectory, String location) throws
             RawContentFilesAmountRetrievalFailureException {
         try {
-            return getFilesAmount(workspaceUnitDirectory, properties.getWorkspaceRawContentDirectory(), location);
+            return getFilesAmount(workspaceUnitDirectory, location, properties.getWorkspaceRawContentDirectory());
         } catch (ContentFilesAmountRetrievalFailureException e) {
             throw new RawContentFilesAmountRetrievalFailureException(e.getMessage());
         }
@@ -356,7 +351,7 @@ public class WorkspaceService {
     public void removeEarliestRawContentFile(String workspaceUnitDirectory, String location) throws
             RawContentFileRemovalFailureException {
         try {
-            removeEarliestFile(workspaceUnitDirectory, properties.getWorkspaceRawContentDirectory(), location);
+            removeEarliestFile(workspaceUnitDirectory, location, properties.getWorkspaceRawContentDirectory());
         } catch (ContentFileRemovalFailureException e) {
             throw new RawContentFileRemovalFailureException(e.getMessage());
         }
@@ -373,7 +368,7 @@ public class WorkspaceService {
     public Boolean isRawContentFileExist(String workspaceUnitDirectory, String location, String name) {
         return Files.exists(
                 Paths.get(
-                        workspaceUnitDirectory, properties.getWorkspaceAdditionalContentDirectory(), location, name));
+                        workspaceUnitDirectory, location, properties.getWorkspaceRawContentDirectory(), name));
     }
 
     /**
@@ -388,7 +383,7 @@ public class WorkspaceService {
     public OutputStream getRawContentFile(String workspaceUnitDirectory, String location, String name) throws
             ContentFileNotFoundException {
         Path contentDirectoryPath = Path.of(
-                workspaceUnitDirectory, properties.getWorkspaceRawContentDirectory(), location, name);
+                workspaceUnitDirectory, location, properties.getWorkspaceRawContentDirectory(), name);
 
         File file = new File(contentDirectoryPath.toString());
 
@@ -417,8 +412,8 @@ public class WorkspaceService {
                 new File(
                         Paths.get(
                                 workspaceUnitDirectory,
-                                properties.getWorkspaceAdditionalContentDirectory(),
                                 location,
+                                properties.getWorkspaceAdditionalContentDirectory(),
                                 name).toString());
 
         try {
@@ -441,7 +436,7 @@ public class WorkspaceService {
         try {
             FileSystemUtils.deleteRecursively(
                     Path.of(
-                            workspaceUnitDirectory, properties.getWorkspaceAdditionalContentDirectory(), location, name));
+                            workspaceUnitDirectory, location, properties.getWorkspaceAdditionalContentDirectory(), name));
         } catch (IOException e) {
             throw new RawContentFileRemovalFailureException(e);
         }
@@ -458,7 +453,7 @@ public class WorkspaceService {
     public Boolean isAdditionalContentFileExist(String workspaceUnitDirectory, String location, String name) {
         return Files.exists(
                 Paths.get(
-                        workspaceUnitDirectory, properties.getWorkspaceAdditionalContentDirectory(), location, name));
+                        workspaceUnitDirectory, location, properties.getWorkspaceAdditionalContentDirectory(), name));
     }
 
     /**
@@ -488,8 +483,8 @@ public class WorkspaceService {
                     new FileInputStream(
                             Paths.get(
                                             workspaceUnitDirectory,
-                                            properties.getWorkspaceAdditionalContentDirectory(),
                                             location,
+                                            properties.getWorkspaceAdditionalContentDirectory(),
                                             name)
                                     .toString());
         } catch (FileNotFoundException e) {

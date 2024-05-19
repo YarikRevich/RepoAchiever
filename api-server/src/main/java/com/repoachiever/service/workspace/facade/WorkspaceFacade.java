@@ -12,6 +12,7 @@ import jakarta.inject.Inject;
 
 import java.io.InputStream;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Objects;
 
 /**
  * Provides high-level access to workspace operations.
@@ -66,25 +67,17 @@ public class WorkspaceFacade {
             throw new RawContentCreationFailureException(e.getMessage());
         }
 
-        if (!workspaceService.isRawContentDirectoryExist(workspaceUnitDirectory)) {
-            try {
-                workspaceService.createRawContentDirectory(workspaceUnitDirectory);
-            } catch (WorkspaceContentDirectoryCreationFailureException e) {
-                throw new RawContentCreationFailureException(e.getMessage());
-            }
-        }
-
-        if (!workspaceService.isRawContentDirectoryExist(workspaceUnitDirectory)) {
-            try {
-                workspaceService.createRawContentDirectory(workspaceUnitDirectory);
-            } catch (WorkspaceContentDirectoryCreationFailureException e) {
-                throw new RawContentCreationFailureException(e.getMessage());
-            }
-        }
-
         if (!workspaceService.isRawContentUnitExist(workspaceUnitDirectory, location)) {
             try {
                 workspaceService.createRawContentUnitDirectory(workspaceUnitDirectory, location);
+            } catch (WorkspaceContentDirectoryCreationFailureException e) {
+                throw new RawContentCreationFailureException(e.getMessage());
+            }
+        }
+
+        if (!workspaceService.isRawContentDirectoryExist(workspaceUnitDirectory, location)) {
+            try {
+                workspaceService.createRawContentDirectory(workspaceUnitDirectory, location);
             } catch (WorkspaceContentDirectoryCreationFailureException e) {
                 throw new RawContentCreationFailureException(e.getMessage());
             }
@@ -98,7 +91,13 @@ public class WorkspaceFacade {
             throw new RawContentCreationFailureException(e);
         }
 
-        while (amount >= configService.getConfig().getResource().getCluster().getMaxVersions()) {
+        try {
+            workspaceService.createRawContentFile(workspaceUnitDirectory, location, name, content);
+        } catch (RawContentFileWriteFailureException e) {
+            throw new RawContentCreationFailureException(e.getMessage());
+        }
+
+        while (amount > configService.getConfig().getResource().getCluster().getMaxVersions() - 1) {
             try {
                 workspaceService.removeEarliestRawContentFile(workspaceUnitDirectory, location);
             } catch (RawContentFileRemovalFailureException e) {
@@ -106,12 +105,6 @@ public class WorkspaceFacade {
             }
 
             amount--;
-        }
-
-        try {
-            workspaceService.createRawContentFile(workspaceUnitDirectory, location, name, content);
-        } catch (RawContentFileWriteFailureException e) {
-            throw new RawContentCreationFailureException(e.getMessage());
         }
     }
 
@@ -138,7 +131,7 @@ public class WorkspaceFacade {
             throw new RawContentRetrievalFailureException(e.getMessage());
         }
 
-        return !workspaceService.isRawContentFileExist(workspaceUnitDirectory, location, name);
+        return workspaceService.isRawContentFileExist(workspaceUnitDirectory, location, name);
     }
 
     /**
@@ -169,17 +162,17 @@ public class WorkspaceFacade {
             throw new AdditionalContentCreationFailureException(e.getMessage());
         }
 
-        if (!workspaceService.isAdditionalContentDirectoryExist(workspaceUnitDirectory)) {
+        if (!workspaceService.isAdditionalContentUnitExist(workspaceUnitDirectory, location)) {
             try {
-                workspaceService.createAdditionalContentDirectory(workspaceUnitDirectory);
+                workspaceService.createAdditionalContentUnitDirectory(workspaceUnitDirectory, location);
             } catch (WorkspaceContentDirectoryCreationFailureException e) {
                 throw new AdditionalContentCreationFailureException(e.getMessage());
             }
         }
 
-        if (!workspaceService.isAdditionalContentUnitExist(workspaceUnitDirectory, location)) {
+        if (!workspaceService.isAdditionalContentDirectoryExist(workspaceUnitDirectory, location)) {
             try {
-                workspaceService.createAdditionalContentUnitDirectory(workspaceUnitDirectory, location);
+                workspaceService.createAdditionalContentDirectory(workspaceUnitDirectory, location);
             } catch (WorkspaceContentDirectoryCreationFailureException e) {
                 throw new AdditionalContentCreationFailureException(e.getMessage());
             }
@@ -193,7 +186,13 @@ public class WorkspaceFacade {
             throw new AdditionalContentCreationFailureException(e);
         }
 
-        while (amount >= configService.getConfig().getResource().getCluster().getMaxVersions()) {
+        try {
+            workspaceService.createAdditionalContentFile(workspaceUnitDirectory, location, name, content);
+        } catch (AdditionalContentFileWriteFailureException e) {
+            throw new AdditionalContentCreationFailureException(e.getMessage());
+        }
+
+        while (amount > configService.getConfig().getResource().getCluster().getMaxVersions() - 1) {
             try {
                 workspaceService.removeEarliestRawContentFile(workspaceUnitDirectory, location);
             } catch (RawContentFileRemovalFailureException e) {
@@ -201,12 +200,6 @@ public class WorkspaceFacade {
             }
 
             amount--;
-        }
-
-        try {
-            workspaceService.createAdditionalContentFile(workspaceUnitDirectory, location, name, content);
-        } catch (AdditionalContentFileWriteFailureException e) {
-            throw new AdditionalContentCreationFailureException(e.getMessage());
         }
     }
 
@@ -233,6 +226,6 @@ public class WorkspaceFacade {
             throw new AdditionalContentRetrievalFailureException(e.getMessage());
         }
 
-        return !workspaceService.isAdditionalContentFileExist(workspaceUnitDirectory, location, name);
+        return workspaceService.isAdditionalContentFileExist(workspaceUnitDirectory, location, name);
     }
 }
