@@ -221,19 +221,36 @@ components:
           type: string
     ContentApplication:
       required:
-        - filter
-        - locations
+        - content
         - provider
         - credentials
       properties:
-        filter:
-          $ref: "#/components/schemas/Filter"
+        content:
+          $ref: "#/components/schemas/ContentUnit"
         provider:
           $ref: "#/components/schemas/Provider"
         exporter:
           $ref: "#/components/schemas/Exporter"
         credentials:
           $ref: "#/components/schemas/CredentialsFieldsFull"
+    ContentUnit:
+      required:
+        - locations
+      properties:
+        locations:
+          type: array
+          items:
+            $ref: "#/components/schemas/LocationsUnit"
+    LocationsUnit:
+      required:
+        - name
+        - additional
+      properties:
+        name:
+          type: string
+        additional:
+          type: boolean
+          default: false
     ContentWithdrawal:
       required:
         - credentials

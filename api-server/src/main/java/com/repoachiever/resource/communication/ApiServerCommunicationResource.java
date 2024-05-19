@@ -1,6 +1,9 @@
 package com.repoachiever.resource.communication;
 
 import com.fasterxml.jackson.databind.annotation.JsonAppend;
+import com.healthmarketscience.rmiio.RemoteInputStream;
+import com.healthmarketscience.rmiio.RemoteInputStreamClient;
+import com.healthmarketscience.rmiio.SimpleRemoteInputStream;
 import com.repoachiever.entity.common.AdditionalContentFileEntity;
 import com.repoachiever.entity.common.PropertiesEntity;
 import com.repoachiever.exception.AdditionalContentCreationFailureException;
@@ -18,6 +21,7 @@ import jakarta.inject.Inject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -45,13 +49,24 @@ public class ApiServerCommunicationResource extends UnicastRemoteObject implemen
      * @see IApiServerCommunicationService
      */
     @Override
-    public void performRawContentUpload(String workspaceUnitKey, String location, String name, InputStream content)
+    public void performRawContentUpload(
+            String workspaceUnitKey, String location, String name, RemoteInputStream content)
             throws RemoteException {
         StateService.getCommunicationGuard().lock();
 
+        InputStream contentRaw;
+
         try {
-            workspaceFacade.addRawContent(workspaceUnitKey, location, name, content);
+            contentRaw = RemoteInputStreamClient.wrap(content);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        try {
+            workspaceFacade.addRawContent(workspaceUnitKey, location, name, contentRaw);
         } catch (RawContentCreationFailureException e) {
+            StateService.getCommunicationGuard().unlock();
+
             throw new RemoteException(e.getMessage());
         }
 
@@ -71,6 +86,8 @@ public class ApiServerCommunicationResource extends UnicastRemoteObject implemen
         try {
             result = workspaceFacade.isRawContentPresent(workspaceUnitKey, location, value);
         } catch (RawContentRetrievalFailureException e) {
+            StateService.getCommunicationGuard().unlock();
+
             throw new RemoteException(e.getMessage());
         }
 
@@ -91,6 +108,8 @@ public class ApiServerCommunicationResource extends UnicastRemoteObject implemen
             workspaceFacade.addAdditionalContent(
                     workspaceUnitKey, location, name, AdditionalContentFileEntity.of(content));
         } catch (AdditionalContentCreationFailureException e) {
+            StateService.getCommunicationGuard().unlock();
+
             throw new RemoteException(e.getMessage());
         }
 
@@ -110,6 +129,8 @@ public class ApiServerCommunicationResource extends UnicastRemoteObject implemen
         try {
             result = workspaceFacade.isAdditionalContentPresent(workspaceUnitKey, location, value);
         } catch (AdditionalContentRetrievalFailureException e) {
+            StateService.getCommunicationGuard().unlock();
+
             throw new RemoteException(e.getMessage());
         }
 

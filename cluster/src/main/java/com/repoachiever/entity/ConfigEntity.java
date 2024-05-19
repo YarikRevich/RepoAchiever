@@ -35,14 +35,28 @@ public class ConfigEntity {
     /** Represents RepoAchiever Cluster configuration used for content management. */
     @Getter
     public static class Content {
+        /**
+         * Represents RepoAchiever Cluster configuration used for locations management.
+         */
+        @Getter
+        public static class Location {
+            @NotNull
+            @JsonProperty("name")
+            public String name;
+
+            @NotNull
+            @JsonProperty("additional")
+            public Boolean additional;
+        }
+
+        @NotNull
+        @JsonProperty("locations")
+        public List<Location> locations;
+
         @NotNull
         @Pattern(regexp = "(^zip$)|(^tar$)")
         @JsonProperty("format")
         public String format;
-
-        @NotNull
-        @JsonProperty("locations")
-        public List<String> locations;
     }
 
     @Valid

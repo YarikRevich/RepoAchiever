@@ -124,6 +124,7 @@ public class RepositoryFacade {
 
             units.add(RepositoryContentUnitDto.of(
                     content.getLocation(),
+                    content.getAdditional(),
                     provider,
                     exporter,
                     credentials));
@@ -145,7 +146,18 @@ public class RepositoryFacade {
                                 value2
                                         .forEach((key3, value3) -> {
                                             result.add(
-                                                    ContentApplication.of(value3.stream().map(RepositoryContentUnitDto::getLocation).toList(), key2, key3.orElse(null), key1));
+                                                    ContentApplication.of(
+                                                            ContentUnit.of(
+                                                                    value3
+                                                                            .stream()
+                                                                            .map(element ->
+                                                                                    LocationsUnit.of(
+                                                                                            element.getLocation(),
+                                                                                            element.getAdditional()))
+                                                                            .toList()),
+                                                            key2,
+                                                            key3.orElse(null),
+                                                            key1));
                                         });
                             });
                 });
@@ -225,9 +237,10 @@ public class RepositoryFacade {
             throw new RepositoryContentApplicationFailureException(e.getMessage());
         }
 
-        for (String location : contentApplication.getLocations()) {
+        for (LocationsUnit location : contentApplication.getContent().getLocations()) {
             try {
-                contentRepository.insert(location, provider.getId(), exporter, secret.getId());
+                contentRepository.insert(
+                        location.getName(), location.getAdditional(), provider.getId(), exporter, secret.getId());
             } catch (RepositoryOperationFailureException e) {
                 throw new RepositoryContentApplicationFailureException(e.getMessage());
             }

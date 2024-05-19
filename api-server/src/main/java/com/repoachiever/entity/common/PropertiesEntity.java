@@ -68,15 +68,6 @@ public class PropertiesEntity {
     @ConfigProperty(name = "workspace.content.additional.directory")
     String workspaceAdditionalContentDirectory;
 
-    @ConfigProperty(name = "workspace.prs-metadata-file.name")
-    String workspacePRsMetadataFileName;
-
-    @ConfigProperty(name = "workspace.issues-metadata-file.name")
-    String workspaceIssuesMetadataFileName;
-
-    @ConfigProperty(name = "workspace.releases-metadata-file.name")
-    String workspaceReleasesMetadataFileName;
-
     @ConfigProperty(name = "repoachiever-cluster.context.alias")
     String clusterContextAlias;
 

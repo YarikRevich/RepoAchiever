@@ -17,6 +17,8 @@ import java.util.Optional;
 public class RepositoryContentUnitDto {
     private String location;
 
+    private Boolean additional;
+
     private Provider provider;
 
     private Optional<Exporter> exporter;

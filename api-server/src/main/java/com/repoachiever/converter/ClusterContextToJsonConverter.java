@@ -13,6 +13,12 @@ import org.apache.logging.log4j.Logger;
 public class ClusterContextToJsonConverter {
     private static final Logger logger = LogManager.getLogger(ClusterContextToJsonConverter.class);
 
+    /**
+     * Converts given context content to json.
+     *
+     * @param content given context content to be converted.
+     * @return converted context content.
+     */
     public static String convert(ClusterContextEntity content) {
         ObjectMapper mapper =
                 new ObjectMapper()

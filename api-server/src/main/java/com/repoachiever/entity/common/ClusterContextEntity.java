@@ -33,8 +33,20 @@ public class ClusterContextEntity {
      */
     @AllArgsConstructor(staticName = "of")
     public static class Content {
+        /**
+         * Represents RepoAchiever Cluster configuration used for locations management.
+         */
+        @AllArgsConstructor(staticName = "of")
+        public static class Location {
+            @JsonProperty("name")
+            public String name;
+
+            @JsonProperty("additional")
+            public Boolean additional;
+        }
+
         @JsonProperty("locations")
-        public List<String> locations;
+        public List<Location> locations;
 
         @JsonProperty("format")
         public String format;

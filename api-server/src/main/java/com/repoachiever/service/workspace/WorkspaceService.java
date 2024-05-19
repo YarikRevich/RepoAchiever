@@ -25,8 +25,6 @@ import java.util.stream.Stream;
 
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.util.FileSystemUtils;
 
 /**
@@ -34,8 +32,6 @@ import org.springframework.util.FileSystemUtils;
  */
 @ApplicationScoped
 public class WorkspaceService {
-    private static final Logger logger = LogManager.getLogger(WorkspaceService.class);
-
     @Inject
     PropertiesEntity properties;
 
@@ -75,7 +71,7 @@ public class WorkspaceService {
      * Creates raw content unit directory in the given workspace unit directory.
      *
      * @param workspaceUnitDirectory given workspace unit directory.
-     * @param location                   given raw content location.
+     * @param location               given raw content location.
      * @throws WorkspaceContentDirectoryCreationFailureException if workspace raw content unit directory creation
      *                                                           operation failed.
      */
@@ -117,7 +113,7 @@ public class WorkspaceService {
      * Creates additional content unit directory in the given workspace unit directory.
      *
      * @param workspaceUnitDirectory given workspace unit directory.
-     * @param location                   given additional content location.
+     * @param location               given additional content location.
      * @throws WorkspaceContentDirectoryCreationFailureException if workspace additional content unit directory creation
      *                                                           operation failed.
      */
@@ -193,7 +189,7 @@ public class WorkspaceService {
      * Checks if raw content unit exists with the help of the given key and location.
      *
      * @param workspaceUnitDirectory given workspace unit directory.
-     * @param location given raw content location.
+     * @param location               given raw content location.
      * @return result if raw content directory exists with the help of the given key.
      */
     public Boolean isRawContentUnitExist(String workspaceUnitDirectory, String location) {
@@ -216,7 +212,7 @@ public class WorkspaceService {
      * Checks if additional content unit exists with the help of the given key and location.
      *
      * @param workspaceUnitDirectory given workspace unit directory.
-     * @param location given additional content location.
+     * @param location               given additional content location.
      * @return result if additional content directory exists with the help of the given key.
      */
     public Boolean isAdditionalContentUnitExist(String workspaceUnitDirectory, String location) {
@@ -475,8 +471,8 @@ public class WorkspaceService {
      * @throws AdditionalContentFileNotFoundException if the additional content file not found.
      */
     public AdditionalContentFileEntity getAdditionalContentFileContent(
-            String workspaceUnitDirectory, String location, String name)
-            throws AdditionalContentFileNotFoundException {
+            String workspaceUnitDirectory, String location, String name) throws
+            AdditionalContentFileNotFoundException, AdditionalContentFileReadFailureException {
         ObjectMapper mapper =
                 new ObjectMapper()
                         .configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true)
@@ -503,9 +499,7 @@ public class WorkspaceService {
         try {
             return reader.<AdditionalContentFileEntity>readValues(variableFile).readAll().getFirst();
         } catch (IOException e) {
-            logger.fatal(e.getMessage());
+            throw new AdditionalContentFileReadFailureException(e.getMessage());
         }
-
-        return null;
     }
 }

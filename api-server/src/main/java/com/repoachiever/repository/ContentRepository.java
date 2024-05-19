@@ -32,27 +32,30 @@ public class ContentRepository {
      * Inserts given values into the content table.
      *
      * @param location given content location.
+     * @param additional given content additional option.
      * @param provider given provider used for content retrieval.
      * @param exporter given exporter used for content retrieval.
      * @param secret   given secret, which allows content retrieval.
      * @throws RepositoryOperationFailureException if operation execution fails.
      */
-    public void insert(String location, Integer provider, Optional<Integer> exporter, Integer secret) throws RepositoryOperationFailureException {
+    public void insert(String location, Boolean additional, Integer provider, Optional<Integer> exporter, Integer secret) throws RepositoryOperationFailureException {
         String query;
 
         if (exporter.isPresent()) {
             query = String.format(
-                    "INSERT INTO %s (location, provider, exporter, secret) VALUES ('%s', %d, %d, %d)",
+                    "INSERT INTO %s (location, additional, provider, exporter, secret) VALUES ('%s', %b, %d, %d, %d)",
                     properties.getDatabaseContentTableName(),
                     location,
+                    additional,
                     provider,
                     exporter.get(),
                     secret);
         } else {
             query = String.format(
-                    "INSERT INTO %s (location, provider, secret) VALUES ('%s', %d, %d)",
+                    "INSERT INTO %s (location, additional, provider, secret) VALUES ('%s', %b, %d, %d)",
                     properties.getDatabaseContentTableName(),
                     location,
+                    additional,
                     provider,
                     secret);
         }
@@ -107,7 +110,7 @@ public class ContentRepository {
             resultSet =
                     repositoryExecutor.performQueryWithResult(
                             String.format(
-                                    "SELECT t.id, t.location, t.provider, t.exporter, t.secret FROM %s as t",
+                                    "SELECT t.id, t.location, t.additional, t.provider, t.exporter, t.secret FROM %s as t",
                                     properties.getDatabaseContentTableName()));
 
         } catch (QueryExecutionFailureException | QueryEmptyResultException e) {
@@ -118,6 +121,7 @@ public class ContentRepository {
 
         Integer id;
         String location;
+        Boolean additional;
         Integer provider;
         Integer exporterRaw;
         Optional<Integer> exporter;
@@ -127,6 +131,7 @@ public class ContentRepository {
             while (resultSet.next()) {
                 id = resultSet.getInt("id");
                 location = resultSet.getString("location");
+                additional = resultSet.getBoolean("additional");
                 provider = resultSet.getInt("provider");
 
                 exporterRaw = resultSet.getInt("exporter");
@@ -138,7 +143,7 @@ public class ContentRepository {
 
                 secret = resultSet.getInt("secret");
 
-                result.add(ContentEntity.of(id, location, provider, exporter, secret));
+                result.add(ContentEntity.of(id, location, additional, provider, exporter, secret));
             }
         } catch (SQLException e) {
             throw new RepositoryOperationFailureException(e.getMessage());

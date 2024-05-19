@@ -9,9 +9,13 @@ import com.repoachiever.service.vendor.git.github.GitGitHubVendorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Optional;
 
-/** Provides high-level access to VCS vendor operations. */
+/**
+ * Provides high-level access to VCS vendor operations.
+ */
 @Service
 public class VendorFacade {
     @Autowired
@@ -24,14 +28,14 @@ public class VendorFacade {
     private GitGitHubVendorService gitGitHubVendorService;
 
     /**
-     * Retrieves latest commit hash for the repository with the given name and given branch.
+     * Retrieves latest record for the repository with the given raw location definition.
      *
      * @param location given raw location definition.
+     * @return retrieved latest record for repository with the given raw location definition.
      * @throws LocationDefinitionsAreNotValidException if given location definitions are not valid.
-     * @throws GitHubContentRetrievalFailureException if GitHub GraphQL client content retrieval fails.
-     * @return retrieved latest commit hash for repository with the given name and given branch.
+     * @throws GitHubContentRetrievalFailureException  if GitHub client content retrieval fails.
      */
-    public String getLatestCommitHash(String location) throws
+    public String getLatestRecord(String location) throws
             LocationDefinitionsAreNotValidException,
             GitHubContentRetrievalFailureException {
         return switch (configService.getConfig().getService().getProvider()) {
@@ -57,14 +61,14 @@ public class VendorFacade {
     }
 
     /**
-     * Retrieves amount of commits for the repository with the given name and given branch.
+     * Retrieves amount of records for the repository with the given raw location definition.
      *
      * @param location given raw location definition.
+     * @return retrieved amount of repository records with the given raw location definition.
      * @throws LocationDefinitionsAreNotValidException if given location definitions are not valid.
-     * @throws GitHubContentRetrievalFailureException if GitHub GraphQL client content retrieval fails.
-     * @return retrieved amount of repository commits with the given name and given branch.
+     * @throws GitHubContentRetrievalFailureException  if GitHub client content retrieval fails.
      */
-    public Integer getCommitAmount(String location) throws
+    public Integer getRecordAmount(String location) throws
             LocationDefinitionsAreNotValidException,
             GitHubContentRetrievalFailureException {
         return switch (configService.getConfig().getService().getProvider()) {
@@ -85,6 +89,35 @@ public class VendorFacade {
                         locationGitHubNotation.getOwner(),
                         locationGitHubNotation.getName(),
                         locationGitHubNotation.getBranch().get());
+            }
+        };
+    }
+
+    /**
+     * Retrieves content from the repository with the given raw location definition and given record identification.
+     *
+     * @param location given raw location definition.
+     * @param record   given record identification.
+     * @return retrieved content from the repository with the given raw location definition and given record
+     * identification.
+     * @throws LocationDefinitionsAreNotValidException if given location definitions are not valid.
+     * @throws GitHubContentRetrievalFailureException  if GitHub client content retrieval fails.
+     */
+    public InputStream getRecordContent(String location, String record) throws
+            LocationDefinitionsAreNotValidException,
+            GitHubContentRetrievalFailureException {
+        return switch (configService.getConfig().getService().getProvider()) {
+            case EXPORTER -> null;
+            case GIT_GITHUB -> {
+                GitHubLocationNotationDto locationGitHubNotation =
+                        vendorConfigurationHelper.parseLocationGitHubNotation(location);
+
+                System.out.println("before");
+
+                yield gitGitHubVendorService.getCommitContent(
+                        locationGitHubNotation.getOwner(),
+                        locationGitHubNotation.getName(),
+                        record);
             }
         };
     }

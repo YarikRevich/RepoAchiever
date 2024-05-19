@@ -16,6 +16,8 @@ public class ContentEntity {
 
     private String location;
 
+    private Boolean additional;
+
     private Integer provider;
 
     private Optional<Integer> exporter;

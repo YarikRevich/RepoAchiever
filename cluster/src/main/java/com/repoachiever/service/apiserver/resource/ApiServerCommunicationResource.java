@@ -1,5 +1,7 @@
 package com.repoachiever.service.apiserver.resource;
 
+import com.healthmarketscience.rmiio.RemoteInputStream;
+import com.healthmarketscience.rmiio.SimpleRemoteInputStream;
 import com.repoachiever.exception.ApiServerOperationFailureException;
 import com.repoachiever.exception.CommunicationConfigurationFailureException;
 import com.repoachiever.service.communication.apiserver.IApiServerCommunicationService;
@@ -60,20 +62,29 @@ public class ApiServerCommunicationResource {
     /**
      * Performs raw content upload operation.
      *
-     * @param content given content to be uploaded.
+     * @param content  given content to be uploaded.
      * @param location given content location.
-     * @param name given content name.
+     * @param name     given content name.
      * @throws ApiServerOperationFailureException if RepoAchiever API Server operation fails.
      */
     public void performRawContentUpload(String location, String name, InputStream content) throws ApiServerOperationFailureException {
         IApiServerCommunicationService allocation = retrieveAllocation();
+
+        RemoteInputStream contentWrapped;
+
+        try {
+            contentWrapped = new SimpleRemoteInputStream(content)
+                    .export();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
 
         try {
             allocation.performRawContentUpload(
                     configService.getConfig().getMetadata().getWorkspaceUnitKey(),
                     location,
                     name,
-                    content);
+                    contentWrapped);
         } catch (RemoteException e) {
             throw new ApiServerOperationFailureException(e.getMessage());
         }
@@ -83,7 +94,7 @@ public class ApiServerCommunicationResource {
      * Checks if raw content with the given value at the given location is already present.
      *
      * @param location given content location.
-     * @param name given content name.
+     * @param name     given content name.
      * @return result of the check.
      * @throws ApiServerOperationFailureException if RepoAchiever API Server operation fails.
      */
@@ -103,9 +114,9 @@ public class ApiServerCommunicationResource {
     /**
      * Performs additional content(issues, prs, releases) upload operation, initiated by RepoAchiever Cluster.
      *
-     * @param content given content to be uploaded.
+     * @param content  given content to be uploaded.
      * @param location given content location.
-     * @param name given content name.
+     * @param name     given content name.
      * @throws ApiServerOperationFailureException if RepoAchiever API Server operation fails.
      */
     public void performAdditionalContentUpload(String location, String name, String content) throws ApiServerOperationFailureException {
@@ -126,7 +137,7 @@ public class ApiServerCommunicationResource {
      * Checks if additional content with the given value at the given location is already present.
      *
      * @param location given content location.
-     * @param name given content name.
+     * @param name     given content name.
      * @return result of the check.
      * @throws ApiServerOperationFailureException if RepoAchiever API Server operation fails.
      */

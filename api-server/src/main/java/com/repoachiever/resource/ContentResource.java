@@ -70,13 +70,20 @@ public class ContentResource implements ContentResourceApi {
             throw new CredentialsFieldIsNotValidException();
         }
 
-        if (!resourceConfigurationHelper.isLocationsDuplicate(contentApplication.getLocations())) {
+        if (!resourceConfigurationHelper.isLocationsDuplicate(
+                contentApplication.getContent().getLocations()
+                        .stream()
+                        .map(element -> element.getName())
+                        .toList())) {
             throw new LocationsFieldIsNotValidException();
         }
 
         if (!resourceConfigurationHelper.areLocationDefinitionsValid(
                 contentApplication.getProvider(),
-                contentApplication.getLocations())) {
+                contentApplication.getContent().getLocations()
+                        .stream()
+                        .map(element -> element.getName())
+                        .toList())) {
             throw new LocationDefinitionsAreNotValidException();
         }
 
@@ -88,7 +95,10 @@ public class ContentResource implements ContentResourceApi {
         if (!vendorFacade.areLocationsValid(
                 contentApplication.getProvider(),
                 contentApplication.getCredentials().getExternal(),
-                contentApplication.getLocations())) {
+                contentApplication.getContent().getLocations()
+                        .stream()
+                        .map(element -> element.getName())
+                        .toList())) {
             throw new LocationsAreNotValidException();
         }
 

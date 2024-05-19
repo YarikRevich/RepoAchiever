@@ -1,5 +1,7 @@
 package com.repoachiever.service.communication.apiserver;
 
+import com.healthmarketscience.rmiio.RemoteInputStream;
+
 import java.io.InputStream;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -17,7 +19,7 @@ public interface IApiServerCommunicationService extends Remote {
      * @param content          given content to be uploaded.
      * @throws RemoteException if remote request fails.
      */
-    void performRawContentUpload(String workspaceUnitKey, String location, String name, InputStream content)
+    void performRawContentUpload(String workspaceUnitKey, String location, String name, RemoteInputStream content)
             throws RemoteException;
 
     /**

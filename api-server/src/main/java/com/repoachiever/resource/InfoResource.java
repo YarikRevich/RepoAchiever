@@ -2,8 +2,8 @@ package com.repoachiever.resource;
 
 import com.repoachiever.api.InfoResourceApi;
 import com.repoachiever.entity.common.PropertiesEntity;
-import com.repoachiever.model.ClusterInfoUnit;
 import com.repoachiever.model.VersionExternalApiInfoResult;
+import com.repoachiever.model.TopologyInfoUnit;
 import com.repoachiever.model.VersionInfoResult;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -31,25 +31,13 @@ public class InfoResource implements InfoResourceApi {
     }
 
     /**
-     * Implementation for declared in OpenAPI configuration v1InfoClusterGet method.
+     * Implementation for declared in OpenAPI configuration v1InfoTopologyGet method.
      *
-     * @return cluster information result.
+     * @return topology information result.
      */
     @Override
-    public List<ClusterInfoUnit> v1InfoClusterGet() {
+    public List<TopologyInfoUnit> v1InfoTopologyGet() {
         // TODO: call cluster service to retrieve data from clusters.
-
-        return null;
-    }
-
-    /**
-     * Implementation for declared in OpenAPI configuration v1InfoTelemetryGet method.
-     *
-     * @return telemetry information result.
-     */
-    @Override
-    public String v1InfoTelemetryGet() {
-        // TODO: call telemetry service to retrieve data.
 
         return null;
     }

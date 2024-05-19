@@ -19,6 +19,9 @@ public class PropertiesEntity {
     @Value(value = "${REPOACHIEVER_CLUSTER_CONTEXT:null}")
     private String clusterContext;
 
+    @Value(value = "${rest-client.github.url}")
+    String restClientGitHubUrl;
+
     @Value(value = "${graphql-client.github.url}")
     String graphQlClientGitHubUrl;
 

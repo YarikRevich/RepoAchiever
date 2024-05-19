@@ -1,10 +1,11 @@
 # Represents section used to declare desired content.
 content:
   # Represents locations of VCS provider repositories, which are intended to be used for requested operations.
-  locations: ["*"]
+  locations:
+    - name: "[YarikRevich]test:master" # Represents location definition name.
 
-  # Enables additional content download of repositories of VCS provider repositories.
-  additional: true
+      # Enables additional content download of repositories of VCS provider repositories.
+      additional: true
 
 # Represents section used for VCS provider configuration.
 service:

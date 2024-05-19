@@ -92,6 +92,11 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
+                  name: additional
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+              - column:
                   name: provider
                   type: INT
                   constraints:

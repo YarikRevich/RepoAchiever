@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Formatter;
 
 /**
- * Represents exception used when GitHub GraphQL client content retrieval process fails.
+ * Represents exception used when GitHub client content retrieval process fails.
  */
 public class GitHubContentRetrievalFailureException extends IOException {
     public GitHubContentRetrievalFailureException() {

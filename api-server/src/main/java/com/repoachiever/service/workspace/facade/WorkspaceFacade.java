@@ -50,7 +50,7 @@ public class WorkspaceFacade {
      */
     public void addRawContent(String workspaceUnitKey, String location, String name, InputStream content)
             throws RawContentCreationFailureException {
-        if (workspaceService.isUnitDirectoryExist(workspaceUnitKey)) {
+        if (!workspaceService.isUnitDirectoryExist(workspaceUnitKey)) {
             try {
                 workspaceService.createUnitDirectory(workspaceUnitKey);
             } catch (WorkspaceUnitDirectoryCreationFailureException e) {
@@ -98,12 +98,14 @@ public class WorkspaceFacade {
             throw new RawContentCreationFailureException(e);
         }
 
-        if (amount >= configService.getConfig().getResource().getCluster().getMaxVersions()) {
+        while (amount >= configService.getConfig().getResource().getCluster().getMaxVersions()) {
             try {
                 workspaceService.removeEarliestRawContentFile(workspaceUnitDirectory, location);
             } catch (RawContentFileRemovalFailureException e) {
                 throw new RawContentCreationFailureException(e.getMessage());
             }
+
+            amount--;
         }
 
         try {
@@ -124,12 +126,8 @@ public class WorkspaceFacade {
      */
     public Boolean isRawContentPresent(String workspaceUnitKey, String location, String name) throws
             RawContentRetrievalFailureException {
-        if (workspaceService.isUnitDirectoryExist(workspaceUnitKey)) {
-            try {
-                workspaceService.createUnitDirectory(workspaceUnitKey);
-            } catch (WorkspaceUnitDirectoryCreationFailureException e) {
-                throw new RawContentRetrievalFailureException(e.getMessage());
-            }
+        if (!workspaceService.isUnitDirectoryExist(workspaceUnitKey)) {
+            return false;
         }
 
         String workspaceUnitDirectory;
@@ -155,7 +153,7 @@ public class WorkspaceFacade {
     public void addAdditionalContent(
             String workspaceUnitKey, String location, String name, AdditionalContentFileEntity content) throws
             AdditionalContentCreationFailureException {
-        if (workspaceService.isUnitDirectoryExist(workspaceUnitKey)) {
+        if (!workspaceService.isUnitDirectoryExist(workspaceUnitKey)) {
             try {
                 workspaceService.createUnitDirectory(workspaceUnitKey);
             } catch (WorkspaceUnitDirectoryCreationFailureException e) {
@@ -195,12 +193,14 @@ public class WorkspaceFacade {
             throw new AdditionalContentCreationFailureException(e);
         }
 
-        if (amount >= configService.getConfig().getResource().getCluster().getMaxVersions()) {
+        while (amount >= configService.getConfig().getResource().getCluster().getMaxVersions()) {
             try {
                 workspaceService.removeEarliestRawContentFile(workspaceUnitDirectory, location);
             } catch (RawContentFileRemovalFailureException e) {
                 throw new AdditionalContentCreationFailureException(e.getMessage());
             }
+
+            amount--;
         }
 
         try {
@@ -221,12 +221,8 @@ public class WorkspaceFacade {
      */
     public Boolean isAdditionalContentPresent(String workspaceUnitKey, String location, String name) throws
             AdditionalContentRetrievalFailureException {
-        if (workspaceService.isUnitDirectoryExist(workspaceUnitKey)) {
-            try {
-                workspaceService.createUnitDirectory(workspaceUnitKey);
-            } catch (WorkspaceUnitDirectoryCreationFailureException e) {
-                throw new AdditionalContentRetrievalFailureException(e.getMessage());
-            }
+        if (!workspaceService.isUnitDirectoryExist(workspaceUnitKey)) {
+            return false;
         }
 
         String workspaceUnitDirectory;

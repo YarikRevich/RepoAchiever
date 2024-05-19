@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.InputStream;
 import java.util.concurrent.*;
 
 /**
@@ -53,10 +54,13 @@ public class SchedulerConfigService {
             throw new SchedulerPeriodRetrievalFailureException(e.getMessage());
         }
 
-        configService.getConfig().getFilter().getLocations().forEach(element -> {
+        configService.getConfig().getContent().getLocations().forEach(element -> {
             logger.info(
                     LoggingConfigurationHelper.getTransferableMessage(
-                            String.format("Starting worker for '%s' location", element)));
+                            String.format(
+                                    "Starting worker for '%s(additional: %b)' location",
+                                    element.getName(),
+                                    element.getAdditional())));
 
             starterScheduledExecutorService.execute(() -> {
                 CountDownLatch closable = new CountDownLatch(1);
@@ -65,13 +69,13 @@ public class SchedulerConfigService {
                     Integer commitAmount;
 
                     try {
-                        commitAmount = vendorFacade.getCommitAmount(element);
+                        commitAmount = vendorFacade.getRecordAmount(element.getName());
                     } catch (LocationDefinitionsAreNotValidException e) {
                         logger.info(
                                 LoggingConfigurationHelper.getTransferableMessage(
                                         String.format(
                                                 "Skipping retrieval of content for '%s' location: %s",
-                                                element,
+                                                element.getName(),
                                                 e.getMessage())));
                         closable.countDown();
 
@@ -81,16 +85,17 @@ public class SchedulerConfigService {
                                 LoggingConfigurationHelper.getTransferableMessage(
                                         String.format(
                                                 "Failed to retrieve content for '%s' location: %s",
-                                                element,
+                                                element.getName(),
                                                 e.getMessage())));
+
                         return;
                     }
 
-                    if (StateService.isContentUpdateHeadCounterBelow(element, commitAmount)) {
-                        String commitHash;
+                    if (StateService.isContentUpdateHeadCounterBelow(element.getName(), commitAmount)) {
+                        String record;
 
                         try {
-                            commitHash = vendorFacade.getLatestCommitHash(element);
+                            record = vendorFacade.getLatestRecord(element.getName());
                         } catch (LocationDefinitionsAreNotValidException ignored) {
                             return;
                         } catch (GitHubContentRetrievalFailureException e) {
@@ -98,30 +103,75 @@ public class SchedulerConfigService {
                                     LoggingConfigurationHelper.getTransferableMessage(
                                             String.format(
                                                     "Failed to retrieve content for '%s' location: %s",
-                                                    element,
+                                                    element.getName(),
                                                     e.getMessage())));
+
                             return;
                         }
 
-                        StateService.getContentUpdatesHeadCounterSet().put(element, commitAmount);
+                        StateService.getContentUpdatesHeadCounterSet().put(element.getName(), commitAmount);
 
-                        Boolean contentPresent;
+                        Boolean contentPresent = false;
 
                         try {
                             contentPresent =
-                                    apiServerCommunicationResource.retrieveRawContentPresent(element, commitHash);
-                        } catch (ApiServerOperationFailureException e) {
-                            logger.info(
-                                    LoggingConfigurationHelper.getTransferableMessage(
-                                            String.format(
-                                                    "Failed to retrieve state for '%s' location: %s",
-                                                    element,
-                                                    e.getMessage())));
-                            return;
+                                    apiServerCommunicationResource.retrieveRawContentPresent(
+                                            element.getName(), record);
+                        } catch (ApiServerOperationFailureException ignored) {
                         }
 
                         if (!contentPresent) {
+                            logger.info(
+                                    LoggingConfigurationHelper.getTransferableMessage(
+                                            String.format(
+                                                    "Downloading remote record content '%s' location and '%s' record",
+                                                    element.getName(),
+                                                    record)));
 
+                            InputStream contentStream;
+
+                            try {
+                                contentStream = vendorFacade.getRecordContent(element.getName(), record);
+                            } catch (LocationDefinitionsAreNotValidException ignored) {
+                                return;
+                            } catch (GitHubContentRetrievalFailureException e) {
+                                logger.info(
+                                        LoggingConfigurationHelper.getTransferableMessage(
+                                                String.format(
+                                                        "Failed to retrieve content for '%s' location: %s",
+                                                        element.getName(),
+                                                        e.getMessage())));
+
+                                return;
+                            }
+
+                            logger.info(
+                                    LoggingConfigurationHelper.getTransferableMessage(
+                                            String.format(
+                                                    "Transferring downloaded record content for '%s' location and '%s' record",
+                                                    element.getName(),
+                                                    record)));
+
+                            try {
+                                apiServerCommunicationResource.performRawContentUpload(
+                                        element.getName(), record, contentStream);
+                            } catch (ApiServerOperationFailureException e) {
+                                logger.info(
+                                        LoggingConfigurationHelper.getTransferableMessage(
+                                                String.format(
+                                                        "Failed to perform content download for '%s' location: %s",
+                                                        element.getName(),
+                                                        e.getMessage())));
+
+                                return;
+                            }
+
+                            logger.info(
+                                    LoggingConfigurationHelper.getTransferableMessage(
+                                            String.format(
+                                                    "Record content transfer finished for '%s' location and '%s' record",
+                                                    element,
+                                                    record)));
                         }
                     }
                 }, 0, period, TimeUnit.MILLISECONDS);

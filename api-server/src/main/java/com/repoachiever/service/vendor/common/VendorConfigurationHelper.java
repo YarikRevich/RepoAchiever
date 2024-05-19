@@ -42,14 +42,6 @@ public class VendorConfigurationHelper {
 
         matcher.find();
 
-        List<String> additional = new ArrayList<>();
-
-//        for (Integer i = 5; i <= matcher.groupCount(); i++) {
-//            additional.add(matcher.group(i)) {
-//
-//            }
-//        }
-
         if (matcher.groupCount() == 4) {
             return GitHubLocationNotationDto.of(
                     matcher.group(1),

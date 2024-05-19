@@ -1,13 +1,11 @@
 package com.repoachiever.service.cluster.facade;
 
-import com.repoachiever.converter.ClusterContextToJsonConverter;
-import com.repoachiever.converter.ContentCredentialsToClusterContextCredentialsConverter;
-import com.repoachiever.converter.ContentExporterToClusterContextExporterConverter;
-import com.repoachiever.converter.ContentProviderToClusterContextProviderConverter;
+import com.repoachiever.converter.*;
 import com.repoachiever.dto.ClusterAllocationDto;
 import com.repoachiever.entity.common.ClusterContextEntity;
 import com.repoachiever.entity.common.PropertiesEntity;
 import com.repoachiever.exception.*;
+import com.repoachiever.model.LocationsUnit;
 import com.repoachiever.model.ContentApplication;
 import com.repoachiever.model.ContentWithdrawal;
 import com.repoachiever.service.cluster.ClusterService;
@@ -87,18 +85,21 @@ public class ClusterFacade {
             telemetryService.increaseSuspendedClustersAmount();
         }
 
-        List<List<String>> segregation = clusterService.performContentLocationsSegregation(
-                contentApplication.getLocations(),
+        List<List<LocationsUnit>> segregation = clusterService.performContentLocationsSegregation(
+                contentApplication.getContent().getLocations(),
                 configService.getConfig().getResource().getCluster().getMaxWorkers());
 
         List<ClusterAllocationDto> candidates = new ArrayList<>();
 
-        for (List<String> locations : segregation) {
+        for (List<LocationsUnit> locations : segregation) {
             String name = ClusterConfigurationHelper.getName(properties.getCommunicationClusterBase());
 
             String context = ClusterContextToJsonConverter.convert(
                     ClusterContextEntity.of(
                             ClusterContextEntity.Metadata.of(name, workspaceUnitKey),
+                            ClusterContextEntity.Content.of(
+                                    ContentLocationsToClusterContextLocationsConverter.convert(locations),
+                                    configService.getConfig().getContent().getFormat()),
                             ClusterContextEntity.Service.of(
                                     ContentProviderToClusterContextProviderConverter.convert(
                                             contentApplication.getProvider()),
@@ -110,9 +111,6 @@ public class ClusterFacade {
                             ClusterContextEntity.Communication.of(
                                     properties.getCommunicationApiServerName(),
                                     configService.getConfig().getCommunication().getPort()),
-                            ClusterContextEntity.Content.of(
-                                    locations,
-                                    configService.getConfig().getContent().getFormat()),
                             ClusterContextEntity.Resource.of(
                                     ClusterContextEntity.Resource.Worker.of(
                                             configService.getConfig().getResource().getWorker().getFrequency()))));

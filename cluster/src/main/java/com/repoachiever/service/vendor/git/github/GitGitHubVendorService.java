@@ -5,23 +5,33 @@ import com.repoachiever.dto.GitHubDefaultBranchResponseDto;
 import com.repoachiever.dto.GitHubLatestCommitHashResponseDto;
 import com.repoachiever.entity.ConfigEntity;
 import com.repoachiever.entity.PropertiesEntity;
+import com.repoachiever.exception.GitHubContentIsEmptyException;
 import com.repoachiever.exception.GitHubContentRetrievalFailureException;
 import com.repoachiever.exception.GitHubGraphQlClientDocumentNotFoundException;
 import com.repoachiever.exception.GitHubServiceNotAvailableException;
+import com.repoachiever.logging.common.LoggingConfigurationHelper;
 import com.repoachiever.service.config.ConfigService;
+import com.repoachiever.service.integration.scheduler.SchedulerConfigService;
 import com.repoachiever.service.vendor.common.VendorConfigurationHelper;
 import jakarta.annotation.PostConstruct;
 import jakarta.ws.rs.core.HttpHeaders;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.graphql.client.HttpGraphQlClient;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Objects;
@@ -31,6 +41,8 @@ import java.util.Objects;
  */
 @Service
 public class GitGitHubVendorService {
+    private static final Logger logger = LogManager.getLogger(GitGitHubVendorService.class);
+
     @Autowired
     private PropertiesEntity properties;
 
@@ -41,6 +53,8 @@ public class GitGitHubVendorService {
     private VendorConfigurationHelper vendorConfigurationHelper;
 
     private HttpGraphQlClient graphQlClient;
+
+    private RestClient restClient;
 
     private String document;
 
@@ -69,6 +83,15 @@ public class GitGitHubVendorService {
             } catch (IOException e) {
                 throw new GitHubGraphQlClientDocumentNotFoundException(e.getMessage());
             }
+
+            this.restClient = RestClient.builder()
+                    .requestFactory(new HttpComponentsClientHttpRequestFactory())
+                    .baseUrl(properties.getRestClientGitHubUrl())
+                    .defaultHeader(
+                            HttpHeaders.AUTHORIZATION,
+                            vendorConfigurationHelper.getWrappedToken(
+                                    configService.getConfig().getService().getCredentials().getToken()))
+                    .build();
         }
     }
 
@@ -206,5 +229,36 @@ public class GitGitHubVendorService {
                 .getTarget()
                 .getHistory()
                 .getTotalCount();
+    }
+
+    /**
+     * Retrieves content from the repository with the given name and given commit hash.
+     *
+     * @param owner  given repository owner.
+     * @param name   given repository name.
+     * @param commitHash given commit hash.
+     * @return retrieved content from the repository with the given name and given commit hash as an input stream.
+     * @throws GitHubContentRetrievalFailureException if GitHub REST API client content retrieval fails.
+     */
+    public InputStream getCommitContent(String owner, String name, String commitHash) throws
+            GitHubContentRetrievalFailureException {
+        ResponseEntity<Resource> resource = restClient
+                .get()
+                .uri(String.format("/repos/%s/%s/tarball/%s", owner, name, commitHash))
+                .retrieve()
+                .toEntity(Resource.class);
+
+        System.out.println("after");
+
+
+        if (Objects.isNull(resource.getBody())) {
+            throw new GitHubContentRetrievalFailureException(new GitHubContentIsEmptyException().getMessage());
+        }
+
+        try {
+             return resource.getBody().getInputStream();
+        } catch (IOException e) {
+            throw new GitHubContentRetrievalFailureException(e.getMessage());
+        }
     }
 }
