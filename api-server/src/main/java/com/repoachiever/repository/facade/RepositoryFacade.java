@@ -5,10 +5,7 @@ import com.repoachiever.entity.repository.ContentEntity;
 import com.repoachiever.entity.repository.ExporterEntity;
 import com.repoachiever.entity.repository.ProviderEntity;
 import com.repoachiever.entity.repository.SecretEntity;
-import com.repoachiever.exception.ContentApplicationRetrievalFailureException;
-import com.repoachiever.exception.RepositoryContentApplicationFailureException;
-import com.repoachiever.exception.RepositoryContentDestructionFailureException;
-import com.repoachiever.exception.RepositoryOperationFailureException;
+import com.repoachiever.exception.*;
 import com.repoachiever.model.*;
 import com.repoachiever.repository.*;
 import com.repoachiever.repository.common.RepositoryConfigurationHelper;
@@ -58,6 +55,55 @@ public class RepositoryFacade {
      */
     public List<String> retrieveLocations(ContentRetrievalApplication contentRetrievalApplication) {
         return null;
+    }
+
+    /**
+     * Checks if content location is present in content repository with the help of the given content download
+     * application.
+     *
+     * @param contentDownload given content download application.
+     * @return result of the check.
+     * @throws ContentValidationFailureException if content validation fails.
+     */
+    public Boolean isContentLocationValid(ContentDownload contentDownload) throws ContentValidationFailureException {
+        ProviderEntity provider;
+
+        try {
+            provider = providerRepository.findByName(contentDownload.getProvider().toString());
+        } catch (RepositoryOperationFailureException e) {
+            throw new ContentValidationFailureException(e.getMessage());
+        }
+
+        Optional<String> credentials = RepositoryConfigurationHelper.getExternalCredentials(
+                contentDownload.getProvider(), contentDownload.getCredentials().getExternal());
+
+        try {
+            if (!secretRepository.isPresentBySessionAndCredentials(
+                    contentDownload.getCredentials().getInternal().getId(), credentials)) {
+                return false;
+            }
+        } catch (RepositoryOperationFailureException e) {
+            throw new ContentValidationFailureException(e.getMessage());
+        }
+
+        SecretEntity secret;
+
+        try {
+            secret = secretRepository.findBySessionAndCredentials(
+                    contentDownload.getCredentials().getInternal().getId(),
+                    credentials);
+        } catch (RepositoryOperationFailureException e) {
+            throw new ContentValidationFailureException(e.getMessage());
+        }
+
+        try {
+            return contentRepository
+                    .findByProviderAndSecret(provider.getId(), secret.getId())
+                    .stream()
+                    .anyMatch(element -> Objects.equals(element.getLocation(), contentDownload.getLocation()));
+        } catch (RepositoryOperationFailureException e) {
+            throw new ContentValidationFailureException(e);
+        }
     }
 
     /**

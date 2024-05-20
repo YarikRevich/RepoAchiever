@@ -5,9 +5,7 @@ import com.repoachiever.dto.ClusterAllocationDto;
 import com.repoachiever.entity.common.ClusterContextEntity;
 import com.repoachiever.entity.common.PropertiesEntity;
 import com.repoachiever.exception.*;
-import com.repoachiever.model.LocationsUnit;
-import com.repoachiever.model.ContentApplication;
-import com.repoachiever.model.ContentWithdrawal;
+import com.repoachiever.model.*;
 import com.repoachiever.service.cluster.ClusterService;
 import com.repoachiever.service.cluster.common.ClusterConfigurationHelper;
 import com.repoachiever.service.cluster.resource.ClusterCommunicationResource;
@@ -20,6 +18,8 @@ import jakarta.inject.Inject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -303,6 +303,97 @@ public class ClusterFacade {
 
             telemetryService.decreaseSuspendedClustersAmount();
         }
+    }
+
+    /**
+     * Removes all the content from the workspace with the help of the given application.
+     *
+     * @param contentCleanup given content cleanup application used for content removal.
+     * @throws ClusterCleanupFailureException if RepoAchiever Cluster cleanup failed.
+     */
+    public void removeAll(ContentCleanup contentCleanup) throws ClusterCleanupFailureException {
+        StateService.getTopologyStateGuard().lock();
+
+        String workspaceUnitKey =
+                workspaceFacade.createUnitKey(contentCleanup.getProvider(), contentCleanup.getCredentials());
+
+        List<ClusterAllocationDto> suspends = new ArrayList<>();
+
+        for (ClusterAllocationDto clusterAllocation : StateService.
+                getClusterAllocationsByWorkspaceUnitKey(workspaceUnitKey)) {
+            logger.info(
+                    String.format(
+                            "Setting RepoAchiever Cluster allocation to suspend state: %s",
+                            clusterAllocation.getName()));
+
+            try {
+                clusterCommunicationResource.performSuspend(clusterAllocation.getName());
+
+            } catch (ClusterOperationFailureException e) {
+                logger.fatal(new ClusterCleanupFailureException(e.getMessage()).getMessage());
+                return;
+            }
+
+            suspends.add(clusterAllocation);
+
+            telemetryService.decreaseServingClustersAmount();
+
+            telemetryService.increaseSuspendedClustersAmount();
+        }
+
+        try {
+            workspaceFacade.removeAll(workspaceUnitKey);
+        } catch (ContentRemovalFailureException e) {
+            throw new ClusterCleanupFailureException(e.getMessage());
+        }
+
+        for (ClusterAllocationDto suspended : suspends) {
+            logger.info(
+                    String.format(
+                            "Setting RepoAchiever Cluster suspended allocation to serve state: %s",
+                            suspended.getName()));
+
+            try {
+                clusterCommunicationResource.performServe(suspended.getName());
+            } catch (ClusterOperationFailureException e) {
+                logger.fatal(new ClusterCleanupFailureException(e.getMessage()).getMessage());
+                return;
+            }
+
+            telemetryService.decreaseSuspendedClustersAmount();
+
+            telemetryService.increaseServingClustersAmount();
+        }
+
+        StateService.getTopologyStateGuard().unlock();
+    }
+
+    /**
+     * Retrieves content reference with the help of the given content download application.
+     *
+     * @param contentDownload given content download application.
+     * @return retrieved content download reference.
+     * @throws ClusterContentReferenceRetrievalFailureException if RepoAchiever Cluster content reference retrieval
+     *                                                          operation failed.
+     */
+    public byte[] retrieveContentReference(ContentDownload contentDownload) throws
+            ClusterContentReferenceRetrievalFailureException {
+        StateService.getTopologyStateGuard().lock();
+
+        String workspaceUnitKey =
+                workspaceFacade.createUnitKey(contentDownload.getProvider(), contentDownload.getCredentials());
+
+        byte[] contentReference;
+
+        try {
+            contentReference = workspaceFacade.createContentReference(workspaceUnitKey, contentDownload.getLocation());
+        } catch (ContentReferenceCreationFailureException e) {
+            throw new ClusterContentReferenceRetrievalFailureException(e.getMessage());
+        }
+
+        StateService.getTopologyStateGuard().unlock();
+
+        return contentReference;
     }
 
     /**

@@ -33,6 +33,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ContentRetrievalResult"
+        400:
+          description: Content was not retrieved
   /v1/content/apply:
     post:
       tags:
@@ -66,25 +68,28 @@ paths:
         400:
           description: Given content configuration was not withdrawn
   /v1/content/download:
-    get:
+    post:
       tags:
         - ContentResource
-      parameters:
-        - in: query
-          name: location
-          schema:
-            type: string
-          description: Name of content location to be downloaded
+      requestBody:
+        required: true
+        description: Content download application
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContentDownload"
       responses:
         200:
           description: A content was successfully retrieved
           content:
-            application/octet-stream:
+            application/zip:
               schema:
                 type: string
                 format: binary
+        400:
+          description: Content was not retrieved
   /v1/content/clean:
-    post:
+    delete:
       tags:
         - ContentResource
       requestBody:
@@ -212,7 +217,29 @@ components:
         locations:
           type: array
           items:
-            type: string
+            $ref: "#/components/schemas/ContentRetrievalUnit"
+    ContentRetrievalUnit:
+      required:
+        - name
+        - raw
+        - additional
+      properties:
+        name:
+          type: string
+        raw:
+          properties:
+            versions:
+              type: array
+              items:
+                type: string
+        additional:
+          properties:
+            enabled:
+              type: boolean
+            versions:
+              type: array
+              items:
+                type: string
     Exporter:
       required:
         - host
@@ -253,17 +280,32 @@ components:
           default: false
     ContentWithdrawal:
       required:
-        - credentials
         - provider
+        - credentials
       properties:
+        provider:
+          $ref: "#/components/schemas/Provider"
+        credentials:
+          $ref: "#/components/schemas/CredentialsFieldsFull"
+    ContentDownload:
+      required:
+        - location
+        - provider
+        - credentials
+      properties:
+        location:
+          type: string
         provider:
           $ref: "#/components/schemas/Provider"
         credentials:
           $ref: "#/components/schemas/CredentialsFieldsFull"
     ContentCleanup:
       required:
+        - provider
         - credentials
       properties:
+        provider:
+          $ref: "#/components/schemas/Provider"
         credentials:
           $ref: "#/components/schemas/CredentialsFieldsFull"
     ContentStateApplication:

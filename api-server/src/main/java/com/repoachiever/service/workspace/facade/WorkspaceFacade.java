@@ -5,14 +5,20 @@ import com.repoachiever.entity.common.PropertiesEntity;
 import com.repoachiever.exception.*;
 import com.repoachiever.model.CredentialsFieldsFull;
 import com.repoachiever.model.Provider;
+import com.repoachiever.model.ContentCleanup;
 import com.repoachiever.service.config.ConfigService;
+import com.repoachiever.service.state.StateService;
 import com.repoachiever.service.workspace.WorkspaceService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import java.io.InputStream;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Objects;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Provides high-level access to workspace operations.
@@ -227,5 +233,46 @@ public class WorkspaceFacade {
         }
 
         return workspaceService.isAdditionalContentFileExist(workspaceUnitDirectory, location, name);
+    }
+
+    /**
+     * Removes all the content from the workspace with the help of the given workspace unit key.
+     *
+     * @param workspaceUnitKey given user workspace unit key.
+     * @throws ContentRemovalFailureException if content removal operation failed.
+     */
+    public void removeAll(String workspaceUnitKey) throws ContentRemovalFailureException {
+        try {
+            workspaceService.removeUnitDirectory(workspaceUnitKey);
+        } catch (WorkspaceUnitDirectoryRemovalFailureException e) {
+            throw new ContentRemovalFailureException(e.getMessage());
+        }
+    }
+
+    /**
+     * Creates content reference with the help of the given workspace unit key and content location.
+     *
+     * @param workspaceUnitKey given user workspace unit key.
+     * @param location         given content location.
+     * @return created content reference.
+     * @throws ContentReferenceCreationFailureException if RepoAchiever Cluster content reference creation failed.
+     */
+    public byte[] createContentReference(String workspaceUnitKey, String location) throws
+            ContentReferenceCreationFailureException {
+        ByteArrayOutputStream result = new ByteArrayOutputStream();
+
+        try (ZipOutputStream writer = new ZipOutputStream(result)) {
+            ZipEntry entry = new ZipEntry("test.txt");
+            writer.putNextEntry(entry);
+            writer.write("itworks".getBytes());
+            writer.closeEntry();
+            writer.flush();
+            writer.finish();
+
+        } catch (IOException e) {
+            throw new ContentReferenceCreationFailureException(e.getMessage());
+        }
+
+        return result.toByteArray();
     }
 }

@@ -69,32 +69,62 @@ public class ContentRepository {
     }
 
     /**
-     * Checks if content entity with the given location is present.
+     * Retrieves all the persisted content entities with the given provider and secret.
      *
-     * @param location given location of the content.
-     * @return result of the check.
+     * @return retrieved content entities.
      * @throws RepositoryOperationFailureException if repository operation fails.
      */
-    public Boolean isPresentByLocation(String location) throws RepositoryOperationFailureException {
-        try {
-            ResultSet resultSet = repositoryExecutor.performQueryWithResult(
-                    String.format(
-                            "SELECT t.id FROM %s as t WHERE t.location = '%s'",
-                            properties.getDatabaseContentTableName(),
-                            location));
+    public List<ContentEntity> findByProviderAndSecret(Integer provider, Integer secret) throws
+            RepositoryOperationFailureException {
+        ResultSet resultSet;
 
-            try {
-                resultSet.close();
-            } catch (SQLException e) {
-                throw new RepositoryOperationFailureException(e.getMessage());
-            }
-        } catch (QueryEmptyResultException e) {
-            return false;
-        } catch (QueryExecutionFailureException e) {
+        try {
+            resultSet =
+                    repositoryExecutor.performQueryWithResult(
+                            String.format(
+                                    "SELECT t.id, t.location, t.additional, t.exporter FROM %s as t WHERE t.provider = %d AND t.secret = %d",
+                                    properties.getDatabaseContentTableName(),
+                                    provider,
+                                    secret));
+
+        } catch (QueryExecutionFailureException | QueryEmptyResultException e) {
             throw new RepositoryOperationFailureException(e.getMessage());
         }
 
-        return true;
+        List<ContentEntity> result = new ArrayList<>();
+
+        Integer id;
+        String location;
+        Boolean additional;
+        Integer exporterRaw;
+        Optional<Integer> exporter;
+
+        try {
+            while (resultSet.next()) {
+                id = resultSet.getInt("id");
+                location = resultSet.getString("location");
+                additional = resultSet.getBoolean("additional");
+
+                exporterRaw = resultSet.getInt("exporter");
+                if (resultSet.wasNull()) {
+                    exporter = Optional.empty();
+                } else {
+                    exporter = Optional.of(exporterRaw);
+                }
+
+                result.add(ContentEntity.of(id, location, additional, provider, exporter, secret));
+            }
+        } catch (SQLException e) {
+            throw new RepositoryOperationFailureException(e.getMessage());
+        }
+
+        try {
+            resultSet.close();
+        } catch (SQLException e) {
+            throw new RepositoryOperationFailureException(e.getMessage());
+        }
+
+        return result;
     }
 
     /**
