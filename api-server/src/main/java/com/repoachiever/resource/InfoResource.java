@@ -2,13 +2,21 @@ package com.repoachiever.resource;
 
 import com.repoachiever.api.InfoResourceApi;
 import com.repoachiever.entity.common.PropertiesEntity;
+import com.repoachiever.exception.CredentialsFieldIsNotValidException;
+import com.repoachiever.model.TopologyInfoApplication;
 import com.repoachiever.model.VersionExternalApiInfoResult;
 import com.repoachiever.model.TopologyInfoUnit;
 import com.repoachiever.model.VersionInfoResult;
+import com.repoachiever.resource.common.ResourceConfigurationHelper;
+import com.repoachiever.service.cluster.ClusterService;
+import com.repoachiever.service.cluster.facade.ClusterFacade;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
+import lombok.SneakyThrows;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Contains implementation of InfoResource.
@@ -17,6 +25,12 @@ import java.util.List;
 public class InfoResource implements InfoResourceApi {
     @Inject
     PropertiesEntity properties;
+
+    @Inject
+    ClusterFacade clusterFacade;
+
+    @Inject
+    ResourceConfigurationHelper resourceConfigurationHelper;
 
     /**
      * Implementation for declared in OpenAPI configuration v1InfoVersionGet method.
@@ -31,14 +45,23 @@ public class InfoResource implements InfoResourceApi {
     }
 
     /**
-     * Implementation for declared in OpenAPI configuration v1InfoTopologyGet method.
+     * Implementation for declared in OpenAPI configuration v1InfoTopologyPost method.
      *
      * @return topology information result.
      */
+    @SneakyThrows
     @Override
-    public List<TopologyInfoUnit> v1InfoTopologyGet() {
-        // TODO: call cluster service to retrieve data from clusters.
+    public List<TopologyInfoUnit> v1InfoTopologyPost(TopologyInfoApplication topologyInfoApplication) {
+        if (Objects.isNull(topologyInfoApplication)) {
+            throw new BadRequestException();
+        }
 
-        return null;
+        if (!resourceConfigurationHelper.isExternalCredentialsFieldValid(
+                topologyInfoApplication.getProvider(),
+                topologyInfoApplication.getCredentials().getExternal())) {
+            throw new CredentialsFieldIsNotValidException();
+        }
+
+        return clusterFacade.retrieveTopology(topologyInfoApplication);
     }
 }

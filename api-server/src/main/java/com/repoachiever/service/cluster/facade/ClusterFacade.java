@@ -233,7 +233,7 @@ public class ClusterFacade {
                 throw new ClusterApplicationFailureException(e1.getMessage());
             }
 
-            candidates.add(ClusterAllocationDto.of(name, pid, context, workspaceUnitKey));
+            candidates.add(ClusterAllocationDto.of(name, workspaceUnitKey, locations, pid, context));
         }
 
         for (ClusterAllocationDto candidate : candidates) {
@@ -561,6 +561,27 @@ public class ClusterFacade {
     }
 
     /**
+     * Retrieves RepoAchiever Cluster allocation topology with the given application.
+     *
+     * @param topologyInfoApplication given topology retrieval application.
+     * @return retrieved topology information.
+     */
+    public List<TopologyInfoUnit> retrieveTopology(TopologyInfoApplication topologyInfoApplication) {
+        List<TopologyInfoUnit> result = new ArrayList<>();
+
+        String workspaceUnitKey =
+                workspaceFacade.createUnitKey(
+                        topologyInfoApplication.getProvider(), topologyInfoApplication.getCredentials());
+
+        for (ClusterAllocationDto clusterAllocation : StateService.getClusterAllocationsByWorkspaceUnitKey(
+                workspaceUnitKey)) {
+            result.add(TopologyInfoUnit.of(clusterAllocation.getName(), clusterAllocation.getLocations()));
+        }
+
+        return result;
+    }
+
+    /**
      * Reapplies all unhealthy RepoAchiever Cluster allocations, which healthcheck operation failed for, recreating them.
      *
      * @throws ClusterUnhealthyReapplicationFailureException if RepoAchiever Cluster unhealthy allocation reapplication fails.
@@ -574,7 +595,10 @@ public class ClusterFacade {
 
         for (ClusterAllocationDto clusterAllocation : StateService.getClusterAllocations()) {
             try {
-                if (!clusterCommunicationResource.retrieveHealthCheck(clusterAllocation.getName())) {
+                Boolean healthy =
+                        clusterCommunicationResource.retrieveHealthCheck(clusterAllocation.getName());
+
+                if (!healthy) {
                     logger.info(
                             String.format(
                                     "Setting RepoAchiever Cluster allocation to suspend state: '%s'",
@@ -641,9 +665,10 @@ public class ClusterFacade {
 
             candidates.add(ClusterAllocationDto.of(
                     removable.getName(),
+                    removable.getWorkspaceUnitKey(),
+                    removable.getLocations(),
                     pid,
-                    removable.getContext(),
-                    removable.getWorkspaceUnitKey()));
+                    removable.getContext()));
         }
 
         for (ClusterAllocationDto candidate : candidates) {

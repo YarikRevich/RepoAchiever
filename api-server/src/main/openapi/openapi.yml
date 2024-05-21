@@ -150,9 +150,16 @@ paths:
               schema:
                 $ref: "#/components/schemas/VersionInfoResult"
   /v1/info/topology:
-    get:
+    post:
       tags:
         - InfoResource
+      requestBody:
+        required: true
+        description: Content configuration application
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TopologyInfoApplication"
       responses:
         200:
           description: General information about deployed topology
@@ -160,6 +167,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TopologyInfoResult"
+        400:
+          description: Given topology information retrieval was not successful
   /v1/health:
     get:
       tags:
@@ -368,6 +377,15 @@ components:
           type: string
         hash:
           type: string
+    TopologyInfoApplication:
+      required:
+        - provider
+        - credentials
+      properties:
+        provider:
+          $ref: "#/components/schemas/Provider"
+        credentials:
+          $ref: "#/components/schemas/CredentialsFieldsFull"
     TopologyInfoResult:
       type: array
       items:
@@ -375,13 +393,14 @@ components:
     TopologyInfoUnit:
       required:
         - name
+        - locations
       properties:
         name:
           type: string
-        health:
-          type: boolean
-        workers:
-          type: integer
+        locations:
+          type: array
+          items:
+            $ref: "#/components/schemas/LocationsUnit"
     HealthCheckResult:
       required:
         - status
