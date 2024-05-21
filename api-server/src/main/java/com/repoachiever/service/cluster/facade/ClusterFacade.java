@@ -369,6 +369,33 @@ public class ClusterFacade {
     }
 
     /**
+     * Checks if given location is available with the given content download application.
+     *
+     * @param contentDownload given content download application
+     * @return result of the check.
+     * @throws ClusterContentAvailabilityRetrievalFailureException if RepoAchiever Cluster content is not available.
+     */
+    public Boolean isAnyContentAvailable(ContentDownload contentDownload) throws
+            ClusterContentAvailabilityRetrievalFailureException {
+        StateService.getTopologyStateGuard().lock();
+
+        String workspaceUnitKey =
+                workspaceFacade.createUnitKey(contentDownload.getProvider(), contentDownload.getCredentials());
+
+        Boolean result;
+
+        try {
+            result = workspaceFacade.isAnyContentAvailable(workspaceUnitKey, contentDownload.getLocation());
+        } catch (ContentAvailabilityRetrievalFailureException e) {
+            throw new ClusterContentAvailabilityRetrievalFailureException(e.getMessage());
+        }
+
+        StateService.getTopologyStateGuard().unlock();
+
+        return result;
+    }
+
+    /**
      * Retrieves content reference with the help of the given content download application.
      *
      * @param contentDownload given content download application.

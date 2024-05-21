@@ -1,5 +1,6 @@
 package com.repoachiever.service.workspace.facade;
 
+import com.repoachiever.converter.AdditionalContentFileToJsonConverter;
 import com.repoachiever.entity.common.AdditionalContentFileEntity;
 import com.repoachiever.entity.common.PropertiesEntity;
 import com.repoachiever.exception.*;
@@ -9,13 +10,13 @@ import com.repoachiever.model.ContentCleanup;
 import com.repoachiever.service.config.ConfigService;
 import com.repoachiever.service.state.StateService;
 import com.repoachiever.service.workspace.WorkspaceService;
+import com.repoachiever.service.workspace.common.WorkspaceConfigurationHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.BasicFileAttributes;
+import java.util.List;
 import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -25,6 +26,9 @@ import java.util.zip.ZipOutputStream;
  */
 @ApplicationScoped
 public class WorkspaceFacade {
+    @Inject
+    PropertiesEntity properties;
+
     @Inject
     ConfigService configService;
 
@@ -187,8 +191,8 @@ public class WorkspaceFacade {
         Integer amount;
 
         try {
-            amount = workspaceService.getRawContentFilesAmount(workspaceUnitDirectory, location);
-        } catch (RawContentFilesAmountRetrievalFailureException e) {
+            amount = workspaceService.getAdditionalContentFilesAmount(workspaceUnitDirectory, location);
+        } catch (AdditionalContentFilesAmountRetrievalFailureException e) {
             throw new AdditionalContentCreationFailureException(e);
         }
 
@@ -250,22 +254,163 @@ public class WorkspaceFacade {
     }
 
     /**
+     * Checks if raw content exists in the workspace with the given workspace unit directory and location.
+     *
+     * @param workspaceUnitDirectory given workspace unit directory.
+     * @param location               given content location.
+     * @return result of the check.
+     * @throws ContentAvailabilityRetrievalFailureException if raw content availability retrieval fails.
+     */
+    private Boolean isRawContentAvailable(String workspaceUnitDirectory, String location) throws
+            ContentAvailabilityRetrievalFailureException {
+        Boolean rawResult = false;
+
+        if (workspaceService.isRawContentUnitExist(workspaceUnitDirectory, location)) {
+            if (workspaceService.isRawContentDirectoryExist(workspaceUnitDirectory, location)) {
+                Integer rawAmount;
+
+                try {
+                    rawAmount = workspaceService.getRawContentFilesAmount(workspaceUnitDirectory, location);
+                } catch (RawContentFilesAmountRetrievalFailureException e) {
+                    throw new ContentAvailabilityRetrievalFailureException(e);
+                }
+
+                rawResult = rawAmount != 0;
+            }
+        }
+
+        return rawResult;
+    }
+
+    /**
+     * Checks if additional content exists in the workspace with the given workspace unit directory and location.
+     *
+     * @param workspaceUnitDirectory given workspace unit directory.
+     * @param location               given content location.
+     * @return result of the check.
+     * @throws ContentAvailabilityRetrievalFailureException if additional content availability retrieval fails.
+     */
+    private Boolean isAdditionalContentAvailable(String workspaceUnitDirectory, String location) throws
+            ContentAvailabilityRetrievalFailureException {
+        Boolean additionalResult = false;
+
+        if (workspaceService.isAdditionalContentUnitExist(workspaceUnitDirectory, location)) {
+            if (workspaceService.isAdditionalContentDirectoryExist(workspaceUnitDirectory, location)) {
+                Integer additionalAmount;
+
+                try {
+                    additionalAmount = workspaceService.getAdditionalContentFilesAmount(workspaceUnitDirectory, location);
+                } catch (AdditionalContentFilesAmountRetrievalFailureException e) {
+                    throw new ContentAvailabilityRetrievalFailureException(e);
+                }
+
+                additionalResult = additionalAmount != 0;
+            }
+        }
+
+        return additionalResult;
+    }
+
+    /**
+     * Checks if given content exists in the workspace with the given workspace unit key and location.
+     *
+     * @param workspaceUnitKey given user workspace unit key.
+     * @param location         given content location.
+     * @return result of the check.
+     * @throws ContentAvailabilityRetrievalFailureException if content availability retrieval fails.
+     */
+    public Boolean isAnyContentAvailable(String workspaceUnitKey, String location) throws
+            ContentAvailabilityRetrievalFailureException {
+        if (!workspaceService.isUnitDirectoryExist(workspaceUnitKey)) {
+            return false;
+        }
+
+        String workspaceUnitDirectory;
+
+        try {
+            workspaceUnitDirectory = workspaceService.getUnitDirectory(workspaceUnitKey);
+        } catch (WorkspaceUnitDirectoryNotFoundException e) {
+            throw new ContentAvailabilityRetrievalFailureException(e.getMessage());
+        }
+
+        return isRawContentAvailable(workspaceUnitDirectory, location) ||
+                isAdditionalContentAvailable(workspaceUnitDirectory, location);
+    }
+
+    /**
      * Creates content reference with the help of the given workspace unit key and content location.
      *
      * @param workspaceUnitKey given user workspace unit key.
      * @param location         given content location.
      * @return created content reference.
-     * @throws ContentReferenceCreationFailureException if RepoAchiever Cluster content reference creation failed.
+     * @throws ContentReferenceCreationFailureException if content reference creation failed.
      */
     public byte[] createContentReference(String workspaceUnitKey, String location) throws
             ContentReferenceCreationFailureException {
+        if (!workspaceService.isUnitDirectoryExist(workspaceUnitKey)) {
+            throw new ContentReferenceCreationFailureException();
+        }
+
+        String workspaceUnitDirectory;
+
+        try {
+            workspaceUnitDirectory = workspaceService.getUnitDirectory(workspaceUnitKey);
+        } catch (WorkspaceUnitDirectoryNotFoundException e) {
+            throw new ContentReferenceCreationFailureException(e.getMessage());
+        }
+
         ByteArrayOutputStream result = new ByteArrayOutputStream();
 
         try (ZipOutputStream writer = new ZipOutputStream(result)) {
-            ZipEntry entry = new ZipEntry("test.txt");
-            writer.putNextEntry(entry);
-            writer.write("itworks".getBytes());
-            writer.closeEntry();
+            if (isRawContentAvailable(workspaceUnitDirectory, location)) {
+                writer.putNextEntry(new ZipEntry(
+                        WorkspaceConfigurationHelper.getZipFolderDefinition(properties.getWorkspaceRawContentDirectory())));
+
+                List<String> rawContentLocations =
+                        workspaceService.getRawContentFilesLocations(workspaceUnitDirectory, location);
+
+                byte[] rawContent;
+
+                for (String rawContentLocation : rawContentLocations) {
+                    writer.putNextEntry(new ZipEntry(
+                            Path.of(properties.getWorkspaceRawContentDirectory(), rawContentLocation).toString()));
+
+                    rawContent =
+                            workspaceService.getRawContentFile(workspaceUnitDirectory, location, rawContentLocation);
+
+                    writer.write(rawContent);
+                }
+
+            }
+
+            if (isAdditionalContentAvailable(workspaceUnitDirectory, location)) {
+                writer.putNextEntry(new ZipEntry(
+                        WorkspaceConfigurationHelper.getZipFolderDefinition(
+                                properties.getWorkspaceAdditionalContentDirectory())));
+
+                List<String> additionalContentLocations =
+                        workspaceService.getAdditionalContentFilesLocations(workspaceUnitDirectory, location);
+
+                String rawContent;
+
+                for (String additionalContentLocation : additionalContentLocations) {
+                    writer.putNextEntry(new ZipEntry(
+                            Path.of(properties.getWorkspaceAdditionalContentDirectory(), additionalContentLocation)
+                                    .toString()));
+
+
+                    rawContent = AdditionalContentFileToJsonConverter.convert(
+                                    workspaceService.getAdditionalContentFileContent(
+                                            workspaceUnitDirectory, location, additionalContentLocation));
+
+                    if (Objects.isNull(rawContent)) {
+                        continue;
+                    }
+
+                    writer.write(rawContent.getBytes());
+                }
+            }
+
             writer.flush();
             writer.finish();
 

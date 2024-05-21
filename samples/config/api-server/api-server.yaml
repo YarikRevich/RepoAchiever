@@ -1,7 +1,7 @@
 # Represents section used for RepoAchiever API Server connection configuration.
 connection:
   # Represents port of RepoAchiever API Server used for connection establishment.
-  port: 8080
+  port: 8085
 
 # Represents section used for RepoAchiever API Server internal communication configuration.
 communication:

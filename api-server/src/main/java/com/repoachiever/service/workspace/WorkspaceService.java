@@ -20,6 +20,8 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -122,7 +124,8 @@ public class WorkspaceService {
      */
     public void createAdditionalContentUnitDirectory(String workspaceUnitDirectory, String location) throws
             WorkspaceContentDirectoryCreationFailureException {
-        Path unitDirectoryPath = Path.of(workspaceUnitDirectory, location);
+        Path unitDirectoryPath = Path.of(
+                workspaceUnitDirectory, location, properties.getWorkspaceAdditionalContentDirectory());
 
         if (Files.notExists(unitDirectoryPath)) {
             try {
@@ -302,6 +305,30 @@ public class WorkspaceService {
     }
 
     /**
+     * Retrieves content files locations of the given type in the given workspace unit.
+     *
+     * @param workspaceUnitDirectory given workspace unit directory.
+     * @param location               given file location.
+     * @param type                   given file type.
+     * @return a list of content locations.
+     * @throws ContentFilesLocationsRetrievalFailureException if files locations retrieval operation failed. .
+     */
+    public List<String> getContentFilesLocations(String workspaceUnitDirectory, String location, String type) throws
+            ContentFilesLocationsRetrievalFailureException {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Path.of(workspaceUnitDirectory, location, type))) {
+            List<String> result = new ArrayList<>();
+
+            for (Path file : stream) {
+                result.add(file.getFileName().toString());
+            }
+
+            return result;
+        } catch (IOException e) {
+            throw new ContentFilesLocationsRetrievalFailureException(e.getMessage());
+        }
+    }
+
+    /**
      * Writes given raw content to the given workspace unit directory.
      *
      * @param workspaceUnitDirectory given workspace unit directory.
@@ -372,6 +399,19 @@ public class WorkspaceService {
     }
 
     /**
+     * Retrieves content files locations of raw type in the given workspace unit.
+     *
+     * @param workspaceUnitDirectory given workspace unit directory.
+     * @param location               given file location.
+     * @return a list of raw content locations.
+     * @throws ContentFilesLocationsRetrievalFailureException if files locations retrieval operation failed. .
+     */
+    public List<String> getRawContentFilesLocations(String workspaceUnitDirectory, String location) throws
+            ContentFilesLocationsRetrievalFailureException {
+        return getContentFilesLocations(workspaceUnitDirectory, location, properties.getWorkspaceRawContentDirectory());
+    }
+
+    /**
      * Retrieves raw content file of the given name with the help of the given workspace unit directory.
      *
      * @param workspaceUnitDirectory given workspace unit directory.
@@ -380,17 +420,15 @@ public class WorkspaceService {
      * @return raw content file stream.
      * @throws ContentFileNotFoundException if the raw content file not found.
      */
-    public OutputStream getRawContentFile(String workspaceUnitDirectory, String location, String name) throws
+    public byte[] getRawContentFile(String workspaceUnitDirectory, String location, String name) throws
             ContentFileNotFoundException {
         Path contentDirectoryPath = Path.of(
                 workspaceUnitDirectory, location, properties.getWorkspaceRawContentDirectory(), name);
 
-        File file = new File(contentDirectoryPath.toString());
-
         try {
-            return new FileOutputStream(file);
-        } catch (FileNotFoundException e) {
-            throw new ContentFileNotFoundException(e);
+            return FileUtils.readFileToByteArray(new File(contentDirectoryPath.toString()));
+        } catch (IOException e) {
+            throw new ContentFileNotFoundException(e.getMessage());
         }
     }
 
@@ -420,6 +458,22 @@ public class WorkspaceService {
             mapper.writeValue(variableFile, input);
         } catch (IOException e) {
             throw new AdditionalContentFileWriteFailureException(e.getMessage());
+        }
+    }
+
+    /**
+     * Retrieves amount of additional content files in the given workspace unit.
+     *
+     * @param workspaceUnitDirectory given workspace unit directory.
+     * @param location               given additional content file location.
+     * @throws AdditionalContentFilesAmountRetrievalFailureException if additional content files amount retrieval failed.
+     */
+    public Integer getAdditionalContentFilesAmount(String workspaceUnitDirectory, String location) throws
+            AdditionalContentFilesAmountRetrievalFailureException {
+        try {
+            return getFilesAmount(workspaceUnitDirectory, location, properties.getWorkspaceAdditionalContentDirectory());
+        } catch (ContentFilesAmountRetrievalFailureException e) {
+            throw new AdditionalContentFilesAmountRetrievalFailureException(e.getMessage());
         }
     }
 
@@ -454,6 +508,20 @@ public class WorkspaceService {
         return Files.exists(
                 Paths.get(
                         workspaceUnitDirectory, location, properties.getWorkspaceAdditionalContentDirectory(), name));
+    }
+
+    /**
+     * Retrieves content files locations of additional type in the given workspace unit.
+     *
+     * @param workspaceUnitDirectory given workspace unit directory.
+     * @param location               given file location.
+     * @return a list of additional content locations.
+     * @throws ContentFilesLocationsRetrievalFailureException if files locations retrieval operation failed. .
+     */
+    public List<String> getAdditionalContentFilesLocations(String workspaceUnitDirectory, String location) throws
+            ContentFilesLocationsRetrievalFailureException {
+        return getContentFilesLocations(
+                workspaceUnitDirectory, location, properties.getWorkspaceAdditionalContentDirectory());
     }
 
     /**
