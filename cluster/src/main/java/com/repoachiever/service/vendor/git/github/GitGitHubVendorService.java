@@ -18,6 +18,8 @@ import jakarta.ws.rs.core.HttpHeaders;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.client.ClientHttpRequestFactories;
+import org.springframework.boot.web.client.ClientHttpRequestFactorySettings;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.graphql.client.HttpGraphQlClient;
@@ -33,6 +35,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -41,8 +44,6 @@ import java.util.Objects;
  */
 @Service
 public class GitGitHubVendorService {
-    private static final Logger logger = LogManager.getLogger(GitGitHubVendorService.class);
-
     @Autowired
     private PropertiesEntity properties;
 
@@ -85,7 +86,10 @@ public class GitGitHubVendorService {
             }
 
             this.restClient = RestClient.builder()
-                    .requestFactory(new HttpComponentsClientHttpRequestFactory())
+                    .requestFactory(ClientHttpRequestFactories.get(new ClientHttpRequestFactorySettings(
+                            Duration.ofSeconds(properties.getRestClientTimeout()),
+                            Duration.ofSeconds(properties.getRestClientTimeout()),
+                            false)))
                     .baseUrl(properties.getRestClientGitHubUrl())
                     .defaultHeader(
                             HttpHeaders.AUTHORIZATION,
@@ -234,10 +238,10 @@ public class GitGitHubVendorService {
     /**
      * Retrieves content from the repository with the given name and given commit hash.
      *
-     * @param owner  given repository owner.
-     * @param name   given repository name.
+     * @param owner      given repository owner.
+     * @param name       given repository name.
      * @param commitHash given commit hash.
-     * @param format given content format type.
+     * @param format     given content format type.
      * @return retrieved content from the repository with the given name and given commit hash as an input stream.
      * @throws GitHubContentRetrievalFailureException if GitHub REST API client content retrieval fails.
      */
@@ -254,7 +258,7 @@ public class GitGitHubVendorService {
         }
 
         try {
-             return resource.getBody().getInputStream();
+            return resource.getBody().getInputStream();
         } catch (IOException e) {
             throw new GitHubContentRetrievalFailureException(e.getMessage());
         }
@@ -263,8 +267,8 @@ public class GitGitHubVendorService {
     /**
      * Retrieves content from the repository with the given name and given commit hash in zip format.
      *
-     * @param owner  given repository owner.
-     * @param name   given repository name.
+     * @param owner      given repository owner.
+     * @param name       given repository name.
      * @param commitHash given commit hash.
      * @return retrieved content from the repository with the given name and given commit hash as an input stream.
      * @throws GitHubContentRetrievalFailureException if GitHub REST API client content retrieval fails.
@@ -277,8 +281,8 @@ public class GitGitHubVendorService {
     /**
      * Retrieves content from the repository with the given name and given commit hash in tar format.
      *
-     * @param owner  given repository owner.
-     * @param name   given repository name.
+     * @param owner      given repository owner.
+     * @param name       given repository name.
      * @param commitHash given commit hash.
      * @return retrieved content from the repository with the given name and given commit hash as an input stream.
      * @throws GitHubContentRetrievalFailureException if GitHub REST API client content retrieval fails.

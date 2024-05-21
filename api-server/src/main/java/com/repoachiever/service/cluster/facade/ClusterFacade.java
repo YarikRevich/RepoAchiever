@@ -301,7 +301,7 @@ public class ClusterFacade {
                 workspaceFacade.createUnitKey(
                         contentWithdrawal.getProvider(), contentWithdrawal.getCredentials());
 
-        logger.info(String.format("Destroying RepoAchiever Cluster topology for: ''%s''", workspaceUnitKey));
+        logger.info(String.format("Destroying RepoAchiever Cluster topology for: '%s'", workspaceUnitKey));
 
         List<ClusterAllocationDto> clusterAllocations =
                 StateService.getClusterAllocationsByWorkspaceUnitKey(workspaceUnitKey);
@@ -386,7 +386,7 @@ public class ClusterFacade {
     public void removeContent(ContentCleanup contentCleanup) throws ClusterCleanupFailureException {
         StateService.getTopologyStateGuard().lock();
 
-        logger.info(String.format("Removing content of ''%s'' location", contentCleanup.getLocation()));
+        logger.info(String.format("Removing content of '%s' location", contentCleanup.getLocation()));
 
         String workspaceUnitKey =
                 workspaceFacade.createUnitKey(contentCleanup.getProvider(), contentCleanup.getCredentials());

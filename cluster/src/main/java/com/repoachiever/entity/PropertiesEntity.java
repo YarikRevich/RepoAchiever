@@ -22,6 +22,9 @@ public class PropertiesEntity {
     @Value(value = "${rest-client.github.url}")
     String restClientGitHubUrl;
 
+    @Value(value = "${rest-client.timeout}")
+    Integer restClientTimeout;
+
     @Value(value = "${graphql-client.github.url}")
     String graphQlClientGitHubUrl;
 

@@ -30,9 +30,6 @@ public class ContentResource implements ContentResourceApi {
     VendorFacade vendorFacade;
 
     @Inject
-    WorkspaceFacade workspaceFacade;
-
-    @Inject
     ResourceConfigurationHelper resourceConfigurationHelper;
 
     /**

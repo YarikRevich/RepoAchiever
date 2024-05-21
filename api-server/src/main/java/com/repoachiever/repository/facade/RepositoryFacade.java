@@ -88,16 +88,19 @@ public class RepositoryFacade {
             throw new ContentLocationsRetrievalFailureException(e.getMessage());
         }
 
+        List<RepositoryContentLocationUnitDto> result = new ArrayList<>();
+
         try {
-            return contentRepository
+            result = contentRepository
                     .findByProviderAndSecret(provider.getId(), secret.getId())
                     .stream()
                     .map(element -> RepositoryContentLocationUnitDto.of(
                             element.getLocation(), element.getAdditional()))
                     .toList();
-        } catch (RepositoryOperationFailureException e) {
-            throw new ContentLocationsRetrievalFailureException(e);
+        } catch (RepositoryOperationFailureException ignored) {
         }
+
+        return result;
     }
 
     /**
