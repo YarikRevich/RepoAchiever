@@ -94,11 +94,27 @@ paths:
         - ContentResource
       requestBody:
         required: true
-        description: Content configuration application
+        description: Content cleanup application
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/ContentCleanup"
+      responses:
+        201:
+          description: Content with the given configuration was successfully deleted
+        400:
+          description: Content with the given configuration was not deleted
+  /v1/content/clean/all:
+    delete:
+      tags:
+        - ContentResource
+      requestBody:
+        required: true
+        description: Full content cleanup application
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContentCleanupAll"
       responses:
         201:
           description: Content with the given configuration was successfully deleted
@@ -227,19 +243,21 @@ components:
         name:
           type: string
         raw:
-          properties:
-            versions:
-              type: array
-              items:
-                type: string
+          $ref: "#/components/schemas/ContentRetrievalUnitRaw"
         additional:
-          properties:
-            enabled:
-              type: boolean
-            versions:
-              type: array
-              items:
-                type: string
+          $ref: "#/components/schemas/ContentRetrievalUnitAdditional"
+    ContentRetrievalUnitRaw:
+      properties:
+        versions:
+          type: array
+          items:
+            type: string
+    ContentRetrievalUnitAdditional:
+      properties:
+        versions:
+          type: array
+          items:
+            type: string
     Exporter:
       required:
         - host
@@ -300,6 +318,18 @@ components:
         credentials:
           $ref: "#/components/schemas/CredentialsFieldsFull"
     ContentCleanup:
+      required:
+        - location
+        - provider
+        - credentials
+      properties:
+        location:
+          type: string
+        provider:
+          $ref: "#/components/schemas/Provider"
+        credentials:
+          $ref: "#/components/schemas/CredentialsFieldsFull"
+    ContentCleanupAll:
       required:
         - provider
         - credentials

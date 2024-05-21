@@ -170,6 +170,22 @@ public class WorkspaceService {
     }
 
     /**
+     * Removes content directory in the given workspace unit.
+     *
+     * @param workspaceUnitDirectory given workspace unit directory.
+     * @param location               given content directory location.
+     * @throws ContentDirectoryRemovalFailureException if content directory cannot be removed.
+     */
+    public void removeContentDirectory(String workspaceUnitDirectory, String location) throws
+            ContentDirectoryRemovalFailureException {
+        try {
+            FileSystemUtils.deleteRecursively(Path.of(workspaceUnitDirectory, location));
+        } catch (IOException e) {
+            throw new ContentDirectoryRemovalFailureException(e.getMessage());
+        }
+    }
+
+    /**
      * Checks if workspace unit directory exists with the help of the given key.
      *
      * @param key given workspace unit directory.
@@ -299,7 +315,7 @@ public class WorkspaceService {
             try {
                 FileSystemUtils.deleteRecursively(target);
             } catch (IOException e) {
-                throw new ContentFileRemovalFailureException(e);
+                throw new ContentFileRemovalFailureException(e.getMessage());
             }
         }
     }
@@ -474,25 +490,6 @@ public class WorkspaceService {
             return getFilesAmount(workspaceUnitDirectory, location, properties.getWorkspaceAdditionalContentDirectory());
         } catch (ContentFilesAmountRetrievalFailureException e) {
             throw new AdditionalContentFilesAmountRetrievalFailureException(e.getMessage());
-        }
-    }
-
-    /**
-     * Removes additional content file in the given workspace unit.
-     *
-     * @param workspaceUnitDirectory given workspace unit directory.
-     * @param location               given additional content file location.
-     * @param name                   given additional content file name.
-     * @throws RawContentFileRemovalFailureException if additional content file cannot be created.
-     */
-    public void removeAdditionalContentFile(String workspaceUnitDirectory, String location, String name) throws
-            RawContentFileRemovalFailureException {
-        try {
-            FileSystemUtils.deleteRecursively(
-                    Path.of(
-                            workspaceUnitDirectory, location, properties.getWorkspaceAdditionalContentDirectory(), name));
-        } catch (IOException e) {
-            throw new RawContentFileRemovalFailureException(e);
         }
     }
 

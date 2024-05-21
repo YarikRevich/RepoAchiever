@@ -4,6 +4,7 @@ import com.repoachiever.converter.AdditionalContentFileToJsonConverter;
 import com.repoachiever.entity.common.AdditionalContentFileEntity;
 import com.repoachiever.entity.common.PropertiesEntity;
 import com.repoachiever.exception.*;
+import com.repoachiever.model.ContentRetrievalUnitRaw;
 import com.repoachiever.model.CredentialsFieldsFull;
 import com.repoachiever.model.Provider;
 import com.repoachiever.model.ContentCleanup;
@@ -16,6 +17,7 @@ import jakarta.inject.Inject;
 
 import java.io.*;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.zip.ZipEntry;
@@ -98,7 +100,7 @@ public class WorkspaceFacade {
         try {
             amount = workspaceService.getRawContentFilesAmount(workspaceUnitDirectory, location);
         } catch (RawContentFilesAmountRetrievalFailureException e) {
-            throw new RawContentCreationFailureException(e);
+            throw new RawContentCreationFailureException(e.getMessage());
         }
 
         try {
@@ -193,7 +195,7 @@ public class WorkspaceFacade {
         try {
             amount = workspaceService.getAdditionalContentFilesAmount(workspaceUnitDirectory, location);
         } catch (AdditionalContentFilesAmountRetrievalFailureException e) {
-            throw new AdditionalContentCreationFailureException(e);
+            throw new AdditionalContentCreationFailureException(e.getMessage());
         }
 
         try {
@@ -245,6 +247,30 @@ public class WorkspaceFacade {
      * @param workspaceUnitKey given user workspace unit key.
      * @throws ContentRemovalFailureException if content removal operation failed.
      */
+    public void removeContent(String workspaceUnitKey, String location) throws ContentRemovalFailureException {
+        if (workspaceService.isUnitDirectoryExist(workspaceUnitKey)) {
+            String workspaceUnitDirectory;
+
+            try {
+                workspaceUnitDirectory = workspaceService.getUnitDirectory(workspaceUnitKey);
+            } catch (WorkspaceUnitDirectoryNotFoundException e) {
+                throw new ContentRemovalFailureException(e.getMessage());
+            }
+
+            try {
+                workspaceService.removeContentDirectory(workspaceUnitDirectory, location);
+            } catch (ContentDirectoryRemovalFailureException e) {
+                throw new ContentRemovalFailureException(e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Removes all the content from the workspace with the help of the given workspace unit key.
+     *
+     * @param workspaceUnitKey given user workspace unit key.
+     * @throws ContentRemovalFailureException if content removal operation failed.
+     */
     public void removeAll(String workspaceUnitKey) throws ContentRemovalFailureException {
         try {
             workspaceService.removeUnitDirectory(workspaceUnitKey);
@@ -272,7 +298,7 @@ public class WorkspaceFacade {
                 try {
                     rawAmount = workspaceService.getRawContentFilesAmount(workspaceUnitDirectory, location);
                 } catch (RawContentFilesAmountRetrievalFailureException e) {
-                    throw new ContentAvailabilityRetrievalFailureException(e);
+                    throw new ContentAvailabilityRetrievalFailureException(e.getMessage());
                 }
 
                 rawResult = rawAmount != 0;
@@ -301,7 +327,7 @@ public class WorkspaceFacade {
                 try {
                     additionalAmount = workspaceService.getAdditionalContentFilesAmount(workspaceUnitDirectory, location);
                 } catch (AdditionalContentFilesAmountRetrievalFailureException e) {
-                    throw new ContentAvailabilityRetrievalFailureException(e);
+                    throw new ContentAvailabilityRetrievalFailureException(e.getMessage());
                 }
 
                 additionalResult = additionalAmount != 0;
@@ -335,6 +361,88 @@ public class WorkspaceFacade {
 
         return isRawContentAvailable(workspaceUnitDirectory, location) ||
                 isAdditionalContentAvailable(workspaceUnitDirectory, location);
+    }
+
+    /**
+     * Retrieves raw content units in the workspace with the given workspace unit key and location.
+     *
+     * @param workspaceUnitKey given user workspace unit key.
+     * @param location         given content location.
+     * @return retrieves raw content units.
+     * @throws RawContentUnitRetrievalFailureException if raw content unit retrieval failed.
+     */
+    public List<String> getRawContentUnits(String workspaceUnitKey, String location) throws
+            RawContentUnitRetrievalFailureException {
+        List<String> result = new ArrayList<>();
+
+        if (workspaceService.isUnitDirectoryExist(workspaceUnitKey)) {
+            String workspaceUnitDirectory;
+
+            try {
+                workspaceUnitDirectory = workspaceService.getUnitDirectory(workspaceUnitKey);
+            } catch (WorkspaceUnitDirectoryNotFoundException e) {
+                throw new RawContentUnitRetrievalFailureException(e.getMessage());
+            }
+
+            Boolean available;
+
+            try {
+                available = isRawContentAvailable(workspaceUnitDirectory, location);
+            } catch (ContentAvailabilityRetrievalFailureException e) {
+                throw new RawContentUnitRetrievalFailureException(e.getMessage());
+            }
+
+            if (available) {
+                try {
+                    result = workspaceService.getRawContentFilesLocations(workspaceUnitDirectory, location);
+                } catch (ContentFilesLocationsRetrievalFailureException e) {
+                    throw new RawContentUnitRetrievalFailureException(e.getMessage());
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Retrieves additional content units in the workspace with the given workspace unit key and location.
+     *
+     * @param workspaceUnitKey given user workspace unit key.
+     * @param location         given content location.
+     * @return retrieves additional content units.
+     * @throws AdditionalContentUnitRetrievalFailureException if additional content unit retrieval failed.
+     */
+    public List<String> getAdditionalContentUnits(String workspaceUnitKey, String location) throws
+            AdditionalContentUnitRetrievalFailureException {
+        List<String> result = new ArrayList<>();
+
+        if (workspaceService.isUnitDirectoryExist(workspaceUnitKey)) {
+            String workspaceUnitDirectory;
+
+            try {
+                workspaceUnitDirectory = workspaceService.getUnitDirectory(workspaceUnitKey);
+            } catch (WorkspaceUnitDirectoryNotFoundException e) {
+                throw new AdditionalContentUnitRetrievalFailureException(e.getMessage());
+            }
+
+            Boolean available;
+
+            try {
+                available = isAdditionalContentAvailable(workspaceUnitDirectory, location);
+            } catch (ContentAvailabilityRetrievalFailureException e) {
+                throw new AdditionalContentUnitRetrievalFailureException(e.getMessage());
+            }
+
+            if (available) {
+                try {
+                    result = workspaceService.getAdditionalContentFilesLocations(workspaceUnitDirectory, location);
+                } catch (ContentFilesLocationsRetrievalFailureException e) {
+                    throw new AdditionalContentUnitRetrievalFailureException(e.getMessage());
+                }
+            }
+        }
+
+        return result;
     }
 
     /**

@@ -69,6 +69,18 @@ public class ContentRepository {
     }
 
     /**
+     * Checks if additional is present by location.
+     *
+     * @param location given content location.
+     * @return result of the check.
+     * @throws RepositoryOperationFailureException if repository operation fails.
+     */
+    public Boolean isAdditionalPresent(String location) throws
+            RepositoryOperationFailureException {
+        return false;
+    }
+
+    /**
      * Retrieves all the persisted content entities with the given provider and secret.
      *
      * @return retrieved content entities.

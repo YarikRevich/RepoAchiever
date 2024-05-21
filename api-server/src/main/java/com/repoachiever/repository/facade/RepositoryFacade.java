@@ -1,5 +1,6 @@
 package com.repoachiever.repository.facade;
 
+import com.repoachiever.dto.RepositoryContentLocationUnitDto;
 import com.repoachiever.dto.RepositoryContentUnitDto;
 import com.repoachiever.entity.repository.ContentEntity;
 import com.repoachiever.entity.repository.ExporterEntity;
@@ -52,34 +53,78 @@ public class RepositoryFacade {
      *
      * @param contentRetrievalApplication given content retrieval application.
      * @return retrieved locations for the given configuration properties.
+     * @throws ContentLocationsRetrievalFailureException if content locations retrieval fails.
      */
-    public List<String> retrieveLocations(ContentRetrievalApplication contentRetrievalApplication) {
-        return null;
-    }
-
-    /**
-     * Checks if content location is present in content repository with the help of the given content download
-     * application.
-     *
-     * @param contentDownload given content download application.
-     * @return result of the check.
-     * @throws ContentValidationFailureException if content validation fails.
-     */
-    public Boolean isContentLocationValid(ContentDownload contentDownload) throws ContentValidationFailureException {
+    public List<RepositoryContentLocationUnitDto> retrieveLocations(
+            ContentRetrievalApplication contentRetrievalApplication) throws ContentLocationsRetrievalFailureException {
         ProviderEntity provider;
 
         try {
-            provider = providerRepository.findByName(contentDownload.getProvider().toString());
+            provider = providerRepository.findByName(contentRetrievalApplication.getProvider().toString());
+        } catch (RepositoryOperationFailureException e) {
+            throw new ContentLocationsRetrievalFailureException(e.getMessage());
+        }
+
+        Optional<String> credentials = RepositoryConfigurationHelper.getExternalCredentials(
+                contentRetrievalApplication.getProvider(),
+                contentRetrievalApplication.getCredentials().getExternal());
+
+        try {
+            if (!secretRepository.isPresentBySessionAndCredentials(
+                    contentRetrievalApplication.getCredentials().getInternal().getId(), credentials)) {
+                throw new ContentLocationsRetrievalFailureException();
+            }
+        } catch (RepositoryOperationFailureException e) {
+            throw new ContentLocationsRetrievalFailureException(e.getMessage());
+        }
+
+        SecretEntity secret;
+
+        try {
+            secret = secretRepository.findBySessionAndCredentials(
+                    contentRetrievalApplication.getCredentials().getInternal().getId(),
+                    credentials);
+        } catch (RepositoryOperationFailureException e) {
+            throw new ContentLocationsRetrievalFailureException(e.getMessage());
+        }
+
+        try {
+            return contentRepository
+                    .findByProviderAndSecret(provider.getId(), secret.getId())
+                    .stream()
+                    .map(element -> RepositoryContentLocationUnitDto.of(
+                            element.getLocation(), element.getAdditional()))
+                    .toList();
+        } catch (RepositoryOperationFailureException e) {
+            throw new ContentLocationsRetrievalFailureException(e);
+        }
+    }
+
+    /**
+     * Checks if content location is present in content repository with the help of the given properties.
+     *
+     * @param location    given content location.
+     * @param provider    given content provider.
+     * @param credentials given content credentials.
+     * @return result of the check.
+     * @throws ContentValidationFailureException if content validation fails.
+     */
+    public Boolean isContentLocationValid(
+            String location, Provider provider, CredentialsFieldsFull credentials) throws ContentValidationFailureException {
+        ProviderEntity rawProvider;
+
+        try {
+            rawProvider = providerRepository.findByName(provider.toString());
         } catch (RepositoryOperationFailureException e) {
             throw new ContentValidationFailureException(e.getMessage());
         }
 
-        Optional<String> credentials = RepositoryConfigurationHelper.getExternalCredentials(
-                contentDownload.getProvider(), contentDownload.getCredentials().getExternal());
+        Optional<String> rawCredentials = RepositoryConfigurationHelper.getExternalCredentials(
+                provider, credentials.getExternal());
 
         try {
             if (!secretRepository.isPresentBySessionAndCredentials(
-                    contentDownload.getCredentials().getInternal().getId(), credentials)) {
+                    credentials.getInternal().getId(), rawCredentials)) {
                 return false;
             }
         } catch (RepositoryOperationFailureException e) {
@@ -90,17 +135,17 @@ public class RepositoryFacade {
 
         try {
             secret = secretRepository.findBySessionAndCredentials(
-                    contentDownload.getCredentials().getInternal().getId(),
-                    credentials);
+                    credentials.getInternal().getId(),
+                    rawCredentials);
         } catch (RepositoryOperationFailureException e) {
             throw new ContentValidationFailureException(e.getMessage());
         }
 
         try {
             return contentRepository
-                    .findByProviderAndSecret(provider.getId(), secret.getId())
+                    .findByProviderAndSecret(rawProvider.getId(), secret.getId())
                     .stream()
-                    .anyMatch(element -> Objects.equals(element.getLocation(), contentDownload.getLocation()));
+                    .anyMatch(element -> Objects.equals(element.getLocation(), location));
         } catch (RepositoryOperationFailureException e) {
             throw new ContentValidationFailureException(e);
         }
