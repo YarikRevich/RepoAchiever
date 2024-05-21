@@ -321,13 +321,35 @@ public class WorkspaceService {
     }
 
     /**
+     * Retrieves content units locations in the given workspace unit.
+     *
+     * @param workspaceUnitDirectory given workspace unit directory.
+     * @return a list of content units locations.
+     * @throws ContentUnitsLocationsRetrievalFailureException if content units locations retrieval operation failed. .
+     */
+    public List<String> getContentUnitsLocations(String workspaceUnitDirectory) throws
+            ContentUnitsLocationsRetrievalFailureException {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Path.of(workspaceUnitDirectory))) {
+            List<String> result = new ArrayList<>();
+
+            for (Path file : stream) {
+                result.add(file.getFileName().toString());
+            }
+
+            return result;
+        } catch (IOException e) {
+            throw new ContentUnitsLocationsRetrievalFailureException(e.getMessage());
+        }
+    }
+
+    /**
      * Retrieves content files locations of the given type in the given workspace unit.
      *
      * @param workspaceUnitDirectory given workspace unit directory.
      * @param location               given file location.
      * @param type                   given file type.
      * @return a list of content locations.
-     * @throws ContentFilesLocationsRetrievalFailureException if files locations retrieval operation failed. .
+     * @throws ContentFilesLocationsRetrievalFailureException if content files locations retrieval operation failed. .
      */
     public List<String> getContentFilesLocations(String workspaceUnitDirectory, String location, String type) throws
             ContentFilesLocationsRetrievalFailureException {

@@ -32,7 +32,7 @@ public class ClusterFacade {
 
     @Inject
     PropertiesEntity properties;
-    
+
     @Inject
     RepositoryFacade repositoryFacade;
 
@@ -62,55 +62,62 @@ public class ClusterFacade {
             ClusterContentRetrievalFailureException {
         StateService.getTopologyStateGuard().lock();
 
-        List<RepositoryContentLocationUnitDto> locationUnits;
-
-        try {
-            locationUnits = repositoryFacade.retrieveLocations(contentRetrievalApplication);
-        } catch (ContentLocationsRetrievalFailureException e) {
-            StateService.getTopologyStateGuard().unlock();
-
-            throw new ClusterContentRetrievalFailureException(e.getMessage());
-        }
-
         String workspaceUnitKey =
                 workspaceFacade.createUnitKey(
                         contentRetrievalApplication.getProvider(), contentRetrievalApplication.getCredentials());
 
+        List<String> locationUnits;
+
+        try {
+            locationUnits = workspaceFacade.getContentUnits(workspaceUnitKey);
+        } catch (ContentUnitRetrievalFailureException e) {
+            throw new ClusterContentRetrievalFailureException(e.getMessage());
+        }
+
         ContentRetrievalResult result = new ContentRetrievalResult();
 
-        for (RepositoryContentLocationUnitDto locationUnit : locationUnits) {
+        for (String locationUnit : locationUnits) {
             List<String> rawContentUnits;
 
             try {
-                rawContentUnits = workspaceFacade.getRawContentUnits(workspaceUnitKey, locationUnit.getLocation());
+                rawContentUnits = workspaceFacade.getRawContentUnits(workspaceUnitKey, locationUnit);
             } catch (RawContentUnitRetrievalFailureException e) {
                 StateService.getTopologyStateGuard().unlock();
 
                 throw new ClusterContentRetrievalFailureException(e.getMessage());
             }
 
-            List<String> additionalContentUnits = new ArrayList<>();
+            List<String> additionalContentUnits;
 
-            if (locationUnit.getAdditional()) {
-                try {
-                    additionalContentUnits = workspaceFacade.getAdditionalContentUnits(
-                            workspaceUnitKey, locationUnit.getLocation());
-                } catch (AdditionalContentUnitRetrievalFailureException e) {
-                    StateService.getTopologyStateGuard().unlock();
+            try {
+                additionalContentUnits = workspaceFacade.getAdditionalContentUnits(
+                        workspaceUnitKey, locationUnit);
+            } catch (AdditionalContentUnitRetrievalFailureException e) {
+                StateService.getTopologyStateGuard().unlock();
 
-                    throw new ClusterContentRetrievalFailureException(e.getMessage());
-                }
+                throw new ClusterContentRetrievalFailureException(e.getMessage());
+            }
+
+            Boolean active = false;
+
+            try {
+                active = repositoryFacade.isContentLocationValid(
+                        locationUnit,
+                        contentRetrievalApplication.getProvider(),
+                        contentRetrievalApplication.getCredentials());
+            } catch (ContentValidationFailureException ignored) {
             }
 
             result.addLocationsItem(
                     ContentRetrievalUnit.of(
-                            locationUnit.getLocation(),
+                            locationUnit,
+                            active,
                             ContentRetrievalUnitRaw.of(rawContentUnits),
                             ContentRetrievalUnitAdditional.of(additionalContentUnits)));
         }
 
         StateService.getTopologyStateGuard().unlock();
-        
+
         return result;
     }
 
@@ -516,20 +523,6 @@ public class ClusterFacade {
         StateService.getTopologyStateGuard().lock();
 
         logger.info(String.format("Retrieving content for '%s' location", contentDownload.getLocation()));
-
-        try {
-            if (!repositoryFacade.isContentLocationValid(
-                    contentDownload.getLocation(), contentDownload.getProvider(), contentDownload.getCredentials())) {
-                StateService.getTopologyStateGuard().unlock();
-
-                throw new ClusterContentReferenceRetrievalFailureException(
-                        new ContentLocationIsNotValidException().getMessage());
-            }
-        } catch (ContentValidationFailureException e) {
-            StateService.getTopologyStateGuard().unlock();
-
-            throw new ClusterContentReferenceRetrievalFailureException(e.getMessage());
-        }
 
         String workspaceUnitKey =
                 workspaceFacade.createUnitKey(contentDownload.getProvider(), contentDownload.getCredentials());

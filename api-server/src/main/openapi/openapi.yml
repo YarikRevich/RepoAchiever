@@ -242,6 +242,8 @@ components:
       properties:
         name:
           type: string
+        active:
+          type: boolean
         raw:
           $ref: "#/components/schemas/ContentRetrievalUnitRaw"
         additional:

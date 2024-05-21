@@ -364,6 +364,36 @@ public class WorkspaceFacade {
     }
 
     /**
+     * Retrieves content units in the workspace with the given workspace unit key and location.
+     *
+     * @param workspaceUnitKey given user workspace unit key.
+     * @return retrieves content units.
+     * @throws ContentUnitRetrievalFailureException if content unit retrieval failed.
+     */
+    public List<String> getContentUnits(String workspaceUnitKey) throws
+            ContentUnitRetrievalFailureException {
+        List<String> result = new ArrayList<>();
+
+        if (workspaceService.isUnitDirectoryExist(workspaceUnitKey)) {
+            String workspaceUnitDirectory;
+
+            try {
+                workspaceUnitDirectory = workspaceService.getUnitDirectory(workspaceUnitKey);
+            } catch (WorkspaceUnitDirectoryNotFoundException e) {
+                throw new ContentUnitRetrievalFailureException(e.getMessage());
+            }
+
+            try {
+                result = workspaceService.getContentUnitsLocations(workspaceUnitDirectory);
+            } catch (ContentUnitsLocationsRetrievalFailureException e) {
+                throw new ContentUnitRetrievalFailureException(e.getMessage());
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Retrieves raw content units in the workspace with the given workspace unit key and location.
      *
      * @param workspaceUnitKey given user workspace unit key.
