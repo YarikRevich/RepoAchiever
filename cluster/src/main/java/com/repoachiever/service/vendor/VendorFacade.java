@@ -1,11 +1,13 @@
 package com.repoachiever.service.vendor;
 
 import com.repoachiever.dto.GitHubLocationNotationDto;
+import com.repoachiever.entity.PropertiesEntity;
 import com.repoachiever.exception.GitHubContentRetrievalFailureException;
 import com.repoachiever.exception.LocationDefinitionsAreNotValidException;
 import com.repoachiever.service.config.ConfigService;
 import com.repoachiever.service.vendor.common.VendorConfigurationHelper;
 import com.repoachiever.service.vendor.git.github.GitGitHubVendorService;
+import lombok.ToString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,9 @@ import java.util.Optional;
 @Service
 public class VendorFacade {
     @Autowired
+    private PropertiesEntity properties;
+
+    @Autowired
     private ConfigService configService;
 
     @Autowired
@@ -26,6 +31,18 @@ public class VendorFacade {
 
     @Autowired
     private GitGitHubVendorService gitGitHubVendorService;
+
+    /**
+     * Checks if provided vendor provider is available.
+     *
+     * @return result of the check.
+     */
+    public Boolean isVendorAvailable() {
+        return switch (configService.getConfig().getService().getProvider()) {
+            case EXPORTER -> null;
+            case GIT_GITHUB -> vendorConfigurationHelper.isVendorAvailable(properties.getRestClientGitHubUrl());
+        };
+    }
 
     /**
      * Retrieves latest record for the repository with the given raw location definition.

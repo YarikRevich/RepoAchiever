@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.util.concurrent.*;
 
 /**
@@ -32,8 +33,7 @@ public class SchedulerConfigService {
     @Autowired
     private ApiServerCommunicationResource apiServerCommunicationResource;
 
-    private final ScheduledExecutorService starterScheduledExecutorService =
-            Executors.newScheduledThreadPool(0, Thread.ofVirtual().factory());
+    private final ExecutorService starterExecutorService = Executors.newVirtualThreadPerTaskExecutor();
 
     private final ScheduledExecutorService operationScheduledExecutorService =
             Executors.newScheduledThreadPool(0, Thread.ofVirtual().factory());
@@ -62,10 +62,36 @@ public class SchedulerConfigService {
                                     element.getName(),
                                     element.getAdditional())));
 
-            starterScheduledExecutorService.execute(() -> {
+            StateService.addSuspender(element.getName());
+
+            starterExecutorService.execute(() -> {
                 CountDownLatch closable = new CountDownLatch(1);
 
-                ScheduledFuture<?> execution = operationScheduledExecutorService.scheduleAtFixedRate(() -> {
+                ScheduledFuture<?> execution = operationScheduledExecutorService.scheduleWithFixedDelay(() -> {
+//                    if (StateService.getSuspended().get()) {
+//                        CountDownLatch awaiter = StateService
+//                                .getSuspenderByName(element.getName())
+//                                .getAwaiter()
+//                                .get();
+//
+//                        if (awaiter.getCount() > 0) {
+//                            awaiter.countDown();
+//                        }
+//
+//                        return;
+//                    }
+
+                    if (!vendorFacade.isVendorAvailable()) {
+                        logger.info(
+                                LoggingConfigurationHelper.getTransferableMessage(
+                                        String.format("Remote provider '%s' is not available: '%s'",
+                                                configService.getConfig().getService().getProvider().toString(),
+                                                element.getName())
+                                ));
+
+                        return;
+                    }
+
                     Integer commitAmount;
 
                     try {
@@ -108,8 +134,6 @@ public class SchedulerConfigService {
 
                             return;
                         }
-
-                        StateService.getContentUpdatesHeadCounterSet().put(element.getName(), commitAmount);
 
                         Boolean contentPresent = false;
 
@@ -172,6 +196,8 @@ public class SchedulerConfigService {
                                                     "Record content transfer finished for '%s' location and '%s' record",
                                                     element.getName(),
                                                     record)));
+
+                            StateService.setContentUpdatesHeadCounter(element.getName(), commitAmount);
                         }
                     }
                 }, 0, period, TimeUnit.MILLISECONDS);

@@ -1,5 +1,6 @@
 package com.repoachiever.service.vendor;
 
+import com.repoachiever.entity.common.PropertiesEntity;
 import com.repoachiever.model.CredentialsFieldsExternal;
 import com.repoachiever.model.Provider;
 import com.repoachiever.service.vendor.common.VendorConfigurationHelper;
@@ -15,10 +16,25 @@ import java.util.List;
 @ApplicationScoped
 public class VendorFacade {
     @Inject
+    PropertiesEntity properties;
+
+    @Inject
     VendorConfigurationHelper vendorConfigurationHelper;
 
     @Inject
     GitGitHubVendorService gitGitHubVendorService;
+
+    /**
+     * Checks if provided vendor provider is available.
+     *
+     * @return result of the check.
+     */
+    public Boolean isVendorAvailable(Provider provider) {
+        return switch (provider) {
+            case EXPORTER -> null;
+            case GIT_GITHUB -> vendorConfigurationHelper.isVendorAvailable(properties.getRestClientGitHubUrl());
+        };
+    }
 
     /**
      * Checks if the given external credentials are valid, according to the given provider name.

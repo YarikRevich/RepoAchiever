@@ -21,8 +21,6 @@ import java.rmi.registry.Registry;
  */
 @ApplicationScoped
 public class ClusterCommunicationResource {
-    private static final Logger logger = LogManager.getLogger(ClusterCommunicationResource.class);
-
     @Inject
     ConfigService configService;
 
@@ -95,6 +93,22 @@ public class ClusterCommunicationResource {
     }
 
     /**
+     * Performs RepoAchiever Cluster content retrieval reset operation.
+     *
+     * @param name given name of RepoAchiever Cluster.
+     * @throws ClusterOperationFailureException if RepoAchiever Cluster operation fails.
+     */
+    public void performRetrievalReset(String name) throws ClusterOperationFailureException {
+        IClusterCommunicationService allocation = retrieveAllocation(name);
+
+        try {
+            allocation.performRetrievalReset();
+        } catch (RemoteException e) {
+            throw new ClusterOperationFailureException(e.getMessage());
+        }
+    }
+
+    /**
      * Retrieves health check status of the RepoAchiever Cluster with the given name.
      *
      * @param name given name of RepoAchiever Cluster.
@@ -123,23 +137,6 @@ public class ClusterCommunicationResource {
 
         try {
             return allocation.retrieveVersion();
-        } catch (RemoteException e) {
-            throw new ClusterOperationFailureException(e.getMessage());
-        }
-    }
-
-    /**
-     * Retrieves amount of RepoAchiever Worker owned by RepoAchiever Cluster with the given name.
-     *
-     * @param name given name of RepoAchiever Cluster.
-     * @return retrieved amount of RepoAchiever Worker owned by RepoAchiever Cluster allocation.
-     * @throws ClusterOperationFailureException if RepoAchiever Cluster operation fails.
-     */
-    public Integer retrieveWorkerAmount(String name) throws ClusterOperationFailureException {
-        IClusterCommunicationService allocation = retrieveAllocation(name);
-
-        try {
-            return allocation.retrieveWorkerAmount();
         } catch (RemoteException e) {
             throw new ClusterOperationFailureException(e.getMessage());
         }

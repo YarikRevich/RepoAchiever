@@ -25,15 +25,20 @@ import org.springframework.core.io.Resource;
 import org.springframework.graphql.client.HttpGraphQlClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.http.client.reactive.JdkClientHttpConnector;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.http.HttpClient;
 import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.HashMap;
@@ -44,6 +49,8 @@ import java.util.Objects;
  */
 @Service
 public class GitGitHubVendorService {
+    private static final Logger logger = LogManager.getLogger(GitGitHubVendorService.class);
+
     @Autowired
     private PropertiesEntity properties;
 
@@ -125,6 +132,8 @@ public class GitGitHubVendorService {
                     .operationName("LatestCommitHash")
                     .retrieve("repository")
                     .toEntity(GitHubLatestCommitHashResponseDto.class)
+                    .timeout(Duration.ofSeconds(properties.getGraphQlClientTimeout()))
+                    .onErrorResume(element -> Mono.empty())
                     .block();
 
         } catch (WebClientResponseException e) {
@@ -171,6 +180,8 @@ public class GitGitHubVendorService {
                     .operationName("DefaultBranch")
                     .retrieve("repository")
                     .toEntity(GitHubDefaultBranchResponseDto.class)
+                    .timeout(Duration.ofSeconds(properties.getGraphQlClientTimeout()))
+                    .onErrorResume(element -> Mono.empty())
                     .block();
 
         } catch (WebClientResponseException e) {
@@ -215,6 +226,8 @@ public class GitGitHubVendorService {
                     .operationName("CommitAmount")
                     .retrieve("repository")
                     .toEntity(GitHubCommitAmountResponseDto.class)
+                    .timeout(Duration.ofSeconds(properties.getGraphQlClientTimeout()))
+                    .onErrorResume(element -> Mono.empty())
                     .block();
 
         } catch (WebClientResponseException e) {

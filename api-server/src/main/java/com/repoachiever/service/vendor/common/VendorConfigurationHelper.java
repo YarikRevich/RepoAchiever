@@ -5,6 +5,8 @@ import com.repoachiever.entity.common.PropertiesEntity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import java.io.IOException;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -53,5 +55,22 @@ public class VendorConfigurationHelper {
                 matcher.group(1),
                 matcher.group(2),
                 Optional.empty());
+    }
+
+    /**
+     * Checks if given vendor external API is available.
+     *
+     * @param base given vendor external API base.
+     * @return result of the check.
+     */
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public Boolean isVendorAvailable(String base) {
+        try {
+            InetAddress.getByName(base);
+        } catch (IOException e) {
+            return false;
+        }
+
+        return true;
     }
 }

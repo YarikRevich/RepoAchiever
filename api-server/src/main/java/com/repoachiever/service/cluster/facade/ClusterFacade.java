@@ -150,6 +150,7 @@ public class ClusterFacade {
 
             } catch (ClusterOperationFailureException e) {
                 logger.fatal(new ClusterApplicationFailureException(e.getMessage()).getMessage());
+
                 return;
             }
 
@@ -220,6 +221,7 @@ public class ClusterFacade {
                         clusterCommunicationResource.performServe(suspended.getName());
                     } catch (ClusterOperationFailureException e2) {
                         logger.fatal(new ClusterApplicationFailureException(e1.getMessage(), e2.getMessage()).getMessage());
+
                         return;
                     }
 
@@ -231,6 +233,16 @@ public class ClusterFacade {
                 StateService.getTopologyStateGuard().unlock();
 
                 throw new ClusterApplicationFailureException(e1.getMessage());
+            }
+
+            for (LocationsUnit location : locations) {
+                try {
+                    workspaceFacade.createContentDirectory(workspaceUnitKey, location.getName());
+                } catch (UnitDirectoryCreationFailureException e) {
+                    logger.fatal(new ClusterApplicationFailureException(e.getMessage()).getMessage());
+
+                    return;
+                }
             }
 
             candidates.add(ClusterAllocationDto.of(name, workspaceUnitKey, locations, pid, context));
@@ -256,6 +268,7 @@ public class ClusterFacade {
                     } catch (ClusterOperationFailureException e2) {
                         logger.fatal(new ClusterApplicationFailureException(
                                 e1.getMessage(), e2.getMessage()).getMessage());
+
                         return;
                     }
 
@@ -411,6 +424,7 @@ public class ClusterFacade {
 
         } catch (ClusterOperationFailureException e) {
             logger.fatal(new ClusterCleanupFailureException(e.getMessage()).getMessage());
+
             return;
         }
 
@@ -428,6 +442,18 @@ public class ClusterFacade {
 
         logger.info(
                 String.format(
+                        "Resetting RepoAchiever Cluster content retrieval: '%s'", clusterAllocation.getName()));
+
+        try {
+            clusterCommunicationResource.performRetrievalReset(clusterAllocation.getName());
+        } catch (ClusterOperationFailureException e) {
+            logger.fatal(new ClusterCleanupFailureException(e.getMessage()).getMessage());
+
+            return;
+        }
+
+        logger.info(
+                String.format(
                         "Setting RepoAchiever Cluster suspended allocation to serve state: '%s'",
                         clusterAllocation.getName()));
 
@@ -435,6 +461,7 @@ public class ClusterFacade {
             clusterCommunicationResource.performServe(clusterAllocation.getName());
         } catch (ClusterOperationFailureException e) {
             logger.fatal(new ClusterCleanupFailureException(e.getMessage()).getMessage());
+
             return;
         }
 
@@ -471,6 +498,7 @@ public class ClusterFacade {
 
             } catch (ClusterOperationFailureException e) {
                 logger.fatal(new ClusterFullCleanupFailureException(e.getMessage()).getMessage());
+
                 return;
             }
 
@@ -492,6 +520,18 @@ public class ClusterFacade {
         for (ClusterAllocationDto suspended : suspends) {
             logger.info(
                     String.format(
+                            "Resetting RepoAchiever Cluster content retrieval: '%s'", suspended.getName()));
+
+            try {
+                clusterCommunicationResource.performRetrievalReset(suspended.getName());
+            } catch (ClusterOperationFailureException e) {
+                logger.fatal(new ClusterCleanupFailureException(e.getMessage()).getMessage());
+
+                return;
+            }
+
+            logger.info(
+                    String.format(
                             "Setting RepoAchiever Cluster suspended allocation to serve state: '%s'",
                             suspended.getName()));
 
@@ -499,6 +539,7 @@ public class ClusterFacade {
                 clusterCommunicationResource.performServe(suspended.getName());
             } catch (ClusterOperationFailureException e) {
                 logger.fatal(new ClusterFullCleanupFailureException(e.getMessage()).getMessage());
+
                 return;
             }
 

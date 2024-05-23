@@ -4,9 +4,14 @@ import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import com.repoachiever.dto.GitHubLocationNotationDto;
 import com.repoachiever.entity.PropertiesEntity;
 import com.repoachiever.exception.LocationDefinitionsAreNotValidException;
+import com.repoachiever.logging.common.LoggingConfigurationHelper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.net.InetAddress;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -57,5 +62,22 @@ public class VendorConfigurationHelper {
                 matcher.group(1),
                 matcher.group(2),
                 Optional.empty());
+    }
+
+    /**
+     * Checks if given vendor external API is available.
+     *
+     * @param base given vendor external API base.
+     * @return result of the check.
+     */
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public Boolean isVendorAvailable(String base) {
+        try {
+            InetAddress.getByName(base);
+        } catch (IOException e) {
+            return false;
+        }
+
+        return true;
     }
 }

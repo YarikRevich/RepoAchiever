@@ -50,16 +50,16 @@ public class WorkspaceService {
     }
 
     /**
-     * Creates raw content directory in the given workspace unit directory and location.
+     * Creates content unit directory in the given workspace unit directory.
      *
      * @param workspaceUnitDirectory given workspace unit directory.
-     * @param location               given raw content location.
-     * @throws WorkspaceContentDirectoryCreationFailureException if workspace raw content directory creation operation
-     *                                                           failed.
+     * @param location               given content location.
+     * @throws WorkspaceContentDirectoryCreationFailureException if workspace content unit directory creation
+     *                                                           operation failed.
      */
-    public void createRawContentDirectory(String workspaceUnitDirectory, String location) throws
+    public void createContentDirectory(String workspaceUnitDirectory, String location) throws
             WorkspaceContentDirectoryCreationFailureException {
-        Path unitDirectoryPath = Path.of(workspaceUnitDirectory, location, properties.getWorkspaceRawContentDirectory());
+        Path unitDirectoryPath = Path.of(workspaceUnitDirectory, location);
 
         if (Files.notExists(unitDirectoryPath)) {
             try {
@@ -71,17 +71,17 @@ public class WorkspaceService {
     }
 
     /**
-     * Creates raw content unit directory in the given workspace unit directory.
+     * Creates raw content directory in the given workspace unit directory and location.
      *
      * @param workspaceUnitDirectory given workspace unit directory.
      * @param location               given raw content location.
-     * @throws WorkspaceContentDirectoryCreationFailureException if workspace raw content unit directory creation
-     *                                                           operation failed.
+     * @throws WorkspaceContentDirectoryCreationFailureException if workspace raw content directory creation operation
+     *                                                           failed.
      */
-    public void createRawContentUnitDirectory(String workspaceUnitDirectory, String location) throws
+    public void createRawContentDirectory(String workspaceUnitDirectory, String location) throws
             WorkspaceContentDirectoryCreationFailureException {
         Path unitDirectoryPath = Path.of(
-                workspaceUnitDirectory, location);
+                workspaceUnitDirectory, location, properties.getWorkspaceRawContentDirectory());
 
         if (Files.notExists(unitDirectoryPath)) {
             try {
@@ -101,28 +101,6 @@ public class WorkspaceService {
      *                                                           operation failed.
      */
     public void createAdditionalContentDirectory(String workspaceUnitDirectory, String location) throws
-            WorkspaceContentDirectoryCreationFailureException {
-        Path unitDirectoryPath = Path.of(
-                workspaceUnitDirectory, location, properties.getWorkspaceAdditionalContentDirectory());
-
-        if (Files.notExists(unitDirectoryPath)) {
-            try {
-                Files.createDirectory(unitDirectoryPath);
-            } catch (IOException e) {
-                throw new WorkspaceContentDirectoryCreationFailureException(e.getMessage());
-            }
-        }
-    }
-
-    /**
-     * Creates additional content unit directory in the given workspace unit directory.
-     *
-     * @param workspaceUnitDirectory given workspace unit directory.
-     * @param location               given additional content location.
-     * @throws WorkspaceContentDirectoryCreationFailureException if workspace additional content unit directory creation
-     *                                                           operation failed.
-     */
-    public void createAdditionalContentUnitDirectory(String workspaceUnitDirectory, String location) throws
             WorkspaceContentDirectoryCreationFailureException {
         Path unitDirectoryPath = Path.of(
                 workspaceUnitDirectory, location, properties.getWorkspaceAdditionalContentDirectory());
@@ -196,6 +174,17 @@ public class WorkspaceService {
     }
 
     /**
+     * Checks if content unit exists with the help of the given key and location.
+     *
+     * @param workspaceUnitDirectory given workspace unit directory.
+     * @param location               given content location.
+     * @return result if content directory exists with the help of the given key and location.
+     */
+    public Boolean isContentDirectoryExist(String workspaceUnitDirectory, String location) {
+        return Files.exists(Paths.get(workspaceUnitDirectory, location));
+    }
+
+    /**
      * Checks if raw content directory exists with the help of the given key and location.
      *
      * @param workspaceUnitDirectory given workspace unit directory.
@@ -208,18 +197,6 @@ public class WorkspaceService {
     }
 
     /**
-     * Checks if raw content unit exists with the help of the given key and location.
-     *
-     * @param workspaceUnitDirectory given workspace unit directory.
-     * @param location               given raw content location.
-     * @return result if raw content directory exists with the help of the given key and location.
-     */
-    public Boolean isRawContentUnitExist(String workspaceUnitDirectory, String location) {
-        return Files.exists(
-                Paths.get(workspaceUnitDirectory, location));
-    }
-
-    /**
      * Checks if additional content directory exists with the help of the given key and location.
      *
      * @param workspaceUnitDirectory given workspace unit directory.
@@ -229,18 +206,6 @@ public class WorkspaceService {
     public Boolean isAdditionalContentDirectoryExist(String workspaceUnitDirectory, String location) {
         return Files.exists(
                 Paths.get(workspaceUnitDirectory, location, properties.getWorkspaceAdditionalContentDirectory()));
-    }
-
-    /**
-     * Checks if additional content unit exists with the help of the given key and location.
-     *
-     * @param workspaceUnitDirectory given workspace unit directory.
-     * @param location               given additional content location.
-     * @return result if additional content directory exists with the help of the given key and location.
-     */
-    public Boolean isAdditionalContentUnitExist(String workspaceUnitDirectory, String location) {
-        return Files.exists(
-                Paths.get(workspaceUnitDirectory, location));
     }
 
     /**

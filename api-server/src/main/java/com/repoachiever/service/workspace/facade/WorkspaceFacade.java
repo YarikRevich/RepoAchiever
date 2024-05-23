@@ -53,6 +53,39 @@ public class WorkspaceFacade {
     }
 
     /**
+     * Adds new content directory for the given workspace unit key and location.
+     *
+     * @param workspaceUnitKey given user workspace unit key.
+     * @param location given content location.
+     * @throws UnitDirectoryCreationFailureException if content directory creation failed.
+     */
+    public void createContentDirectory(String workspaceUnitKey, String location) throws UnitDirectoryCreationFailureException {
+        if (!workspaceService.isUnitDirectoryExist(workspaceUnitKey)) {
+            try {
+                workspaceService.createUnitDirectory(workspaceUnitKey);
+            } catch (WorkspaceUnitDirectoryCreationFailureException e) {
+                throw new UnitDirectoryCreationFailureException(e.getMessage());
+            }
+        }
+
+        String workspaceUnitDirectory;
+
+        try {
+            workspaceUnitDirectory = workspaceService.getUnitDirectory(workspaceUnitKey);
+        } catch (WorkspaceUnitDirectoryNotFoundException e) {
+            throw new UnitDirectoryCreationFailureException(e.getMessage());
+        }
+
+        if (!workspaceService.isContentDirectoryExist(workspaceUnitDirectory, location)) {
+            try {
+                workspaceService.createContentDirectory(workspaceUnitDirectory, location);
+            } catch (WorkspaceContentDirectoryCreationFailureException e) {
+                throw new UnitDirectoryCreationFailureException(e.getMessage());
+            }
+        }
+    }
+
+    /**
      * Adds new version of raw content file as the raw input stream.
      *
      * @param workspaceUnitKey given user workspace unit key.
@@ -77,14 +110,6 @@ public class WorkspaceFacade {
             workspaceUnitDirectory = workspaceService.getUnitDirectory(workspaceUnitKey);
         } catch (WorkspaceUnitDirectoryNotFoundException e) {
             throw new RawContentCreationFailureException(e.getMessage());
-        }
-
-        if (!workspaceService.isRawContentUnitExist(workspaceUnitDirectory, location)) {
-            try {
-                workspaceService.createRawContentUnitDirectory(workspaceUnitDirectory, location);
-            } catch (WorkspaceContentDirectoryCreationFailureException e) {
-                throw new RawContentCreationFailureException(e.getMessage());
-            }
         }
 
         if (!workspaceService.isRawContentDirectoryExist(workspaceUnitDirectory, location)) {
@@ -172,14 +197,6 @@ public class WorkspaceFacade {
             workspaceUnitDirectory = workspaceService.getUnitDirectory(workspaceUnitKey);
         } catch (WorkspaceUnitDirectoryNotFoundException e) {
             throw new AdditionalContentCreationFailureException(e.getMessage());
-        }
-
-        if (!workspaceService.isAdditionalContentUnitExist(workspaceUnitDirectory, location)) {
-            try {
-                workspaceService.createAdditionalContentUnitDirectory(workspaceUnitDirectory, location);
-            } catch (WorkspaceContentDirectoryCreationFailureException e) {
-                throw new AdditionalContentCreationFailureException(e.getMessage());
-            }
         }
 
         if (!workspaceService.isAdditionalContentDirectoryExist(workspaceUnitDirectory, location)) {
@@ -291,7 +308,7 @@ public class WorkspaceFacade {
             ContentAvailabilityRetrievalFailureException {
         Boolean rawResult = false;
 
-        if (workspaceService.isRawContentUnitExist(workspaceUnitDirectory, location)) {
+        if (workspaceService.isContentDirectoryExist(workspaceUnitDirectory, location)) {
             if (workspaceService.isRawContentDirectoryExist(workspaceUnitDirectory, location)) {
                 Integer rawAmount;
 
@@ -320,7 +337,7 @@ public class WorkspaceFacade {
             ContentAvailabilityRetrievalFailureException {
         Boolean additionalResult = false;
 
-        if (workspaceService.isAdditionalContentUnitExist(workspaceUnitDirectory, location)) {
+        if (workspaceService.isContentDirectoryExist(workspaceUnitDirectory, location)) {
             if (workspaceService.isAdditionalContentDirectoryExist(workspaceUnitDirectory, location)) {
                 Integer additionalAmount;
 

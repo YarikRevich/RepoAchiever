@@ -98,6 +98,7 @@ public class TelemetryConfigService {
                     connection.setSoTimeout(properties.getDiagnosticsMetricsConnectionTimeout());
                 } catch (SocketException e) {
                     logger.error(new TelemetryOperationFailureException(e.getMessage()).getMessage());
+
                     return;
                 }
 
@@ -109,15 +110,18 @@ public class TelemetryConfigService {
                                 new OutputStreamWriter(connection.getOutputStream(), StandardCharsets.UTF_8);
                     } catch (IOException e) {
                         logger.error(new TelemetryOperationFailureException(e.getMessage()).getMessage());
+
                         return;
                     }
 
                     BufferedReader inputStreamReader;
+
                     try {
                         inputStreamReader = new BufferedReader(
                                 new InputStreamReader(connection.getInputStream()));
                     } catch (IOException e) {
                         logger.error(new TelemetryOperationFailureException(e.getMessage()).getMessage());
+
                         return;
                     }
 
@@ -134,6 +138,7 @@ public class TelemetryConfigService {
                         outputStreamWriter.flush();
                     } catch (IOException e) {
                         logger.error(new TelemetryOperationFailureException(e.getMessage()).getMessage());
+
                         return;
                     }
 
@@ -141,6 +146,7 @@ public class TelemetryConfigService {
                         inputStreamReader.readLine();
                     } catch (IOException e) {
                         logger.error(new TelemetryOperationFailureException(e.getMessage()).getMessage());
+
                         return;
                     }
 
@@ -148,6 +154,7 @@ public class TelemetryConfigService {
                         inputStreamReader.close();
                     } catch (IOException e) {
                         logger.error(new TelemetryOperationFailureException(e.getMessage()).getMessage());
+
                         return;
                     }
 
@@ -155,6 +162,7 @@ public class TelemetryConfigService {
                         outputStreamWriter.close();
                     } catch (IOException e) {
                         logger.error(new TelemetryOperationFailureException(e.getMessage()).getMessage());
+
                         return;
                     }
 

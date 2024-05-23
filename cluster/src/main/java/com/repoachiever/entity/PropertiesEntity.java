@@ -19,6 +19,9 @@ public class PropertiesEntity {
     @Value(value = "${REPOACHIEVER_CLUSTER_CONTEXT:null}")
     private String clusterContext;
 
+    @Value(value = "${github.connection-probe.timeout}")
+    Integer gitHubConnectionProbeTimeout;
+
     @Value(value = "${rest-client.github.url}")
     String restClientGitHubUrl;
 
@@ -27,6 +30,9 @@ public class PropertiesEntity {
 
     @Value(value = "${graphql-client.github.url}")
     String graphQlClientGitHubUrl;
+
+    @Value(value = "${graphql-client.timeout}")
+    Integer graphQlClientTimeout;
 
     @Value(value = "${graphql-client.github.document.location}")
     String graphQlClientGitHubDocumentLocation;

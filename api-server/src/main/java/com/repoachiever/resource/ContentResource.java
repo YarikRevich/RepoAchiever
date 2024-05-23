@@ -93,6 +93,10 @@ public class ContentResource implements ContentResourceApi {
             throw new LocationDefinitionsAreNotValidException();
         }
 
+        if (!vendorFacade.isVendorAvailable(contentApplication.getProvider())) {
+            throw new ProviderIsNotAvailableException();
+        }
+
         if (!vendorFacade.isExternalCredentialsValid(
                 contentApplication.getProvider(), contentApplication.getCredentials().getExternal())) {
             throw new CredentialsAreNotValidException();
@@ -173,6 +177,10 @@ public class ContentResource implements ContentResourceApi {
             throw new CredentialsFieldIsNotValidException();
         }
 
+        if (!vendorFacade.isVendorAvailable(contentCleanup.getProvider())) {
+            throw new ProviderIsNotAvailableException();
+        }
+
         if (!vendorFacade.isExternalCredentialsValid(
                 contentCleanup.getProvider(), contentCleanup.getCredentials().getExternal())) {
             throw new CredentialsAreNotValidException();
@@ -196,6 +204,10 @@ public class ContentResource implements ContentResourceApi {
         if (!resourceConfigurationHelper.isExternalCredentialsFieldValid(
                 contentCleanupAll.getProvider(), contentCleanupAll.getCredentials().getExternal())) {
             throw new CredentialsFieldIsNotValidException();
+        }
+
+        if (!vendorFacade.isVendorAvailable(contentCleanupAll.getProvider())) {
+            throw new ProviderIsNotAvailableException();
         }
 
         if (!vendorFacade.isExternalCredentialsValid(

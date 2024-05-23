@@ -25,20 +25,23 @@ import java.util.Arrays;
  */
 @Service
 public class ApiServerCommunicationResource {
-    private static final Logger logger = LogManager.getLogger(ApiServerCommunicationResource.class);
-
     @Autowired
     private ConfigService configService;
 
     private Registry registry;
 
+    /**
+     * Configures RepoAchiever API Server communication registry.
+     *
+     * @throws CommunicationConfigurationFailureException if RepoAchiever API Server communication failed.
+     */
     @PostConstruct
-    private void configure() {
+    private void configure() throws CommunicationConfigurationFailureException {
         try {
             this.registry = LocateRegistry.getRegistry(
                     configService.getConfig().getCommunication().getPort());
         } catch (RemoteException e) {
-            logger.fatal(new CommunicationConfigurationFailureException(e.getMessage()).getMessage());
+            throw new CommunicationConfigurationFailureException(e.getMessage());
         }
     }
 

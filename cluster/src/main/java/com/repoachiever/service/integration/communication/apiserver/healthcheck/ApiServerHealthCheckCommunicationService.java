@@ -48,7 +48,8 @@ public class ApiServerHealthCheckCommunicationService {
                 }
 
             } catch (ApiServerOperationFailureException e) {
-                logger.fatal(e.getMessage());
+                ((ConfigurableApplicationContext) applicationContext).close();
+                System.exit(1);
             }
         }, 0, properties.getCommunicationApiServerHealthCheckFrequency(), TimeUnit.MILLISECONDS);
     }

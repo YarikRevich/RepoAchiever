@@ -20,6 +20,9 @@ public class PropertiesEntity {
     @ConfigProperty(name = "quarkus.http.port")
     Integer applicationPort;
 
+    @ConfigProperty(name = "quarkus.rest-client.github.url")
+    String restClientGitHubUrl;
+
     @ConfigProperty(name = "github.location.notation")
     String gitHubLocationNotation;
 
