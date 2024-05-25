@@ -36,23 +36,17 @@ public class ClusterCommunicationResource extends UnicastRemoteObject implements
         StateService.getSuspendGuard().lock();
 
         StateService.getSuspended().set(true);
-//
-//        for (SuspenderDto suspender : StateService.getSuspenders()) {
-//            try {
-//                suspender
-//                        .getAwaiter()
-//                        .get()
-//                        .await();
-//            } catch (InterruptedException e) {
-//                throw new RemoteException(e.getMessage());
-//            }
-//
-//            logger.info(
-//                    LoggingConfigurationHelper
-//                            .getTransferableMessage(
-//                                    String.format("RepoAchiever Cluster allocation '%s' is suspended",
-//                                            suspender.getName())));
-//        }
+
+        for (SuspenderDto suspender : StateService.getSuspenders()) {
+            try {
+                suspender
+                        .getAwaiter()
+                        .get()
+                        .await();
+            } catch (InterruptedException e) {
+                throw new RemoteException(e.getMessage());
+            }
+        }
 
         StateService.getSuspendGuard().unlock();
     }
@@ -65,18 +59,6 @@ public class ClusterCommunicationResource extends UnicastRemoteObject implements
         StateService.getSuspendGuard().lock();
 
         StateService.getSuspended().set(false);
-
-//        for (SuspenderDto suspender : StateService.getSuspenders()) {
-//            suspender
-//                    .getAwaiter()
-//                    .set(new CountDownLatch(1));
-//
-//            logger.info(
-//                    LoggingConfigurationHelper
-//                            .getTransferableMessage(
-//                                    String.format("RepoAchiever Cluster allocation '%s' is serving",
-//                                            suspender.getName())));
-//        }
 
         StateService.getSuspendGuard().unlock();
     }

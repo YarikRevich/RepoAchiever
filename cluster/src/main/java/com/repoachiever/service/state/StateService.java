@@ -39,21 +39,47 @@ public class StateService {
      * @param name given RepoAchiever Cluster suspender name.
      */
     public static void addSuspender(String name) {
-        suspenders.add(SuspenderDto.of(name, new AtomicReference<>()));
+        suspenders.add(SuspenderDto.of(name, new AtomicReference<>(new CountDownLatch(0))));
     }
 
     /**
-     * Retrieves RepoAchiever Cluster suspender by the given name.
+     * Removes RepoAchiever Cluster suspender with the given name.
      *
      * @param name given RepoAchiever Cluster suspender name.
-     * @return retrieved RepoAchiever Cluster suspender name.
      */
-    public static SuspenderDto getSuspenderByName(String name) {
+    public static void removeSuspenderByName(String name) {
+        suspenders.removeIf(element -> Objects.equals(element.getName(), name));
+    }
+
+    /**
+     * Resets RepoAchiever Cluster suspender by the given name.
+     *
+     * @param name given RepoAchiever Cluster suspender name.
+     */
+    public static void resetSuspenderByName(String name) {
+        suspenders
+                .stream()
+                .filter(element -> Objects.equals(element.getName(), name))
+                .toList()
+                .getFirst()
+                .getAwaiter()
+                .set(new CountDownLatch(1));
+    }
+
+    /**
+     * Retrieves RepoAchiever Cluster suspender awaiter by the given name.
+     *
+     * @param name given RepoAchiever Cluster suspender name.
+     * @return retrieved RepoAchiever Cluster suspender awaiter name.
+     */
+    public static CountDownLatch getSuspenderAwaiterByName(String name) {
         return suspenders
                 .stream()
                 .filter(element -> Objects.equals(element.getName(), name))
                 .toList()
-                .getFirst();
+                .getFirst()
+                .getAwaiter()
+                .get();
     }
 
     /**

@@ -22,6 +22,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Provides high-level access to RepoAchiever Cluster related operations.
@@ -380,10 +381,6 @@ public class ClusterFacade {
                                 clusterAllocation.getName()));
             }
 
-            telemetryService.increaseSuspendedClustersAmount();
-
-            telemetryService.decreaseServingClustersAmount();
-
             logger.info(
                     String.format("Removing RepoAchiever Cluster allocation: '%s'", clusterAllocation.getName()));
 
@@ -392,8 +389,6 @@ public class ClusterFacade {
             } catch (ClusterDestructionFailureException e) {
                 throw new ClusterFullDestructionFailureException(e.getMessage());
             }
-
-            telemetryService.decreaseSuspendedClustersAmount();
         }
     }
 

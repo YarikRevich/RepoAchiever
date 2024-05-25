@@ -112,6 +112,14 @@ public class WorkspaceFacade {
             throw new RawContentCreationFailureException(e.getMessage());
         }
 
+        if (!workspaceService.isContentDirectoryExist(workspaceUnitDirectory, location)) {
+            try {
+                workspaceService.createContentDirectory(workspaceUnitDirectory, location);
+            } catch (WorkspaceContentDirectoryCreationFailureException e) {
+                throw new RawContentCreationFailureException(e.getMessage());
+            }
+        }
+
         if (!workspaceService.isRawContentDirectoryExist(workspaceUnitDirectory, location)) {
             try {
                 workspaceService.createRawContentDirectory(workspaceUnitDirectory, location);
@@ -197,6 +205,14 @@ public class WorkspaceFacade {
             workspaceUnitDirectory = workspaceService.getUnitDirectory(workspaceUnitKey);
         } catch (WorkspaceUnitDirectoryNotFoundException e) {
             throw new AdditionalContentCreationFailureException(e.getMessage());
+        }
+
+        if (!workspaceService.isContentDirectoryExist(workspaceUnitDirectory, location)) {
+            try {
+                workspaceService.createContentDirectory(workspaceUnitDirectory, location);
+            } catch (WorkspaceContentDirectoryCreationFailureException e) {
+                throw new AdditionalContentCreationFailureException(e.getMessage());
+            }
         }
 
         if (!workspaceService.isAdditionalContentDirectoryExist(workspaceUnitDirectory, location)) {
@@ -567,6 +583,7 @@ public class WorkspaceFacade {
             }
 
             writer.flush();
+
             writer.finish();
 
         } catch (IOException e) {

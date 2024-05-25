@@ -13,8 +13,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.swing.plaf.nimbus.State;
 import java.io.InputStream;
-import java.net.InetAddress;
 import java.util.concurrent.*;
 
 /**
@@ -68,18 +68,13 @@ public class SchedulerConfigService {
                 CountDownLatch closable = new CountDownLatch(1);
 
                 ScheduledFuture<?> execution = operationScheduledExecutorService.scheduleWithFixedDelay(() -> {
-//                    if (StateService.getSuspended().get()) {
-//                        CountDownLatch awaiter = StateService
-//                                .getSuspenderByName(element.getName())
-//                                .getAwaiter()
-//                                .get();
-//
-//                        if (awaiter.getCount() > 0) {
-//                            awaiter.countDown();
-//                        }
-//
-//                        return;
-//                    }
+                    if (StateService.getSuspended().get()) {
+                        return;
+                    }
+
+                    StateService.resetSuspenderByName(element.getName());
+
+                    CountDownLatch awaiter = StateService.getSuspenderAwaiterByName(element.getName());
 
                     if (!vendorFacade.isVendorAvailable()) {
                         logger.info(
@@ -88,6 +83,8 @@ public class SchedulerConfigService {
                                                 configService.getConfig().getService().getProvider().toString(),
                                                 element.getName())
                                 ));
+
+                        awaiter.countDown();
 
                         return;
                     }
@@ -103,6 +100,9 @@ public class SchedulerConfigService {
                                                 "Skipping retrieval of content for '%s' location: %s",
                                                 element.getName(),
                                                 e.getMessage())));
+
+                        StateService.removeSuspenderByName(element.getName());
+
                         closable.countDown();
 
                         return;
@@ -114,6 +114,8 @@ public class SchedulerConfigService {
                                                 element.getName(),
                                                 e.getMessage())));
 
+                        awaiter.countDown();
+
                         return;
                     }
 
@@ -122,7 +124,18 @@ public class SchedulerConfigService {
 
                         try {
                             record = vendorFacade.getLatestRecord(element.getName());
-                        } catch (LocationDefinitionsAreNotValidException ignored) {
+                        } catch (LocationDefinitionsAreNotValidException e) {
+                            logger.info(
+                                    LoggingConfigurationHelper.getTransferableMessage(
+                                            String.format(
+                                                    "Skipping retrieval of content for '%s' location: %s",
+                                                    element.getName(),
+                                                    e.getMessage())));
+
+                            StateService.removeSuspenderByName(element.getName());
+
+                            closable.countDown();
+
                             return;
                         } catch (GitHubContentRetrievalFailureException e) {
                             logger.info(
@@ -131,6 +144,8 @@ public class SchedulerConfigService {
                                                     "Failed to retrieve content for '%s' location: %s",
                                                     element.getName(),
                                                     e.getMessage())));
+
+                            awaiter.countDown();
 
                             return;
                         }
@@ -156,7 +171,18 @@ public class SchedulerConfigService {
 
                             try {
                                 contentStream = vendorFacade.getRecordContent(element.getName(), record);
-                            } catch (LocationDefinitionsAreNotValidException ignored) {
+                            } catch (LocationDefinitionsAreNotValidException e) {
+                                logger.info(
+                                        LoggingConfigurationHelper.getTransferableMessage(
+                                                String.format(
+                                                        "Skipping retrieval of content for '%s' location: %s",
+                                                        element.getName(),
+                                                        e.getMessage())));
+
+                                StateService.removeSuspenderByName(element.getName());
+
+                                closable.countDown();
+
                                 return;
                             } catch (GitHubContentRetrievalFailureException e) {
                                 logger.info(
@@ -165,6 +191,8 @@ public class SchedulerConfigService {
                                                         "Failed to retrieve content for '%s' location: %s",
                                                         element.getName(),
                                                         e.getMessage())));
+
+                                awaiter.countDown();
 
                                 return;
                             }
@@ -187,6 +215,8 @@ public class SchedulerConfigService {
                                                         element.getName(),
                                                         e.getMessage())));
 
+                                awaiter.countDown();
+
                                 return;
                             }
 
@@ -199,6 +229,8 @@ public class SchedulerConfigService {
 
                             StateService.setContentUpdatesHeadCounter(element.getName(), commitAmount);
                         }
+
+                        awaiter.countDown();
                     }
                 }, 0, period, TimeUnit.MILLISECONDS);
 
