@@ -5,6 +5,8 @@ import com.repoachiever.dto.GitHubLocationNotationDto;
 import com.repoachiever.entity.PropertiesEntity;
 import com.repoachiever.exception.LocationDefinitionsAreNotValidException;
 import com.repoachiever.logging.common.LoggingConfigurationHelper;
+import jakarta.xml.bind.DatatypeConverter;
+import lombok.SneakyThrows;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.security.MessageDigest;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -62,6 +65,18 @@ public class VendorConfigurationHelper {
                 matcher.group(1),
                 matcher.group(2),
                 Optional.empty());
+    }
+
+    /**
+     * Creates additional content hash from the given segments.
+     *
+     * @param segments given segments to be used for additional content hash creation.
+     * @return created additional content hash from the given segments.
+     */
+    @SneakyThrows
+    public String createAdditionalContentHash(String... segments) {
+        MessageDigest md = MessageDigest.getInstance("SHA3-256");
+        return DatatypeConverter.printHexBinary(md.digest(String.join(".", segments).getBytes()));
     }
 
     /**

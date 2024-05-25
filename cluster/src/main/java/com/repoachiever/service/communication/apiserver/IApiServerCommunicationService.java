@@ -5,6 +5,7 @@ import com.healthmarketscience.rmiio.RemoteInputStream;
 import java.io.InputStream;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.Map;
 
 /**
  * Represents communication provider for RepoAchiever API Server.
@@ -40,10 +41,10 @@ public interface IApiServerCommunicationService extends Remote {
      * @param workspaceUnitKey given user workspace unit key.
      * @param location         given content location.
      * @param name             given content name.
-     * @param content          given content to be uploaded.
+     * @param data             given converted content data to be uploaded.
      * @throws RemoteException if remote request fails.
      */
-    void performAdditionalContentUpload(String workspaceUnitKey, String location, String name, String content)
+    void performAdditionalContentUpload(String workspaceUnitKey, String location, String name, String data)
             throws RemoteException;
 
     /**

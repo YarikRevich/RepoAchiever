@@ -40,6 +40,9 @@ public class PropertiesEntity {
     @Value(value = "${github.location.notation}")
     String gitHubLocationNotation;
 
+    @Value(value = "${github.additional.pull-requests.name}")
+    String gitHubAdditionalPullRequestsName;
+
     @Value(value = "${communication.api-server.health-check.frequency}")
     private Integer communicationApiServerHealthCheckFrequency;
 

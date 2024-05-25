@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import com.healthmarketscience.rmiio.RemoteInputStream;
 import com.healthmarketscience.rmiio.RemoteInputStreamClient;
 import com.healthmarketscience.rmiio.SimpleRemoteInputStream;
+import com.repoachiever.converter.JsonToAdditionalContentDataConverter;
 import com.repoachiever.entity.common.AdditionalContentFileEntity;
 import com.repoachiever.entity.common.PropertiesEntity;
 import com.repoachiever.exception.AdditionalContentCreationFailureException;
@@ -23,8 +24,11 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -99,13 +103,24 @@ public class ApiServerCommunicationResource extends UnicastRemoteObject implemen
      * @see IApiServerCommunicationService
      */
     @Override
-    public void performAdditionalContentUpload(String workspaceUnitKey, String location, String name, String content)
-            throws RemoteException {
+    public void performAdditionalContentUpload(
+            String workspaceUnitKey, String location, String name, String data) throws RemoteException {
         StateService.getCommunicationGuard().lock();
+
+        Map<String, String> rawData = JsonToAdditionalContentDataConverter.convert(data);
+        if (Objects.isNull(rawData)) {
+            throw new RemoteException();
+        }
 
         try {
             workspaceFacade.addAdditionalContent(
-                    workspaceUnitKey, location, name, AdditionalContentFileEntity.of(content));
+                    workspaceUnitKey, location, name, AdditionalContentFileEntity.of(
+                            rawData
+                                    .entrySet()
+                                    .stream()
+                                    .map(
+                                            element -> AdditionalContentFileEntity.Data.of(element.getKey(), element.getValue()))
+                                    .toList()));
         } catch (AdditionalContentCreationFailureException e) {
             StateService.getCommunicationGuard().unlock();
 

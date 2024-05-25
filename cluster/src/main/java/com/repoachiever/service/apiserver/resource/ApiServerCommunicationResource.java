@@ -2,6 +2,7 @@ package com.repoachiever.service.apiserver.resource;
 
 import com.healthmarketscience.rmiio.RemoteInputStream;
 import com.healthmarketscience.rmiio.SimpleRemoteInputStream;
+import com.repoachiever.converter.AdditionalContentDataToJsonConverter;
 import com.repoachiever.exception.ApiServerOperationFailureException;
 import com.repoachiever.exception.CommunicationConfigurationFailureException;
 import com.repoachiever.service.communication.apiserver.IApiServerCommunicationService;
@@ -19,6 +20,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * Represents implementation for RepoAchiever API Server remote API.
@@ -117,12 +119,13 @@ public class ApiServerCommunicationResource {
     /**
      * Performs additional content(issues, prs, releases) upload operation, initiated by RepoAchiever Cluster.
      *
-     * @param content  given content to be uploaded.
      * @param location given content location.
      * @param name     given content name.
+     * @param data  given data to be uploaded.
      * @throws ApiServerOperationFailureException if RepoAchiever API Server operation fails.
      */
-    public void performAdditionalContentUpload(String location, String name, String content) throws ApiServerOperationFailureException {
+    public void performAdditionalContentUpload(
+            String location, String name, Map<String, String> data) throws ApiServerOperationFailureException {
         IApiServerCommunicationService allocation = retrieveAllocation();
 
         try {
@@ -130,7 +133,7 @@ public class ApiServerCommunicationResource {
                     configService.getConfig().getMetadata().getWorkspaceUnitKey(),
                     location,
                     name,
-                    content);
+                    AdditionalContentDataToJsonConverter.convert(data));
         } catch (RemoteException e) {
             throw new ApiServerOperationFailureException(e.getMessage());
         }

@@ -263,18 +263,18 @@ public class GitGitHubVendorService {
     }
 
     /**
-     * Retrieves content from the repository with the given name and given commit hash.
+     * Retrieves raw content from the repository with the given name and given commit hash.
      *
      * @param owner      given repository owner.
      * @param name       given repository name.
      * @param commitHash given commit hash.
      * @param format     given content format type.
-     * @return retrieved content from the repository with the given name and given commit hash as an input stream.
+     * @return retrieved raw content from the repository with the given name and given commit hash as an input stream.
      * @throws GitHubContentRetrievalFailureException if GitHub REST API client content retrieval fails.
      */
     public InputStream getCommitContent(String owner, String name, String format, String commitHash) throws
             GitHubContentRetrievalFailureException {
-        DataBuffer resource = restClient
+        DataBuffer response = restClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path(
@@ -286,20 +286,20 @@ public class GitGitHubVendorService {
                 .onErrorResume(element -> Mono.empty())
                 .block();
 
-        if (Objects.isNull(resource)) {
+        if (Objects.isNull(response)) {
             throw new GitHubContentRetrievalFailureException(new GitHubContentIsEmptyException().getMessage());
         }
 
-        return resource.asInputStream();
+        return response.asInputStream();
     }
 
     /**
-     * Retrieves content from the repository with the given name and given commit hash in zip format.
+     * Retrieves raw content from the repository with the given name and given commit hash in zip format.
      *
      * @param owner      given repository owner.
      * @param name       given repository name.
      * @param commitHash given commit hash.
-     * @return retrieved content from the repository with the given name and given commit hash as an input stream.
+     * @return retrieved raw content from the repository with the given name and given commit hash as an input stream.
      * @throws GitHubContentRetrievalFailureException if GitHub REST API client content retrieval fails.
      */
     public InputStream getCommitContentAsZip(String owner, String name, String commitHash) throws
@@ -308,16 +308,44 @@ public class GitGitHubVendorService {
     }
 
     /**
-     * Retrieves content from the repository with the given name and given commit hash in tar format.
+     * Retrieves raw content from the repository with the given name and given commit hash in tar format.
      *
      * @param owner      given repository owner.
      * @param name       given repository name.
      * @param commitHash given commit hash.
-     * @return retrieved content from the repository with the given name and given commit hash as an input stream.
+     * @return retrieved raw content from the repository with the given name and given commit hash as an input stream.
      * @throws GitHubContentRetrievalFailureException if GitHub REST API client content retrieval fails.
      */
     public InputStream getCommitContentAsTar(String owner, String name, String commitHash) throws
             GitHubContentRetrievalFailureException {
         return getCommitContent(owner, name, "tarball", commitHash);
+    }
+
+    /**
+     * Retrieves additional content from the repository with the given name and given commit hash.
+     *
+     * @param owner      given repository owner.
+     * @param name       given repository name.
+     * @return retrieved pull requests content from the repository with the given name and given commit hash as an input stream.
+     * @throws GitHubContentRetrievalFailureException if GitHub REST API client content retrieval fails.
+     */
+    public String getPullRequests(String owner, String name) throws GitHubContentRetrievalFailureException {
+        String response = restClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path(
+                                String.format("/repos/%s/%s/pulls", owner, name))
+                        .build())
+                .retrieve()
+                .bodyToMono(String.class)
+                .timeout(Duration.ofSeconds(properties.getRestClientTimeout()))
+                .onErrorResume(element -> Mono.empty())
+                .block();
+
+        if (Objects.isNull(response)) {
+            throw new GitHubContentRetrievalFailureException(new GitHubContentIsEmptyException().getMessage());
+        }
+
+        return response;
     }
 }

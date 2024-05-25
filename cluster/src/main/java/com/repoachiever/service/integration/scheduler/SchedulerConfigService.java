@@ -1,6 +1,7 @@
 package com.repoachiever.service.integration.scheduler;
 
 import com.repoachiever.converter.CronExpressionConverter;
+import com.repoachiever.dto.AdditionalContentDto;
 import com.repoachiever.exception.*;
 import com.repoachiever.logging.common.LoggingConfigurationHelper;
 import com.repoachiever.service.apiserver.resource.ApiServerCommunicationResource;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import javax.swing.plaf.nimbus.State;
 import java.io.InputStream;
+import java.util.Objects;
 import java.util.concurrent.*;
 
 /**
@@ -150,27 +152,27 @@ public class SchedulerConfigService {
                             return;
                         }
 
-                        Boolean contentPresent = false;
+                        Boolean rawContentPresent = false;
 
                         try {
-                            contentPresent =
+                            rawContentPresent =
                                     apiServerCommunicationResource.retrieveRawContentPresent(
                                             element.getName(), record);
                         } catch (ApiServerOperationFailureException ignored) {
                         }
 
-                        if (!contentPresent) {
+                        if (!rawContentPresent) {
                             logger.info(
                                     LoggingConfigurationHelper.getTransferableMessage(
                                             String.format(
-                                                    "Downloading remote record content '%s' location and '%s' record",
+                                                    "Downloading raw content '%s' location and '%s' record",
                                                     element.getName(),
                                                     record)));
 
                             InputStream contentStream;
 
                             try {
-                                contentStream = vendorFacade.getRecordContent(element.getName(), record);
+                                contentStream = vendorFacade.getRecordRawContent(element.getName(), record);
                             } catch (LocationDefinitionsAreNotValidException e) {
                                 logger.info(
                                         LoggingConfigurationHelper.getTransferableMessage(
@@ -200,7 +202,7 @@ public class SchedulerConfigService {
                             logger.info(
                                     LoggingConfigurationHelper.getTransferableMessage(
                                             String.format(
-                                                    "Transferring downloaded record content for '%s' location and '%s' record",
+                                                    "Transferring downloaded raw content for '%s' location and '%s' record",
                                                     element.getName(),
                                                     record)));
 
@@ -211,7 +213,7 @@ public class SchedulerConfigService {
                                 logger.info(
                                         LoggingConfigurationHelper.getTransferableMessage(
                                                 String.format(
-                                                        "Failed to perform content download for '%s' location: %s",
+                                                        "Failed to perform content uploading for '%s' location: %s",
                                                         element.getName(),
                                                         e.getMessage())));
 
@@ -223,15 +225,88 @@ public class SchedulerConfigService {
                             logger.info(
                                     LoggingConfigurationHelper.getTransferableMessage(
                                             String.format(
-                                                    "Record content transfer finished for '%s' location and '%s' record",
+                                                    "Raw content transfer finished for '%s' location and '%s' record",
                                                     element.getName(),
                                                     record)));
 
                             StateService.setContentUpdatesHeadCounter(element.getName(), commitAmount);
                         }
+                    }
+
+                    AdditionalContentDto additionalContent;
+
+                    try {
+                        additionalContent = vendorFacade.getAdditionalContent(element.getName());
+                    } catch (LocationDefinitionsAreNotValidException e) {
+                        logger.info(
+                                LoggingConfigurationHelper.getTransferableMessage(
+                                        String.format(
+                                                "Skipping retrieval of content for '%s' location: %s",
+                                                element.getName(),
+                                                e.getMessage())));
+
+                        StateService.removeSuspenderByName(element.getName());
+
+                        closable.countDown();
+
+                        return;
+                    } catch (GitHubContentRetrievalFailureException e) {
+                        logger.info(
+                                LoggingConfigurationHelper.getTransferableMessage(
+                                        String.format(
+                                                "Failed to retrieve content for '%s' location: %s",
+                                                element.getName(),
+                                                e.getMessage())));
 
                         awaiter.countDown();
+
+                        return;
                     }
+
+                    if (Objects.nonNull(additionalContent)) {
+                        Boolean additionalContentPresent = false;
+
+                        try {
+                            additionalContentPresent =
+                                    apiServerCommunicationResource.retrieveAdditionalContentPresent(
+                                            element.getName(), additionalContent.getHash());
+                        } catch (ApiServerOperationFailureException ignored) {
+                        }
+
+                        if (!additionalContentPresent) {
+                            logger.info(
+                                    LoggingConfigurationHelper.getTransferableMessage(
+                                            String.format(
+                                                    "Transferring downloaded additional content for '%s' location and '%s' hash",
+                                                    element.getName(),
+                                                    additionalContent.getHash())));
+
+                            try {
+                                apiServerCommunicationResource.performAdditionalContentUpload(
+                                        element.getName(), additionalContent.getHash(), additionalContent.getData());
+                            } catch (ApiServerOperationFailureException e) {
+                                logger.info(
+                                        LoggingConfigurationHelper.getTransferableMessage(
+                                                String.format(
+                                                        "Failed to perform additional content uploading for '%s' location: %s",
+                                                        element.getName(),
+                                                        e.getMessage())));
+
+                                awaiter.countDown();
+
+                                return;
+                            }
+
+                            logger.info(
+                                    LoggingConfigurationHelper.getTransferableMessage(
+                                            String.format(
+                                                    "Additional content transfer finished for '%s' location and '%s' hash",
+                                                    element.getName(),
+                                                    additionalContent.getHash())));
+                        }
+                    }
+
+                    awaiter.countDown();
                 }, 0, period, TimeUnit.MILLISECONDS);
 
                 try {
