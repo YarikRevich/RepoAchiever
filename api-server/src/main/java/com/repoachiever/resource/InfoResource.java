@@ -2,7 +2,9 @@ package com.repoachiever.resource;
 
 import com.repoachiever.api.InfoResourceApi;
 import com.repoachiever.entity.common.PropertiesEntity;
+import com.repoachiever.exception.CredentialsAreNotValidException;
 import com.repoachiever.exception.CredentialsFieldIsNotValidException;
+import com.repoachiever.exception.ProviderIsNotAvailableException;
 import com.repoachiever.model.TopologyInfoApplication;
 import com.repoachiever.model.VersionExternalApiInfoResult;
 import com.repoachiever.model.TopologyInfoUnit;
@@ -10,6 +12,7 @@ import com.repoachiever.model.VersionInfoResult;
 import com.repoachiever.resource.common.ResourceConfigurationHelper;
 import com.repoachiever.service.cluster.ClusterService;
 import com.repoachiever.service.cluster.facade.ClusterFacade;
+import com.repoachiever.service.vendor.VendorFacade;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
@@ -28,6 +31,9 @@ public class InfoResource implements InfoResourceApi {
 
     @Inject
     ClusterFacade clusterFacade;
+
+    @Inject
+    VendorFacade vendorFacade;
 
     @Inject
     ResourceConfigurationHelper resourceConfigurationHelper;
@@ -60,6 +66,15 @@ public class InfoResource implements InfoResourceApi {
                 topologyInfoApplication.getProvider(),
                 topologyInfoApplication.getCredentials().getExternal())) {
             throw new CredentialsFieldIsNotValidException();
+        }
+
+        if (!vendorFacade.isVendorAvailable(topologyInfoApplication.getProvider())) {
+            throw new ProviderIsNotAvailableException();
+        }
+
+        if (!vendorFacade.isExternalCredentialsValid(
+                topologyInfoApplication.getProvider(), topologyInfoApplication.getCredentials().getExternal())) {
+            throw new CredentialsAreNotValidException();
         }
 
         return clusterFacade.retrieveTopology(topologyInfoApplication);

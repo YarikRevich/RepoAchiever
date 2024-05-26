@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.repoachiever.entity.ConfigEntity;
 import com.repoachiever.entity.PropertiesEntity;
 import com.repoachiever.exception.ConfigFileClosureFailureException;
@@ -61,7 +62,7 @@ public class ConfigService {
 
         try {
             ObjectMapper mapper =
-                    new ObjectMapper(new JsonFactory())
+                    new ObjectMapper(new YAMLFactory())
                             .configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true)
                             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
                             .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);

@@ -39,6 +39,10 @@ public class CleanExternalCommandService implements ICommand<CleanExternalComman
             throw new ApiServerOperationFailureException(new VersionMismatchException().getMessage());
         }
 
+        visualizationState.getLabel().pushNext();
+
+        visualizationState.getLabel().pushNext();
+
         CleanContentClientService cleanContentClientService =
                 new CleanContentClientService(cleanExternalCommand.getConfig().getApiServer().getHost());
 

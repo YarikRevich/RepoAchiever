@@ -35,5 +35,7 @@ public class HealthCheckInternalCommandService implements ICommand<ConfigEntity>
           new ApiServerNotAvailableException(healthCheckResult.getChecks().toString())
               .getMessage());
     }
+
+    visualizationState.getLabel().pushNext();
   }
 }

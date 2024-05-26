@@ -35,6 +35,10 @@ public class ApplyExternalCommandService implements ICommand<ConfigEntity> {
       throw new ApiServerOperationFailureException(new VersionMismatchException().getMessage());
     }
 
+    visualizationState.getLabel().pushNext();
+
+    visualizationState.getLabel().pushNext();
+
     ApplyContentClientService applyContentClientService =
             new ApplyContentClientService(config.getApiServer().getHost());
 

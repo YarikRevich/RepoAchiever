@@ -42,6 +42,10 @@ public class ContentExternalCommandService implements ICommand<ConfigEntity> {
             throw new ApiServerOperationFailureException(new VersionMismatchException().getMessage());
         }
 
+        visualizationState.getLabel().pushNext();
+
+        visualizationState.getLabel().pushNext();
+
         ContentClientService contentClientService = new ContentClientService(config.getApiServer().getHost());
 
         ContentRetrievalApplication request = ContentRetrievalApplication.of(

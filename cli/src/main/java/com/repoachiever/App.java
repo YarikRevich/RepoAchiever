@@ -1,6 +1,7 @@
 package com.repoachiever;
 
 import com.repoachiever.entity.PropertiesEntity;
+import com.repoachiever.service.client.content.download.DownloadContentClientService;
 import com.repoachiever.service.client.info.version.VersionInfoClientService;
 import com.repoachiever.service.command.BaseCommandService;
 import com.repoachiever.service.command.external.clean.CleanExternalCommandService;
@@ -15,7 +16,11 @@ import com.repoachiever.service.command.internal.health.HealthCheckInternalComma
 import com.repoachiever.service.config.ConfigService;
 import com.repoachiever.service.visualization.VisualizationService;
 import com.repoachiever.service.visualization.label.apply.ApplyCommandVisualizationLabel;
+import com.repoachiever.service.visualization.label.clean.CleanCommandVisualizationLabel;
+import com.repoachiever.service.visualization.label.cleanall.CleanAllCommandVisualizationLabel;
 import com.repoachiever.service.visualization.label.content.ContentCommandVisualizationLabel;
+import com.repoachiever.service.visualization.label.download.DownloadCommandVisualizationLabel;
+import com.repoachiever.service.visualization.label.topology.TopologyCommandVisualizationLabel;
 import com.repoachiever.service.visualization.label.withdraw.WithdrawCommandVisualizationLabel;
 import com.repoachiever.service.visualization.label.version.VersionCommandVisualizationLabel;
 import com.repoachiever.service.visualization.state.VisualizationState;
@@ -51,7 +56,11 @@ import picocli.CommandLine;
         PropertiesEntity.class,
         ApplyCommandVisualizationLabel.class,
         WithdrawCommandVisualizationLabel.class,
+        CleanCommandVisualizationLabel.class,
+        CleanAllCommandVisualizationLabel.class,
         ContentCommandVisualizationLabel.class,
+        DownloadCommandVisualizationLabel.class,
+        TopologyCommandVisualizationLabel.class,
         VersionCommandVisualizationLabel.class,
         VisualizationService.class,
         VisualizationState.class

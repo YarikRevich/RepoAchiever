@@ -235,9 +235,6 @@
                                 <typeMapping>binary=byte[]</typeMapping>
                                 <typeMapping>file=byte[]</typeMapping>
                             </typeMappings>
-<!--                            <importMappings>-->
-<!--                                <importMapping>OutputStream=java.io.OutputStream</importMapping>-->
-<!--                            </importMappings>-->
                             <configOptions>
                                 <additionalModelTypeAnnotations>@lombok.Data @lombok.NoArgsConstructor @lombok.AllArgsConstructor(staticName = "of")</additionalModelTypeAnnotations>
                                 <sourceFolder>src/main/java</sourceFolder>

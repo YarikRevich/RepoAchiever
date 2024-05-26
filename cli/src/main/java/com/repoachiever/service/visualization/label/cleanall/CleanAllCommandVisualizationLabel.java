@@ -1,28 +1,27 @@
-package com.repoachiever.service.visualization.label.apply;
+package com.repoachiever.service.visualization.label.cleanall;
 
 import com.repoachiever.dto.VisualizationLabelDto;
 import com.repoachiever.entity.PropertiesEntity;
 import com.repoachiever.service.visualization.common.IVisualizationLabel;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayDeque;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 /**
- * Represents label set used for apply command service.
+ * Represents label set used for cleanall command service.
  */
 @Service
-public class ApplyCommandVisualizationLabel implements IVisualizationLabel {
+public class CleanAllCommandVisualizationLabel implements IVisualizationLabel {
     private final ArrayDeque<VisualizationLabelDto> stepsQueue = new ArrayDeque<>();
 
     private final ArrayDeque<String> batchQueue = new ArrayDeque<>();
 
     private final ReentrantLock mutex = new ReentrantLock();
 
-    public ApplyCommandVisualizationLabel(@Autowired PropertiesEntity properties) {
+    public CleanAllCommandVisualizationLabel(@Autowired PropertiesEntity properties) {
         stepsQueue.addAll(
                 List.of(
                         VisualizationLabelDto.of(
@@ -33,9 +32,9 @@ public class ApplyCommandVisualizationLabel implements IVisualizationLabel {
                                 properties.getProgressVisualizationVersionRequestLabel(), 40),
                         VisualizationLabelDto.of(
                                 properties.getProgressVisualizationVersionResponseLabel(), 60),
-                        VisualizationLabelDto.of(properties.getProgressVisualizationApplyRequestLabel(), 70),
+                        VisualizationLabelDto.of(properties.getProgressVisualizationCleanAllRequestLabel(), 70),
                         VisualizationLabelDto.of(
-                                properties.getProgressVisualizationApplyResponseLabel(), 100)));
+                                properties.getProgressVisualizationCleanAllResponseLabel(), 100)));
     }
 
     /**

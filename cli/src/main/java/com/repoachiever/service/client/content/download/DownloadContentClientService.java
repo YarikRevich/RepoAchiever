@@ -7,19 +7,26 @@ import com.repoachiever.exception.ApiServerOperationFailureException;
 import com.repoachiever.model.ContentDownload;
 import com.repoachiever.model.ContentWithdrawal;
 import com.repoachiever.service.client.common.IClient;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.netty.http.client.HttpClient;
 
 import java.io.File;
 
 /**
  * Represents implementation for v1ContentDownloadPost endpoint of ContentResourceApi.
  */
-public class DownloadContentClientService implements IClient<File, ContentDownload> {
+public class DownloadContentClientService implements IClient<byte[], ContentDownload> {
     private final ContentResourceApi contentResourceApi;
 
     public DownloadContentClientService(String host) {
-        ApiClient apiClient = new ApiClient().setBasePath(host);
+        ApiClient apiClient = new ApiClient(WebClient.builder()
+                .clientConnector(new ReactorClientHttpConnector(
+                        HttpClient.create().followRedirect(true)))
+                .build())
+                .setBasePath(host);
 
         this.contentResourceApi = new ContentResourceApi(apiClient);
     }
@@ -28,9 +35,11 @@ public class DownloadContentClientService implements IClient<File, ContentDownlo
      * @see IClient
      */
     @Override
-    public File process(ContentDownload input) throws ApiServerOperationFailureException {
+    public byte[] process(ContentDownload input) throws ApiServerOperationFailureException {
         try {
-            return contentResourceApi.v1ContentDownloadPost(input).block();
+            return contentResourceApi
+                    .v1ContentDownloadPost(input)
+                    .block();
         } catch (WebClientResponseException e) {
             throw new ApiServerOperationFailureException(e.getResponseBodyAsString());
         } catch (WebClientRequestException e) {

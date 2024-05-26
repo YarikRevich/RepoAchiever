@@ -40,5 +40,7 @@ public class VersionExternalCommandService implements ICommand<ConfigEntity> {
             visualizationState.addResult(
                     String.format("Client version: %s", properties.getGitCommitId()));
         }
+
+        visualizationState.getLabel().pushNext();
     }
 }

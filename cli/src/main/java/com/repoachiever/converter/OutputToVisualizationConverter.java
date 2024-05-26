@@ -1,6 +1,8 @@
 package com.repoachiever.converter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.util.DefaultIndenter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -17,6 +19,12 @@ public class OutputToVisualizationConverter {
     public static String convert(Object output) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
 
-        return mapper.writeValueAsString(output);
+        DefaultPrettyPrinter.Indenter indenter =
+                new DefaultIndenter("    ", DefaultIndenter.SYS_LF);
+        DefaultPrettyPrinter printer = new DefaultPrettyPrinter();
+        printer.indentObjectsWith(indenter);
+        printer.indentArraysWith(indenter);
+
+        return mapper.writer(printer).writeValueAsString(output);
     }
 }

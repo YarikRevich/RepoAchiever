@@ -16,7 +16,11 @@ import com.repoachiever.service.command.internal.health.HealthCheckInternalComma
 import com.repoachiever.service.config.ConfigService;
 import com.repoachiever.service.visualization.VisualizationService;
 import com.repoachiever.service.visualization.label.apply.ApplyCommandVisualizationLabel;
+import com.repoachiever.service.visualization.label.clean.CleanCommandVisualizationLabel;
+import com.repoachiever.service.visualization.label.cleanall.CleanAllCommandVisualizationLabel;
 import com.repoachiever.service.visualization.label.content.ContentCommandVisualizationLabel;
+import com.repoachiever.service.visualization.label.download.DownloadCommandVisualizationLabel;
+import com.repoachiever.service.visualization.label.topology.TopologyCommandVisualizationLabel;
 import com.repoachiever.service.visualization.label.withdraw.WithdrawCommandVisualizationLabel;
 import com.repoachiever.service.visualization.label.version.VersionCommandVisualizationLabel;
 import com.repoachiever.service.visualization.state.VisualizationState;
@@ -75,13 +79,25 @@ public class BaseCommandService {
     private HealthCheckInternalCommandService healthCheckInternalCommandService;
 
     @Autowired
-    private ApplyCommandVisualizationLabel startCommandVisualizationLabel;
+    private ApplyCommandVisualizationLabel applyCommandVisualizationLabel;
 
     @Autowired
-    private WithdrawCommandVisualizationLabel stopCommandVisualizationLabel;
+    private WithdrawCommandVisualizationLabel withdrawCommandVisualizationLabel;
 
     @Autowired
-    private ContentCommandVisualizationLabel stateCommandVisualizationLabel;
+    private CleanCommandVisualizationLabel cleanCommandVisualizationLabel;
+
+    @Autowired
+    private CleanAllCommandVisualizationLabel cleanAllCommandVisualizationLabel;
+
+    @Autowired
+    private ContentCommandVisualizationLabel contentCommandVisualizationLabel;
+
+    @Autowired
+    private DownloadCommandVisualizationLabel downloadCommandVisualizationLabel;
+
+    @Autowired
+    private TopologyCommandVisualizationLabel topologyCommandVisualizationLabel;
 
     @Autowired
     private VersionCommandVisualizationLabel versionCommandVisualizationLabel;
@@ -103,7 +119,7 @@ public class BaseCommandService {
             configLocation = properties.getConfigDefaultLocation();
         }
 
-        visualizationState.setLabel(startCommandVisualizationLabel);
+        visualizationState.setLabel(applyCommandVisualizationLabel);
 
         visualizationService.process();
 
@@ -146,7 +162,7 @@ public class BaseCommandService {
             configLocation = properties.getConfigDefaultLocation();
         }
 
-        visualizationState.setLabel(stopCommandVisualizationLabel);
+        visualizationState.setLabel(withdrawCommandVisualizationLabel);
 
         visualizationService.process();
 
@@ -191,7 +207,7 @@ public class BaseCommandService {
             configLocation = properties.getConfigDefaultLocation();
         }
 
-        visualizationState.setLabel(stopCommandVisualizationLabel);
+        visualizationState.setLabel(cleanCommandVisualizationLabel);
 
         visualizationService.process();
 
@@ -234,7 +250,7 @@ public class BaseCommandService {
             configLocation = properties.getConfigDefaultLocation();
         }
 
-        visualizationState.setLabel(stopCommandVisualizationLabel);
+        visualizationState.setLabel(cleanAllCommandVisualizationLabel);
 
         visualizationService.process();
 
@@ -278,7 +294,7 @@ public class BaseCommandService {
             configLocation = properties.getConfigDefaultLocation();
         }
 
-        visualizationState.setLabel(stateCommandVisualizationLabel);
+        visualizationState.setLabel(contentCommandVisualizationLabel);
 
         visualizationService.process();
 
@@ -317,14 +333,14 @@ public class BaseCommandService {
     private void download(
             @Option(names = {"--config"}, description = "A location of configuration file", defaultValue = "null")
             String configLocation,
-            @Option(names = {"--output"}, description = "", defaultValue = "null", required = true) String outputLocation,
+            @Option(names = {"--output"}, description = "", required = true) String outputLocation,
             @Option(names = {"--location"}, description = "A name of remote content location", required = true)
             String location) {
         if (Objects.equals(configLocation, "null")) {
             configLocation = properties.getConfigDefaultLocation();
         }
 
-        visualizationState.setLabel(stateCommandVisualizationLabel);
+        visualizationState.setLabel(downloadCommandVisualizationLabel);
 
         visualizationService.process();
 
@@ -367,7 +383,7 @@ public class BaseCommandService {
             configLocation = properties.getConfigDefaultLocation();
         }
 
-        visualizationState.setLabel(versionCommandVisualizationLabel);
+        visualizationState.setLabel(topologyCommandVisualizationLabel);
 
         visualizationService.process();
 

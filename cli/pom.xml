@@ -194,6 +194,10 @@
               <generateModelDocumentation>false</generateModelDocumentation>
               <generateSupportingFiles>true</generateSupportingFiles>
               <auth>false</auth>
+              <typeMappings>
+                <typeMapping>binary=byte[]</typeMapping>
+                <typeMapping>file=byte[]</typeMapping>
+              </typeMappings>
               <configOptions>
                 <additionalModelTypeAnnotations>@lombok.Data @lombok.AllArgsConstructor(staticName = "of")</additionalModelTypeAnnotations>
                 <sourceFolder>src/main/java</sourceFolder>

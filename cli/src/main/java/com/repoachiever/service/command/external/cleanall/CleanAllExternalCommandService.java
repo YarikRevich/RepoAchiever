@@ -42,6 +42,10 @@ public class CleanAllExternalCommandService implements ICommand<ConfigEntity> {
             throw new ApiServerOperationFailureException(new VersionMismatchException().getMessage());
         }
 
+        visualizationState.getLabel().pushNext();
+
+        visualizationState.getLabel().pushNext();
+
         CleanAllContentClientService cleanAllContentClientService =
                 new CleanAllContentClientService(config.getApiServer().getHost());
 

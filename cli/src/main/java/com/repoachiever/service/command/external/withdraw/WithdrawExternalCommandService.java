@@ -37,6 +37,10 @@ public class WithdrawExternalCommandService implements ICommand<ConfigEntity> {
       throw new ApiServerOperationFailureException(new VersionMismatchException().getMessage());
     }
 
+    visualizationState.getLabel().pushNext();
+
+    visualizationState.getLabel().pushNext();
+
     WithdrawContentClientService withdrawContentClientService =
             new WithdrawContentClientService(config.getApiServer().getHost());
 

@@ -12,6 +12,7 @@ import com.repoachiever.service.client.content.download.DownloadContentClientSer
 import com.repoachiever.service.client.info.version.VersionInfoClientService;
 import com.repoachiever.service.command.common.ICommand;
 import com.repoachiever.service.visualization.state.VisualizationState;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,13 +21,16 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-/** Represents download external command service. */
+/**
+ * Represents download external command service.
+ */
 @Service
 public class DownloadExternalCommandService implements ICommand<DownloadExternalCommandDto> {
     @Autowired
     private PropertiesEntity properties;
 
-    @Autowired private VisualizationState visualizationState;
+    @Autowired
+    private VisualizationState visualizationState;
 
     /**
      * @see ICommand
@@ -44,6 +48,10 @@ public class DownloadExternalCommandService implements ICommand<DownloadExternal
             throw new ApiServerOperationFailureException(new VersionMismatchException().getMessage());
         }
 
+        visualizationState.getLabel().pushNext();
+
+        visualizationState.getLabel().pushNext();
+
         DownloadContentClientService downloadContentClientService =
                 new DownloadContentClientService(downloadExternalCommand.getConfig().getApiServer().getHost());
 
@@ -55,10 +63,10 @@ public class DownloadExternalCommandService implements ICommand<DownloadExternal
                         downloadExternalCommand.getConfig().getService().getProvider(),
                         downloadExternalCommand.getConfig().getService().getCredentials()));
 
-        File contentDownloadResult = downloadContentClientService.process(request);
+        byte[] contentDownloadResult = downloadContentClientService.process(request);
 
         try {
-            Files.move(contentDownloadResult.toPath(), Path.of(downloadExternalCommand.getOutputLocation()));
+            FileUtils.writeByteArrayToFile(new File(downloadExternalCommand.getOutputLocation()), contentDownloadResult);
         } catch (IOException e) {
             throw new ApiServerOperationFailureException(e.getMessage());
         }
