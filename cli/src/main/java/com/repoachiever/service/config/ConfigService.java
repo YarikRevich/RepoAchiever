@@ -30,26 +30,23 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Service used to perform RepoAchiever Cluster configuration processing operation.
+ * Service used to perform RepoAchiever CLI configuration processing operation.
  */
+@Getter
 @Component
 public class ConfigService {
-    @Autowired
-    private PropertiesEntity properties;
-
-    @Getter
     private ConfigEntity config;
 
     /**
      * Performs configuration file parsing operation.
      *
+     * @param configLocation given configuration file location.
      * @throws ConfigFileNotFoundException if configuration file is not found.
      * @throws ConfigValidationException if configuration file operation failed.
      * @throws ConfigFileReadingFailureException if configuration file reading operation failed.
      * @throws ConfigFileClosureFailureException if configuration file closure operation failed.
      */
-    @PostConstruct
-    private void configure() throws
+    public void configure(String configLocation) throws
             ConfigFileNotFoundException,
             ConfigFileReadingFailureException,
             ConfigValidationException,
@@ -57,14 +54,12 @@ public class ConfigService {
         InputStream file = null;
 
         try {
-            try {
-                file = new FileInputStream(
-                        Paths.get(
-                                properties.getConfigDefaultDirectory(), properties.getConfigDefaultName()).toString());
-            } catch (FileNotFoundException e) {
-                throw new ConfigFileNotFoundException(e.getMessage());
-            }
+            file = new FileInputStream(Paths.get(configLocation).toString());
+        } catch (FileNotFoundException e) {
+            throw new ConfigFileNotFoundException(e.getMessage());
+        }
 
+        try {
             ObjectMapper mapper =
                     new ObjectMapper(new JsonFactory())
                             .configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true)

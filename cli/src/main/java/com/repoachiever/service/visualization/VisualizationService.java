@@ -2,49 +2,63 @@ package com.repoachiever.service.visualization;
 
 import com.repoachiever.entity.PropertiesEntity;
 import com.repoachiever.service.visualization.state.VisualizationState;
+
 import java.util.concurrent.*;
+
 import lombok.SneakyThrows;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-/** Represents visualization service used to indicate current execution steps. */
+/**
+ * Represents visualization service used to indicate current execution steps.
+ */
 @Service
 public class VisualizationService {
-  @Autowired private PropertiesEntity properties;
+    private static final Logger logger = LogManager.getLogger(VisualizationService.class);
 
-  @Autowired private VisualizationState visualizationState;
+    @Autowired
+    private PropertiesEntity properties;
 
-  private final ScheduledExecutorService scheduledExecutorService =
-      Executors.newScheduledThreadPool(2);
+    @Autowired
+    private VisualizationState visualizationState;
 
-  private final CountDownLatch latch = new CountDownLatch(1);
+    private final ScheduledExecutorService scheduledExecutorService =
+            Executors.newScheduledThreadPool(0, Thread.ofVirtual().factory());
 
-  /** Starts progress visualization processor. */
-  public void process() {
-    scheduledExecutorService.scheduleAtFixedRate(
-        () -> {
-          if (visualizationState.getLabel().isNext()) {
-            System.out.println(visualizationState.getLabel().getCurrent());
-          }
+    private final CountDownLatch latch = new CountDownLatch(1);
 
-          if (visualizationState.getLabel().isEmpty() && !visualizationState.getLabel().isNext()) {
-            latch.countDown();
-          }
-        },
-        0,
-        properties.getProgressVisualizationPeriod(),
-        TimeUnit.MILLISECONDS);
-  }
+    /**
+     * Starts progress visualization processor.
+     */
+    public void process() {
+        scheduledExecutorService.scheduleAtFixedRate(
+                () -> {
+                    if (visualizationState.getLabel().isNext()) {
+                        logger.info(visualizationState.getLabel().getCurrent());
+                    }
 
-  /** Awaits for visualization service to end its processes. */
-  @SneakyThrows
-  public void await() {
-    latch.await();
-
-    if (!visualizationState.getResult().isEmpty()) {
-      System.out.print("\n");
+                    if (visualizationState.getLabel().isEmpty() && !visualizationState.getLabel().isNext()) {
+                        latch.countDown();
+                    }
+                },
+                0,
+                properties.getProgressVisualizationPeriod(),
+                TimeUnit.MILLISECONDS);
     }
 
-    visualizationState.getResult().forEach(System.out::println);
-  }
+    /**
+     * Awaits for visualization service to end its processes.
+     */
+    @SneakyThrows
+    public void await() {
+        latch.await();
+
+        if (!visualizationState.getResult().isEmpty()) {
+            System.out.print("\n");
+        }
+
+        visualizationState.getResult().forEach(logger::info);
+    }
 }

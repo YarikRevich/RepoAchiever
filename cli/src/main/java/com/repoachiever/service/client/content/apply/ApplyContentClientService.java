@@ -2,7 +2,7 @@ package com.repoachiever.service.client.content.apply;
 
 import com.repoachiever.ApiClient;
 import com.repoachiever.api.ContentResourceApi;
-import com.repoachiever.exception.ApiServerException;
+import com.repoachiever.exception.ApiServerOperationFailureException;
 import com.repoachiever.exception.ApiServerNotAvailableException;
 import com.repoachiever.service.client.common.IClient;
 import com.repoachiever.service.config.ConfigService;
@@ -14,18 +14,14 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 
 import com.repoachiever.model.ContentApplication;
 
-/** Represents content application operation service. */
-@Service
+/**
+ * Represents implementation for v1ContentApplyPost endpoint of ContentResourceApi.
+ */
 public class ApplyContentClientService implements IClient<Void, ContentApplication> {
-    @Autowired
-    private ConfigService configService;
+    private final ContentResourceApi contentResourceApi;
 
-    private ContentResourceApi contentResourceApi;
-
-    @PostConstruct
-    private void configure() {
-        ApiClient apiClient =
-                new ApiClient().setBasePath(configService.getConfig().getApiServer().getHost());
+    public ApplyContentClientService(String host) {
+        ApiClient apiClient = new ApiClient().setBasePath(host);
 
         this.contentResourceApi = new ContentResourceApi(apiClient);
     }
@@ -35,15 +31,13 @@ public class ApplyContentClientService implements IClient<Void, ContentApplicati
      */
     @Override
     public Void process(ContentApplication input)
-            throws ApiServerException {
+            throws ApiServerOperationFailureException {
         try {
-            return contentResourceApi
-                    .v1ContentApplyPost(input)
-                    .block();
+            return contentResourceApi.v1ContentApplyPost(input).block();
         } catch (WebClientResponseException e) {
-            throw new ApiServerException(e.getResponseBodyAsString());
+            throw new ApiServerOperationFailureException(e.getResponseBodyAsString());
         } catch (WebClientRequestException e) {
-            throw new ApiServerException(new ApiServerNotAvailableException(e.getMessage()).getMessage());
+            throw new ApiServerOperationFailureException(new ApiServerNotAvailableException(e.getMessage()).getMessage());
         }
     }
 }

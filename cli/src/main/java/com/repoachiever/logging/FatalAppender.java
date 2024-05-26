@@ -42,4 +42,3 @@ public class FatalAppender extends AbstractAppender {
     }
   }
 }
-

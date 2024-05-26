@@ -17,11 +17,8 @@ public class PropertiesEntity {
   @Value(value = "${git.commit.id.abbrev}")
   private String gitCommitId;
 
-  @Value(value = "${config.default.directory}")
-  private String configDefaultDirectory;
-
-  @Value(value = "${config.default.name}")
-  private String configDefaultName;
+  @Value(value = "${config.default.location}")
+  private String configDefaultLocation;
 
   @Value(value = "${progress.visualization.period}")
   private Integer progressVisualizationPeriod;

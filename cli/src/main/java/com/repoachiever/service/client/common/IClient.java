@@ -1,6 +1,6 @@
 package com.repoachiever.service.client.common;
 
-import com.repoachiever.exception.ApiServerException;
+import com.repoachiever.exception.ApiServerOperationFailureException;
 
 /**
  * Represents external resource command interface.
@@ -15,5 +15,5 @@ public interface IClient<T, K> {
    * @param input input to be given as request body.
    * @return command response.
    */
-  T process(K input) throws ApiServerException;
+  T process(K input) throws ApiServerOperationFailureException;
 }

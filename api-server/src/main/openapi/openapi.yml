@@ -427,9 +427,7 @@ components:
         - UP
         - DOWN
     ReadinessCheckApplication:
-      properties:
-        test:
-          type: object
+      type: object
     ReadinessCheckResult:
       required:
         - name

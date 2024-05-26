@@ -77,8 +77,7 @@ public class ClusterService {
         ClusterDeployCommandService clusterDeployCommandService =
                 new ClusterDeployCommandService(
                         clusterContext,
-                        properties.getBinDirectory(),
-                        properties.getBinClusterLocation());
+                        properties.getClusterBinLocation());
 
         CommandExecutorOutputDto clusterDeployCommandOutput;
 

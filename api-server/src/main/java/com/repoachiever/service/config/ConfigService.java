@@ -61,8 +61,7 @@ public class ConfigService {
 
         try {
             try {
-                file = new FileInputStream(
-                        Paths.get(properties.getConfigDirectory(), properties.getConfigName()).toString());
+                file = new FileInputStream(Paths.get(properties.getConfigLocation()).toString());
             } catch (FileNotFoundException e) {
                 throw new ConfigFileNotFoundException(e.getMessage());
             }

@@ -50,17 +50,11 @@ public class PropertiesEntity {
     @ConfigProperty(name = "database.statement.close-delay")
     Integer databaseStatementCloseDelay;
 
-    @ConfigProperty(name = "bin.directory")
-    String binDirectory;
+    @ConfigProperty(name = "cluster.bin.location")
+    String clusterBinLocation;
 
-    @ConfigProperty(name = "bin.cluster.location")
-    String binClusterLocation;
-
-    @ConfigProperty(name = "config.directory")
-    String configDirectory;
-
-    @ConfigProperty(name = "config.name")
-    String configName;
+    @ConfigProperty(name = "config.location")
+    String configLocation;
 
     @ConfigProperty(name = "workspace.directory")
     String workspaceDirectory;
