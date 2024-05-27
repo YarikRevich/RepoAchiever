@@ -21,20 +21,23 @@ import java.rmi.registry.Registry;
  */
 @ApplicationScoped
 public class ClusterCommunicationResource {
-    private static final Logger logger = LogManager.getLogger(ClusterCommunicationResource.class);
-
     @Inject
     ConfigService configService;
 
     private Registry registry;
 
+    /**
+     * Prepares RMI registry configuration.
+     *
+     * @throws CommunicationConfigurationFailureException if communication configuration fails.
+     */
     @PostConstruct
-    private void configure() {
+    private void configure() throws CommunicationConfigurationFailureException {
         try {
             this.registry = LocateRegistry.getRegistry(
                     configService.getConfig().getCommunication().getPort());
         } catch (RemoteException e) {
-            logger.fatal(new CommunicationConfigurationFailureException(e.getMessage()).getMessage());
+            throw new CommunicationConfigurationFailureException(e.getMessage());
         }
     }
 
@@ -90,6 +93,22 @@ public class ClusterCommunicationResource {
     }
 
     /**
+     * Performs RepoAchiever Cluster content retrieval reset operation.
+     *
+     * @param name given name of RepoAchiever Cluster.
+     * @throws ClusterOperationFailureException if RepoAchiever Cluster operation fails.
+     */
+    public void performRetrievalReset(String name) throws ClusterOperationFailureException {
+        IClusterCommunicationService allocation = retrieveAllocation(name);
+
+        try {
+            allocation.performRetrievalReset();
+        } catch (RemoteException e) {
+            throw new ClusterOperationFailureException(e.getMessage());
+        }
+    }
+
+    /**
      * Retrieves health check status of the RepoAchiever Cluster with the given name.
      *
      * @param name given name of RepoAchiever Cluster.
@@ -118,23 +137,6 @@ public class ClusterCommunicationResource {
 
         try {
             return allocation.retrieveVersion();
-        } catch (RemoteException e) {
-            throw new ClusterOperationFailureException(e.getMessage());
-        }
-    }
-
-    /**
-     * Retrieves amount of RepoAchiever Worker owned by RepoAchiever Cluster with the given name.
-     *
-     * @param name given name of RepoAchiever Cluster.
-     * @return retrieved amount of RepoAchiever Worker owned by RepoAchiever Cluster allocation.
-     * @throws ClusterOperationFailureException if RepoAchiever Cluster operation fails.
-     */
-    public Integer retrieveWorkerAmount(String name) throws ClusterOperationFailureException {
-        IClusterCommunicationService allocation = retrieveAllocation(name);
-
-        try {
-            return allocation.retrieveWorkerAmount();
         } catch (RemoteException e) {
             throw new ClusterOperationFailureException(e.getMessage());
         }

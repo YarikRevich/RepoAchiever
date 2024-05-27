@@ -9,7 +9,7 @@ import com.repoachiever.model.TopicLogsResult;
 import com.repoachiever.service.client.command.*;
 import com.repoachiever.service.command.external.start.StartExternalCommandService;
 import com.repoachiever.service.command.external.state.StateExternalCommandService;
-import com.repoachiever.service.command.external.stop.StopExternalCommandService;
+import com.repoachiever.service.command.external.withdraw.StopExternalCommandService;
 import com.repoachiever.service.command.external.version.VersionExternalCommandService;
 import com.repoachiever.service.command.internal.health.HealthCheckInternalCommandService;
 import com.repoachiever.service.command.internal.readiness.ReadinessCheckInternalCommandService;

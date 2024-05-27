@@ -160,6 +160,10 @@
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.healthmarketscience.rmiio</groupId>
+            <artifactId>rmiio</artifactId>
+        </dependency>
 
         <!-- TEMPLATES -->
         <dependency>
@@ -227,6 +231,10 @@
                             <generateModelDocumentation>false</generateModelDocumentation>
                             <generateSupportingFiles>true</generateSupportingFiles>
                             <auth>false</auth>
+                            <typeMappings>
+                                <typeMapping>binary=byte[]</typeMapping>
+                                <typeMapping>file=byte[]</typeMapping>
+                            </typeMappings>
                             <configOptions>
                                 <additionalModelTypeAnnotations>@lombok.Data @lombok.NoArgsConstructor @lombok.AllArgsConstructor(staticName = "of")</additionalModelTypeAnnotations>
                                 <sourceFolder>src/main/java</sourceFolder>

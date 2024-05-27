@@ -14,7 +14,7 @@ public class ClusterDeployCommandService extends SProcess {
     private final SProcessExecutor.OS osType;
 
     public ClusterDeployCommandService(
-            String clusterContext, String binDirectory, String binClusterLocation) {
+            String clusterContext, String clusterBinLocation) {
         this.osType = SProcessExecutor.getCommandExecutor().getOSType();
 
         this.command = switch (osType) {
@@ -22,7 +22,7 @@ public class ClusterDeployCommandService extends SProcess {
             case UNIX, MAC, ANY -> String.format(
                     "%s java -jar %s & echo $!",
                     ClusterConfigurationHelper.getEnvironmentVariables(clusterContext),
-                    Path.of(binDirectory, binClusterLocation));
+                    Path.of(clusterBinLocation));
         };
     }
 

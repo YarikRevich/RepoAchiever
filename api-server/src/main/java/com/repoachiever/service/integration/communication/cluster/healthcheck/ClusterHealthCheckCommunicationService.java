@@ -11,6 +11,7 @@ import com.repoachiever.service.config.ConfigService;
 import com.repoachiever.service.state.StateService;
 import io.quarkus.runtime.Startup;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.apache.logging.log4j.LogManager;
@@ -28,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Service used to perform RepoAchiever Cluster communication health check operations.
  */
+@Startup(value = 800)
 @ApplicationScoped
 public class ClusterHealthCheckCommunicationService {
     private static final Logger logger = LogManager.getLogger(ClusterHealthCheckCommunicationService.class);
@@ -44,15 +46,24 @@ public class ClusterHealthCheckCommunicationService {
     /**
      * Performs RepoAchiever Cluster communication health check operations. If RepoAchiever Cluster is not responding,
      * then it will be redeployed.
+     *
+     * @throws ApplicationStartGuardFailureException if RepoAchiever API Server application start guard operation
+     *                                               fails.
      */
     @PostConstruct
-    private void process() {
-        scheduledExecutorService.schedule(() -> {
-//            try {
-//                clusterFacade.reapplyUnhealthy();
-//            } catch (ClusterUnhealthyReapplicationFailureException e) {
-//                logger.fatal(e.getMessage());
-//            }
-        }, properties.getCommunicationClusterHealthCheckFrequency(), TimeUnit.MILLISECONDS);
+    private void process() throws ApplicationStartGuardFailureException {
+        try {
+            StateService.getStartGuard().await();
+        } catch (InterruptedException e) {
+            throw new ApplicationStartGuardFailureException(e.getMessage());
+        }
+
+        scheduledExecutorService.scheduleAtFixedRate(() -> {
+            try {
+                clusterFacade.reApplyUnhealthy();
+            } catch (ClusterUnhealthyReapplicationFailureException e) {
+                logger.fatal(e.getMessage());
+            }
+        }, 0, properties.getCommunicationClusterHealthCheckFrequency(), TimeUnit.MILLISECONDS);
     }
 }

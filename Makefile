@@ -124,7 +124,7 @@ else
 endif
 
 .PHONY: build-gui
-build-gui: clean create-local-client clone-client-config create-local-api-server build-api-server ## Build GUI application
+build-gui: clean create-local-client clone-client-config ## Build GUI application
 ifneq (,$(wildcard ./bin/gui))
 	@rm -r ./bin/gui
 endif

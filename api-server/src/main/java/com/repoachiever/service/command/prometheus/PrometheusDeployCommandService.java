@@ -1,5 +1,6 @@
 package com.repoachiever.service.command.prometheus;
 
+import com.repoachiever.service.command.common.CommandConfigurationHelper;
 import com.repoachiever.service.command.prometheus.common.PrometheusConfigurationHelper;
 import process.SProcess;
 import process.SProcessExecutor;
@@ -12,19 +13,19 @@ public class PrometheusDeployCommandService extends SProcess {
     private final SProcessExecutor.OS osType;
 
     public PrometheusDeployCommandService(
-            String name, String image, Integer port, String configLocation, String internalLocation) {
+            String name, String image, Integer port, String network, String configLocation, String internalLocation) {
         this.osType = SProcessExecutor.getCommandExecutor().getOSType();
 
         this.command = switch (osType) {
             case WINDOWS -> null;
             case UNIX, MAC, ANY -> String.format(
-                    "docker run -d %s %s %s --name %s %s %s %s",
+                    "docker run -d %s %s %s %s %s %s %s",
                     PrometheusConfigurationHelper.getDockerParameters(),
                     PrometheusConfigurationHelper.getDockerVolumes(configLocation, internalLocation),
-                    PrometheusConfigurationHelper.getDockerPorts(port),
-                    name,
+                    CommandConfigurationHelper.getDockerNetwork(network),
+                    CommandConfigurationHelper.getDockerName(name),
                     image,
-                    PrometheusConfigurationHelper.getDockerCommandArguments(),
+                    PrometheusConfigurationHelper.getDockerCommandArguments(port),
                     PrometheusConfigurationHelper.getDockerCommandOptions());
         };
     }

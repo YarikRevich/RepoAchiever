@@ -17,20 +17,11 @@ public class PropertiesEntity {
   @Value(value = "${git.commit.id.abbrev}")
   private String gitCommitId;
 
-  @Value(value = "${config.root}")
-  private String configRootPath;
-
-  @Value(value = "${config.user.file}")
-  private String configUserFilePath;
+  @Value(value = "${config.default.location}")
+  private String configDefaultLocation;
 
   @Value(value = "${progress.visualization.period}")
   private Integer progressVisualizationPeriod;
-
-  @Value(value = "${progress.visualization.secrets-acquire-request}")
-  private String progressVisualizationSecretsAcquireRequestLabel;
-
-  @Value(value = "${progress.visualization.script-acquire-request}")
-  private String progressVisualizationScriptAcquireRequestLabel;
 
   @Value(value = "${progress.visualization.apply-request}")
   private String progressVisualizationApplyRequestLabel;
@@ -38,26 +29,56 @@ public class PropertiesEntity {
   @Value(value = "${progress.visualization.apply-response}")
   private String progressVisualizationApplyResponseLabel;
 
-  @Value(value = "${progress.visualization.destroy-request}")
-  private String progressVisualizationDestroyRequestLabel;
+  @Value(value = "${progress.visualization.withdraw-request}")
+  private String progressVisualizationWithdrawRequestLabel;
 
-  @Value(value = "${progress.visualization.destroy-response}")
-  private String progressVisualizationDestroyResponseLabel;
+  @Value(value = "${progress.visualization.withdraw-response}")
+  private String progressVisualizationWithdrawResponseLabel;
 
-  @Value(value = "${progress.visualization.state-request}")
-  private String progressVisualizationStateRequestLabel;
+  @Value(value = "${progress.visualization.clean-request}")
+  private String progressVisualizationCleanRequestLabel;
 
-  @Value(value = "${progress.visualization.state-response}")
-  private String progressVisualizationStateResponseLabel;
+  @Value(value = "${progress.visualization.clean-response}")
+  private String progressVisualizationCleanResponseLabel;
 
-  @Value(value = "${progress.visualization.version-info-request}")
-  private String progressVisualizationVersionInfoRequestLabel;
+  @Value(value = "${progress.visualization.clean-all-request}")
+  private String progressVisualizationCleanAllRequestLabel;
+
+  @Value(value = "${progress.visualization.clean-all-response}")
+  private String progressVisualizationCleanAllResponseLabel;
+
+  @Value(value = "${progress.visualization.content-request}")
+  private String progressVisualizationContentRequestLabel;
+
+  @Value(value = "${progress.visualization.content-response}")
+  private String progressVisualizationContentResponseLabel;
+
+  @Value(value = "${progress.visualization.download-request}")
+  private String progressVisualizationDownloadRequestLabel;
+
+  @Value(value = "${progress.visualization.download-response}")
+  private String progressVisualizationDownloadResponseLabel;
+
+  @Value(value = "${progress.visualization.topology-request}")
+  private String progressVisualizationTopologyRequestLabel;
+
+  @Value(value = "${progress.visualization.topology-response}")
+  private String progressVisualizationTopologyResponseLabel;
+
+  @Value(value = "${progress.visualization.version-request}")
+  private String progressVisualizationVersionRequestLabel;
+
+  @Value(value = "${progress.visualization.version-response}")
+  private String progressVisualizationVersionResponseLabel;
 
   @Value(value = "${progress.visualization.health-check-request}")
   private String progressVisualizationHealthCheckRequestLabel;
 
-  @Value(value = "${progress.visualization.readiness-check-request}")
-  private String progressVisualizationReadinessCheckRequestLabel;
+  @Value(value = "${progress.visualization.health-check-response}")
+  private String progressVisualizationHealthCheckResponseLabel;
+
+  @Value(value = "${logging.state.frequency}")
+  private Integer loggingStateFrequency;
 
   @Bean
   private static PropertySourcesPlaceholderConfigurer placeholderConfigurer() {

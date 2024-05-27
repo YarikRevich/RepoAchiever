@@ -1,7 +1,7 @@
 # Represents section used for RepoAchiever API Server connection configuration.
 connection:
   # Represents port of RepoAchiever API Server used for connection establishment.
-  port: 8080
+  port: 8085
 
 # Represents section used for RepoAchiever API Server internal communication configuration.
 communication:
@@ -50,7 +50,10 @@ resource:
     # Represents the highest amount of allocated workers per cluster.
     max-workers: 5
 
+    # Represents the highest amount of downloaded content versions per each.
+    max-versions: 5
+
   # Represents a set of options used for RepoAchiever Worker configuration.
   worker:
     # Represents frequency of requests to selected VCS provider resources.
-    frequency: "10 * * * * *"
+    frequency: "0/30 * * * * ?"

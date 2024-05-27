@@ -33,6 +33,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ContentRetrievalResult"
+        400:
+          description: Content was not retrieved
   /v1/content/apply:
     post:
       tags:
@@ -66,34 +68,53 @@ paths:
         400:
           description: Given content configuration was not withdrawn
   /v1/content/download:
-    get:
-      tags:
-        - ContentResource
-      parameters:
-        - in: query
-          name: location
-          schema:
-            type: string
-          description: Name of content location to be downloaded
-      responses:
-        200:
-          description: A content was successfully retrieved
-          content:
-            application/octet-stream:
-              schema:
-                type: string
-                format: binary
-  /v1/content/clean:
     post:
       tags:
         - ContentResource
       requestBody:
         required: true
-        description: Content configuration application
+        description: Content download application
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContentDownload"
+      responses:
+        200:
+          description: A content was successfully retrieved
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        400:
+          description: Content was not retrieved
+  /v1/content/clean:
+    delete:
+      tags:
+        - ContentResource
+      requestBody:
+        required: true
+        description: Content cleanup application
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/ContentCleanup"
+      responses:
+        201:
+          description: Content with the given configuration was successfully deleted
+        400:
+          description: Content with the given configuration was not deleted
+  /v1/content/clean/all:
+    delete:
+      tags:
+        - ContentResource
+      requestBody:
+        required: true
+        description: Full content cleanup application
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContentCleanupAll"
       responses:
         201:
           description: Content with the given configuration was successfully deleted
@@ -128,28 +149,26 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/VersionInfoResult"
-  /v1/info/cluster:
-    get:
+  /v1/info/topology:
+    post:
       tags:
         - InfoResource
+      requestBody:
+        required: true
+        description: Content configuration application
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TopologyInfoApplication"
       responses:
         200:
-          description: General information about running clusters
+          description: General information about deployed topology
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ClusterInfoResult"
-  /v1/info/telemetry:
-    get:
-      tags:
-        - InfoResource
-      responses:
-        200:
-          description: A set of Prometheus samples used by Grafana instance
-          content:
-            text/plain:
-              schema:
-                type: string
+                $ref: "#/components/schemas/TopologyInfoResult"
+        400:
+          description: Given topology information retrieval was not successful
   /v1/health:
     get:
       tags:
@@ -184,7 +203,7 @@ components:
     Provider:
       type: string
       enum:
-        - git-local
+        - exporter
         - git-github
     CredentialsFieldsFull:
       required:
@@ -223,34 +242,111 @@ components:
         locations:
           type: array
           items:
+            $ref: "#/components/schemas/ContentRetrievalUnit"
+    ContentRetrievalUnit:
+      required:
+        - name
+        - raw
+        - additional
+      properties:
+        name:
+          type: string
+        active:
+          type: boolean
+        raw:
+          $ref: "#/components/schemas/ContentRetrievalUnitRaw"
+        additional:
+          $ref: "#/components/schemas/ContentRetrievalUnitAdditional"
+    ContentRetrievalUnitRaw:
+      properties:
+        versions:
+          type: array
+          items:
             type: string
+    ContentRetrievalUnitAdditional:
+      properties:
+        versions:
+          type: array
+          items:
+            type: string
+    Exporter:
+      required:
+        - host
+      properties:
+        host:
+          type: string
     ContentApplication:
       required:
-        - locations
+        - content
         - provider
         - credentials
+      properties:
+        content:
+          $ref: "#/components/schemas/ContentUnit"
+        provider:
+          $ref: "#/components/schemas/Provider"
+        exporter:
+          $ref: "#/components/schemas/Exporter"
+        credentials:
+          $ref: "#/components/schemas/CredentialsFieldsFull"
+    ContentUnit:
+      required:
+        - locations
       properties:
         locations:
           type: array
           items:
-            type: string
+            $ref: "#/components/schemas/LocationsUnit"
+    LocationsUnit:
+      required:
+        - name
+        - additional
+      properties:
+        name:
+          type: string
+        additional:
+          type: boolean
+          default: false
+    ContentWithdrawal:
+      required:
+        - provider
+        - credentials
+      properties:
         provider:
           $ref: "#/components/schemas/Provider"
         credentials:
           $ref: "#/components/schemas/CredentialsFieldsFull"
-    ContentWithdrawal:
+    ContentDownload:
       required:
-        - credentials
+        - location
         - provider
+        - credentials
       properties:
+        location:
+          type: string
         provider:
           $ref: "#/components/schemas/Provider"
         credentials:
           $ref: "#/components/schemas/CredentialsFieldsFull"
     ContentCleanup:
       required:
+        - location
+        - provider
         - credentials
       properties:
+        location:
+          type: string
+        provider:
+          $ref: "#/components/schemas/Provider"
+        credentials:
+          $ref: "#/components/schemas/CredentialsFieldsFull"
+    ContentCleanupAll:
+      required:
+        - provider
+        - credentials
+      properties:
+        provider:
+          $ref: "#/components/schemas/Provider"
         credentials:
           $ref: "#/components/schemas/CredentialsFieldsFull"
     ContentStateApplication:
@@ -281,20 +377,30 @@ components:
           type: string
         hash:
           type: string
-    ClusterInfoResult:
+    TopologyInfoApplication:
+      required:
+        - provider
+        - credentials
+      properties:
+        provider:
+          $ref: "#/components/schemas/Provider"
+        credentials:
+          $ref: "#/components/schemas/CredentialsFieldsFull"
+    TopologyInfoResult:
       type: array
       items:
-        $ref: "#/components/schemas/ClusterInfoUnit"
-    ClusterInfoUnit:
+        $ref: "#/components/schemas/TopologyInfoUnit"
+    TopologyInfoUnit:
       required:
         - name
+        - locations
       properties:
         name:
           type: string
-        health:
-          type: boolean
-        workers:
-          type: integer
+        locations:
+          type: array
+          items:
+            $ref: "#/components/schemas/LocationsUnit"
     HealthCheckResult:
       required:
         - status
@@ -321,9 +427,7 @@ components:
         - UP
         - DOWN
     ReadinessCheckApplication:
-      properties:
-        test:
-          type: object
+      type: object
     ReadinessCheckResult:
       required:
         - name

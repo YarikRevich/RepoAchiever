@@ -1,5 +1,8 @@
 package com.repoachiever.service.apiserver.resource;
 
+import com.healthmarketscience.rmiio.RemoteInputStream;
+import com.healthmarketscience.rmiio.SimpleRemoteInputStream;
+import com.repoachiever.converter.AdditionalContentDataToJsonConverter;
 import com.repoachiever.exception.ApiServerOperationFailureException;
 import com.repoachiever.exception.CommunicationConfigurationFailureException;
 import com.repoachiever.service.communication.apiserver.IApiServerCommunicationService;
@@ -17,26 +20,30 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * Represents implementation for RepoAchiever API Server remote API.
  */
 @Service
 public class ApiServerCommunicationResource {
-    private static final Logger logger = LogManager.getLogger(ApiServerCommunicationResource.class);
-
     @Autowired
     private ConfigService configService;
 
     private Registry registry;
 
+    /**
+     * Configures RepoAchiever API Server communication registry.
+     *
+     * @throws CommunicationConfigurationFailureException if RepoAchiever API Server communication failed.
+     */
     @PostConstruct
-    private void configure() {
+    private void configure() throws CommunicationConfigurationFailureException {
         try {
             this.registry = LocateRegistry.getRegistry(
                     configService.getConfig().getCommunication().getPort());
         } catch (RemoteException e) {
-            logger.fatal(new CommunicationConfigurationFailureException(e.getMessage()).getMessage());
+            throw new CommunicationConfigurationFailureException(e.getMessage());
         }
     }
 
@@ -60,16 +67,50 @@ public class ApiServerCommunicationResource {
     /**
      * Performs raw content upload operation.
      *
-     * @param content given content to be uploaded.
+     * @param content  given content to be uploaded.
+     * @param location given content location.
+     * @param name     given content name.
      * @throws ApiServerOperationFailureException if RepoAchiever API Server operation fails.
      */
-    public void performRawContentUpload(InputStream content) throws ApiServerOperationFailureException {
+    public void performRawContentUpload(String location, String name, InputStream content) throws ApiServerOperationFailureException {
         IApiServerCommunicationService allocation = retrieveAllocation();
+
+        RemoteInputStream contentWrapped;
+
+        try {
+            contentWrapped = new SimpleRemoteInputStream(content)
+                    .export();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
 
         try {
             allocation.performRawContentUpload(
                     configService.getConfig().getMetadata().getWorkspaceUnitKey(),
-                    content);
+                    location,
+                    name,
+                    contentWrapped);
+        } catch (RemoteException e) {
+            throw new ApiServerOperationFailureException(e.getMessage());
+        }
+    }
+
+    /**
+     * Checks if raw content with the given value at the given location is already present.
+     *
+     * @param location given content location.
+     * @param name     given content name.
+     * @return result of the check.
+     * @throws ApiServerOperationFailureException if RepoAchiever API Server operation fails.
+     */
+    public Boolean retrieveRawContentPresent(String location, String name) throws ApiServerOperationFailureException {
+        IApiServerCommunicationService allocation = retrieveAllocation();
+
+        try {
+            return allocation.retrieveRawContentPresent(
+                    configService.getConfig().getMetadata().getWorkspaceUnitKey(),
+                    location,
+                    name);
         } catch (RemoteException e) {
             throw new ApiServerOperationFailureException(e.getMessage());
         }
@@ -78,16 +119,42 @@ public class ApiServerCommunicationResource {
     /**
      * Performs additional content(issues, prs, releases) upload operation, initiated by RepoAchiever Cluster.
      *
-     * @param content given content to be uploaded.
+     * @param location given content location.
+     * @param name     given content name.
+     * @param data  given data to be uploaded.
      * @throws ApiServerOperationFailureException if RepoAchiever API Server operation fails.
      */
-    public void performAdditionalContentUpload(String content) throws ApiServerOperationFailureException {
+    public void performAdditionalContentUpload(
+            String location, String name, Map<String, String> data) throws ApiServerOperationFailureException {
         IApiServerCommunicationService allocation = retrieveAllocation();
 
         try {
             allocation.performAdditionalContentUpload(
                     configService.getConfig().getMetadata().getWorkspaceUnitKey(),
-                    content);
+                    location,
+                    name,
+                    AdditionalContentDataToJsonConverter.convert(data));
+        } catch (RemoteException e) {
+            throw new ApiServerOperationFailureException(e.getMessage());
+        }
+    }
+
+    /**
+     * Checks if additional content with the given value at the given location is already present.
+     *
+     * @param location given content location.
+     * @param name     given content name.
+     * @return result of the check.
+     * @throws ApiServerOperationFailureException if RepoAchiever API Server operation fails.
+     */
+    public Boolean retrieveAdditionalContentPresent(String location, String name) throws ApiServerOperationFailureException {
+        IApiServerCommunicationService allocation = retrieveAllocation();
+
+        try {
+            return allocation.retrieveAdditionalContentPresent(
+                    configService.getConfig().getMetadata().getWorkspaceUnitKey(),
+                    location,
+                    name);
         } catch (RemoteException e) {
             throw new ApiServerOperationFailureException(e.getMessage());
         }

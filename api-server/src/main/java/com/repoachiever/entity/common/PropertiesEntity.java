@@ -20,6 +20,12 @@ public class PropertiesEntity {
     @ConfigProperty(name = "quarkus.http.port")
     Integer applicationPort;
 
+    @ConfigProperty(name = "quarkus.rest-client.github.url")
+    String restClientGitHubUrl;
+
+    @ConfigProperty(name = "github.location.notation")
+    String gitHubLocationNotation;
+
     @ConfigProperty(name = "state.location")
     String stateLocation;
 
@@ -35,44 +41,29 @@ public class PropertiesEntity {
     @ConfigProperty(name = "database.tables.provider.name")
     String databaseProviderTableName;
 
+    @ConfigProperty(name = "database.tables.exporter.name")
+    String databaseExporterTableName;
+
     @ConfigProperty(name = "database.tables.secret.name")
     String databaseSecretTableName;
 
     @ConfigProperty(name = "database.statement.close-delay")
     Integer databaseStatementCloseDelay;
 
-    @ConfigProperty(name = "bin.directory")
-    String binDirectory;
+    @ConfigProperty(name = "cluster.bin.location")
+    String clusterBinLocation;
 
-    @ConfigProperty(name = "bin.cluster.location")
-    String binClusterLocation;
-
-    @ConfigProperty(name = "config.directory")
-    String configDirectory;
-
-    @ConfigProperty(name = "config.name")
-    String configName;
+    @ConfigProperty(name = "config.location")
+    String configLocation;
 
     @ConfigProperty(name = "workspace.directory")
     String workspaceDirectory;
 
-    @ConfigProperty(name = "workspace.content.directory")
-    String workspaceContentDirectory;
+    @ConfigProperty(name = "workspace.content.raw.directory")
+    String workspaceRawContentDirectory;
 
-    @ConfigProperty(name = "workspace.content.version-amount")
-    Integer workspaceContentVersionAmount;
-
-    @ConfigProperty(name = "workspace.metadata.directory")
-    String workspaceMetadataDirectory;
-
-    @ConfigProperty(name = "workspace.prs-metadata-file.name")
-    String workspacePRsMetadataFileName;
-
-    @ConfigProperty(name = "workspace.issues-metadata-file.name")
-    String workspaceIssuesMetadataFileName;
-
-    @ConfigProperty(name = "workspace.releases-metadata-file.name")
-    String workspaceReleasesMetadataFileName;
+    @ConfigProperty(name = "workspace.content.additional.directory")
+    String workspaceAdditionalContentDirectory;
 
     @ConfigProperty(name = "repoachiever-cluster.context.alias")
     String clusterContextAlias;
@@ -89,8 +80,11 @@ public class PropertiesEntity {
     @ConfigProperty(name = "communication.cluster.startup-timeout")
     Integer communicationClusterStartupTimeout;
 
-    @ConfigProperty(name = "communication.cluster.health-check-frequency")
+    @ConfigProperty(name = "communication.cluster.health-check.frequency")
     Integer communicationClusterHealthCheckFrequency;
+
+    @ConfigProperty(name = "diagnostics.scrape.delay")
+    Integer diagnosticsScrapeDelay;
 
     @ConfigProperty(name = "diagnostics.common.docker.network.name")
     String diagnosticsCommonDockerNetworkName;

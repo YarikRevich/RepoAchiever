@@ -7,6 +7,7 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
@@ -22,11 +23,22 @@ public class StateService {
     private static Boolean started = false;
 
     /**
+     * Represents RepoAchiever API Server application startup guard.
+     */
+    @Getter
+    private final static CountDownLatch startGuard = new CountDownLatch(1);
+
+    /**
      * Represents RepoAchiever Cluster topology state guard.
      */
     @Getter
     private final static ReentrantLock topologyStateGuard = new ReentrantLock();
 
+    /**
+     * Represents RepoAchiever Cluster communication guard.
+     */
+    @Getter
+    private final static ReentrantLock communicationGuard = new ReentrantLock();
 
     /**
      * Represents a set of all available RepoAchiever Cluster allocations.
@@ -35,16 +47,33 @@ public class StateService {
     private final static List<ClusterAllocationDto> clusterAllocations = new ArrayList<>();
 
     /**
-     * Retrieves RepoAchiever allocations with the given workspace unit key.
+     * Retrieves RepoAchiever Cluster allocations with the given workspace unit key.
      *
      * @param workspaceUnitKey given workspace unit key.
-     * @return filtered RepoAchiever allocations according to the given workspace unit key.
+     * @return filtered RepoAchiever Cluster allocations according to the given workspace unit key.
      */
     public static List<ClusterAllocationDto> getClusterAllocationsByWorkspaceUnitKey(String workspaceUnitKey) {
         return clusterAllocations.
-                stream().
-                filter(element -> Objects.equals(element.getWorkspaceUnitKey(), workspaceUnitKey)).
-                collect(Collectors.toList());
+                stream()
+                .filter(element -> Objects.equals(element.getWorkspaceUnitKey(), workspaceUnitKey))
+                .toList();
+    }
+
+    /**
+     * Retrieves RepoAchiever Cluster allocation with the given workspace unit key and name.
+     *
+     * @param workspaceUnitKey given workspace unit key.
+     * @param name             given RepoAchiever Cluster allocation name.
+     * @return filtered RepoAchiever Cluster allocations according to the given workspace unit key.
+     */
+    public static ClusterAllocationDto getClusterAllocationByWorkspaceUnitKeyAndName(
+            String workspaceUnitKey, String name) {
+        return clusterAllocations.
+                stream()
+                .filter(element -> Objects.equals(element.getWorkspaceUnitKey(), workspaceUnitKey) &&
+                        Objects.equals(element.getName(), name))
+                .toList()
+                .getFirst();
     }
 
     /**

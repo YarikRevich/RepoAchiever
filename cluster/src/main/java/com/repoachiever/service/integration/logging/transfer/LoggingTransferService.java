@@ -27,15 +27,13 @@ public class LoggingTransferService {
     private ApiServerCommunicationResource apiServerCommunicationResource;
 
     private final ScheduledExecutorService scheduledExecutorService =
-            Executors.newScheduledThreadPool(2);
+            Executors.newSingleThreadScheduledExecutor();
 
     /**
      * Performs application logs transfer to RepoAchiever API Server allocation.
      */
     @PostConstruct
     private void process() {
-        logger.info(LoggingConfigurationHelper.getTransferableMessage("it works"));
-
         scheduledExecutorService.scheduleAtFixedRate(() -> {
             if (!StateService.getExit()) {
                 while (!StateService.getLogMessagesQueue().isEmpty()) {

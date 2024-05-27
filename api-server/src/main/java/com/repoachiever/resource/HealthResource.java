@@ -1,20 +1,18 @@
 package com.repoachiever.resource;
 
 import com.repoachiever.api.HealthResourceApi;
-import com.repoachiever.entity.common.PropertiesEntity;
 import com.repoachiever.model.HealthCheckResult;
-import com.repoachiever.model.ReadinessCheckApplication;
 import com.repoachiever.model.ReadinessCheckResult;
 import com.repoachiever.service.client.smallrye.ISmallRyeHealthCheckClientService;
-import com.repoachiever.service.workspace.WorkspaceService;
-import com.repoachiever.service.workspace.facade.WorkspaceFacade;
+import com.repoachiever.service.config.ConfigService;
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.WebApplicationException;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
-import java.util.Objects;
+import java.net.URI;
 
 /**
  * Contains implementation of HealthResource.
@@ -22,17 +20,19 @@ import java.util.Objects;
 @ApplicationScoped
 public class HealthResource implements HealthResourceApi {
     @Inject
-    PropertiesEntity properties;
+    ConfigService configService;
 
-    @Inject
-    WorkspaceFacade workspaceFacade;
-
-    @Inject
-    WorkspaceService workspaceService;
-
-    @Inject
-    @RestClient
     ISmallRyeHealthCheckClientService smallRyeHealthCheckClientService;
+
+    @PostConstruct
+    private void configure() {
+        smallRyeHealthCheckClientService = RestClientBuilder.newBuilder()
+                .baseUri(
+                        URI.create(
+                                String.format(
+                                        "http://localhost:%d", configService.getConfig().getConnection().getPort())))
+                .build(ISmallRyeHealthCheckClientService.class);
+    }
 
     /**
      * Implementation for declared in OpenAPI configuration v1HealthGet method.
@@ -51,15 +51,11 @@ public class HealthResource implements HealthResourceApi {
     /**
      * Implementation for declared in OpenAPI configuration v1ReadinessPost method.
      *
-     * @param readinessCheckApplication application used to perform application readiness check.
+     * @param body application used to perform application readiness check.
      * @return readiness check result.
      */
     @Override
-    public ReadinessCheckResult v1ReadinessPost(ReadinessCheckApplication readinessCheckApplication) {
-        if (Objects.isNull(readinessCheckApplication)) {
-            throw new BadRequestException();
-        }
-
-        return null;
+    public ReadinessCheckResult v1ReadinessPost(Object body) {
+        throw new InternalServerErrorException();
     }
 }

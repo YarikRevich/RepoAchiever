@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
-import com.repoachiever.entity.common.MetadataFileEntity;
+import com.repoachiever.entity.common.AdditionalContentFileEntity;
 import com.repoachiever.entity.common.PropertiesEntity;
 import com.repoachiever.exception.*;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -13,15 +13,20 @@ import jakarta.inject.Inject;
 import jakarta.xml.bind.DatatypeConverter;
 
 import java.io.*;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.util.FileSystemUtils;
 
 /**
@@ -29,8 +34,6 @@ import org.springframework.util.FileSystemUtils;
  */
 @ApplicationScoped
 public class WorkspaceService {
-    private static final Logger logger = LogManager.getLogger(WorkspaceService.class);
-
     @Inject
     PropertiesEntity properties;
 
@@ -47,14 +50,60 @@ public class WorkspaceService {
     }
 
     /**
-     * Creates content directory in the given workspace unit directory
+     * Creates content unit directory in the given workspace unit directory.
      *
-     * @param workspaceUnitDirectory given workspace unit directory
-     * @throws WorkspaceContentDirectoryCreationFailureException if workspace content directory creation operation failed.
+     * @param workspaceUnitDirectory given workspace unit directory.
+     * @param location               given content location.
+     * @throws WorkspaceContentDirectoryCreationFailureException if workspace content unit directory creation
+     *                                                           operation failed.
      */
-    public void createContentDirectory(String workspaceUnitDirectory) throws
+    public void createContentDirectory(String workspaceUnitDirectory, String location) throws
             WorkspaceContentDirectoryCreationFailureException {
-        Path unitDirectoryPath = Path.of(workspaceUnitDirectory, properties.getWorkspaceContentDirectory());
+        Path unitDirectoryPath = Path.of(workspaceUnitDirectory, location);
+
+        if (Files.notExists(unitDirectoryPath)) {
+            try {
+                Files.createDirectory(unitDirectoryPath);
+            } catch (IOException e) {
+                throw new WorkspaceContentDirectoryCreationFailureException(e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Creates raw content directory in the given workspace unit directory and location.
+     *
+     * @param workspaceUnitDirectory given workspace unit directory.
+     * @param location               given raw content location.
+     * @throws WorkspaceContentDirectoryCreationFailureException if workspace raw content directory creation operation
+     *                                                           failed.
+     */
+    public void createRawContentDirectory(String workspaceUnitDirectory, String location) throws
+            WorkspaceContentDirectoryCreationFailureException {
+        Path unitDirectoryPath = Path.of(
+                workspaceUnitDirectory, location, properties.getWorkspaceRawContentDirectory());
+
+        if (Files.notExists(unitDirectoryPath)) {
+            try {
+                Files.createDirectory(unitDirectoryPath);
+            } catch (IOException e) {
+                throw new WorkspaceContentDirectoryCreationFailureException(e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Creates additional content directory in the given workspace unit directory and location.
+     *
+     * @param workspaceUnitDirectory given workspace unit directory.
+     * @param location               given additional content location.
+     * @throws WorkspaceContentDirectoryCreationFailureException if workspace additional content directory creation
+     *                                                           operation failed.
+     */
+    public void createAdditionalContentDirectory(String workspaceUnitDirectory, String location) throws
+            WorkspaceContentDirectoryCreationFailureException {
+        Path unitDirectoryPath = Path.of(
+                workspaceUnitDirectory, location, properties.getWorkspaceAdditionalContentDirectory());
 
         if (Files.notExists(unitDirectoryPath)) {
             try {
@@ -99,13 +148,64 @@ public class WorkspaceService {
     }
 
     /**
-     * Checks if workspace unit directory with the help of the given key.
+     * Removes content directory in the given workspace unit.
      *
-     * @param key given workspace unit key.
+     * @param workspaceUnitDirectory given workspace unit directory.
+     * @param location               given content directory location.
+     * @throws ContentDirectoryRemovalFailureException if content directory cannot be removed.
+     */
+    public void removeContentDirectory(String workspaceUnitDirectory, String location) throws
+            ContentDirectoryRemovalFailureException {
+        try {
+            FileSystemUtils.deleteRecursively(Path.of(workspaceUnitDirectory, location));
+        } catch (IOException e) {
+            throw new ContentDirectoryRemovalFailureException(e.getMessage());
+        }
+    }
+
+    /**
+     * Checks if workspace unit directory exists with the help of the given key.
+     *
+     * @param key given workspace unit directory.
      * @return result if workspace unit directory exists with the help of the given key.
      */
-    public boolean isUnitDirectoryExist(String key) {
+    public Boolean isUnitDirectoryExist(String key) {
         return Files.exists(Paths.get(properties.getWorkspaceDirectory(), key));
+    }
+
+    /**
+     * Checks if content unit exists with the help of the given key and location.
+     *
+     * @param workspaceUnitDirectory given workspace unit directory.
+     * @param location               given content location.
+     * @return result if content directory exists with the help of the given key and location.
+     */
+    public Boolean isContentDirectoryExist(String workspaceUnitDirectory, String location) {
+        return Files.exists(Paths.get(workspaceUnitDirectory, location));
+    }
+
+    /**
+     * Checks if raw content directory exists with the help of the given key and location.
+     *
+     * @param workspaceUnitDirectory given workspace unit directory.
+     * @param location               given raw content location.
+     * @return result if raw content directory exists with the help of the given key and location.
+     */
+    public Boolean isRawContentDirectoryExist(String workspaceUnitDirectory, String location) {
+        return Files.exists(
+                Paths.get(workspaceUnitDirectory, location, properties.getWorkspaceRawContentDirectory()));
+    }
+
+    /**
+     * Checks if additional content directory exists with the help of the given key and location.
+     *
+     * @param workspaceUnitDirectory given workspace unit directory.
+     * @param location               given additional content location.
+     * @return result if additional content directory exists with the help of the given key and location.
+     */
+    public Boolean isAdditionalContentDirectoryExist(String workspaceUnitDirectory, String location) {
+        return Files.exists(
+                Paths.get(workspaceUnitDirectory, location, properties.getWorkspaceAdditionalContentDirectory()));
     }
 
     /**
@@ -126,237 +226,327 @@ public class WorkspaceService {
     }
 
     /**
-     * Writes given content repository to the given workspace unit directory.
+     * Retrieves amount of files of the given type in the given workspace unit.
      *
      * @param workspaceUnitDirectory given workspace unit directory.
-     * @param name given content repository name.
-     * @param input given content repository input.
-     * @throws ContentFileWriteFailureException if content file cannot be created.
+     * @param location               given raw content file location.
+     * @param type                   given file type.
+     * @throws ContentFilesAmountRetrievalFailureException if files amount retrieval failed.
      */
-    public void createContentFile(String workspaceUnitDirectory, String name, InputStream input) throws
-            ContentFileWriteFailureException {
-        Path contentDirectoryPath = Path.of(workspaceUnitDirectory, properties.getWorkspaceContentDirectory(), name);
+    private Integer getFilesAmount(String workspaceUnitDirectory, String location, String type) throws
+            ContentFilesAmountRetrievalFailureException {
+        try (Stream<Path> stream = Files.list(Path.of(workspaceUnitDirectory, location, type))) {
+            return (int) stream.count();
+        } catch (IOException e) {
+            throw new ContentFilesAmountRetrievalFailureException(e.getMessage());
+        }
+    }
+
+    /**
+     * Removes earliest file of the given type in the given workspace unit according to the creation timestamp.
+     *
+     * @param workspaceUnitDirectory given workspace unit directory.
+     * @param location               given file location.
+     * @param type                   given file type.
+     * @throws ContentFileRemovalFailureException if earliest file removal operation failed. .
+     */
+    private void removeEarliestFile(String workspaceUnitDirectory, String location, String type) throws
+            ContentFileRemovalFailureException {
+        Path target = null;
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Path.of(workspaceUnitDirectory, location, type))) {
+            Instant earliestTimestamp = null;
+
+            for (Path file : stream) {
+                BasicFileAttributes attributes;
+
+                try {
+                    attributes = Files.readAttributes(file, BasicFileAttributes.class);
+                } catch (IOException e) {
+                    throw new RawContentFileRemovalFailureException(e.getMessage());
+                }
+
+                if (Objects.isNull(earliestTimestamp) ||
+                        attributes.creationTime().toInstant().isBefore(earliestTimestamp)) {
+                    earliestTimestamp = attributes.creationTime().toInstant();
+                    target = file;
+                }
+            }
+        } catch (IOException e) {
+            throw new ContentFileRemovalFailureException(e.getMessage());
+        }
+
+        if (Objects.nonNull(target)) {
+            try {
+                FileSystemUtils.deleteRecursively(target);
+            } catch (IOException e) {
+                throw new ContentFileRemovalFailureException(e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Retrieves content units locations in the given workspace unit.
+     *
+     * @param workspaceUnitDirectory given workspace unit directory.
+     * @return a list of content units locations.
+     * @throws ContentUnitsLocationsRetrievalFailureException if content units locations retrieval operation failed. .
+     */
+    public List<String> getContentUnitsLocations(String workspaceUnitDirectory) throws
+            ContentUnitsLocationsRetrievalFailureException {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Path.of(workspaceUnitDirectory))) {
+            List<String> result = new ArrayList<>();
+
+            for (Path file : stream) {
+                result.add(file.getFileName().toString());
+            }
+
+            return result;
+        } catch (IOException e) {
+            throw new ContentUnitsLocationsRetrievalFailureException(e.getMessage());
+        }
+    }
+
+    /**
+     * Retrieves content files locations of the given type in the given workspace unit.
+     *
+     * @param workspaceUnitDirectory given workspace unit directory.
+     * @param location               given file location.
+     * @param type                   given file type.
+     * @return a list of content locations.
+     * @throws ContentFilesLocationsRetrievalFailureException if content files locations retrieval operation failed. .
+     */
+    public List<String> getContentFilesLocations(String workspaceUnitDirectory, String location, String type) throws
+            ContentFilesLocationsRetrievalFailureException {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Path.of(workspaceUnitDirectory, location, type))) {
+            List<String> result = new ArrayList<>();
+
+            for (Path file : stream) {
+                result.add(file.getFileName().toString());
+            }
+
+            return result;
+        } catch (IOException e) {
+            throw new ContentFilesLocationsRetrievalFailureException(e.getMessage());
+        }
+    }
+
+    /**
+     * Writes given raw content to the given workspace unit directory.
+     *
+     * @param workspaceUnitDirectory given workspace unit directory.
+     * @param location               given raw content location.
+     * @param name                   given raw content name.
+     * @param input                  given raw content input.
+     * @throws RawContentFileWriteFailureException if raw content file cannot be created.
+     */
+    public void createRawContentFile(
+            String workspaceUnitDirectory, String location, String name, InputStream input) throws
+            RawContentFileWriteFailureException {
+        Path contentDirectoryPath = Path.of(
+                workspaceUnitDirectory, location, properties.getWorkspaceRawContentDirectory(), name);
 
         File file = new File(contentDirectoryPath.toString());
 
         try {
             FileUtils.copyInputStreamToFile(input, file);
         } catch (IOException e) {
-            throw new ContentFileWriteFailureException(e.getMessage());
+            throw new RawContentFileWriteFailureException(e.getMessage());
         }
     }
 
     /**
-     * Removes content file in the given workspace unit.
+     * Retrieves amount of raw content files in the given workspace unit.
      *
      * @param workspaceUnitDirectory given workspace unit directory.
-     * @param name given content repository name.
-     * @throws ContentFileRemovalFailureException if content file cannot be created.
+     * @param location               given raw content file location.
+     * @throws RawContentFilesAmountRetrievalFailureException if raw content files amount retrieval failed.
      */
-    public void removeContentFile(String workspaceUnitDirectory, String name) throws
-            ContentFileRemovalFailureException {
+    public Integer getRawContentFilesAmount(String workspaceUnitDirectory, String location) throws
+            RawContentFilesAmountRetrievalFailureException {
         try {
-            FileSystemUtils.deleteRecursively(
-                    Path.of(workspaceUnitDirectory, properties.getWorkspaceContentDirectory(), name));
-        } catch (IOException e) {
-            throw new ContentFileRemovalFailureException(e);
+            return getFilesAmount(workspaceUnitDirectory, location, properties.getWorkspaceRawContentDirectory());
+        } catch (ContentFilesAmountRetrievalFailureException e) {
+            throw new RawContentFilesAmountRetrievalFailureException(e.getMessage());
         }
     }
 
     /**
-     * Retrieves content file of the given name with the help of the given workspace unit directory.
+     * Removes earliest raw content file in the given workspace unit according to the creation timestamp.
      *
      * @param workspaceUnitDirectory given workspace unit directory.
+     * @param location               given raw content file location.
+     * @throws RawContentFileRemovalFailureException if earliest raw content file removal operation failed. .
+     */
+    public void removeEarliestRawContentFile(String workspaceUnitDirectory, String location) throws
+            RawContentFileRemovalFailureException {
+        try {
+            removeEarliestFile(workspaceUnitDirectory, location, properties.getWorkspaceRawContentDirectory());
+        } catch (ContentFileRemovalFailureException e) {
+            throw new RawContentFileRemovalFailureException(e.getMessage());
+        }
+    }
+
+    /**
+     * Checks if additional content file of the given type exists in the given workspace unit directory.
+     *
+     * @param workspaceUnitDirectory given workspace unit directory.
+     * @param location               given location of the additional content file.
+     * @param name                   given name of the additional content file.
+     * @return result if additional content file exists in the given workspace unit directory.
+     */
+    public Boolean isRawContentFileExist(String workspaceUnitDirectory, String location, String name) {
+        return Files.exists(
+                Paths.get(
+                        workspaceUnitDirectory, location, properties.getWorkspaceRawContentDirectory(), name));
+    }
+
+    /**
+     * Retrieves content files locations of raw type in the given workspace unit.
+     *
+     * @param workspaceUnitDirectory given workspace unit directory.
+     * @param location               given file location.
+     * @return a list of raw content locations.
+     * @throws ContentFilesLocationsRetrievalFailureException if files locations retrieval operation failed. .
+     */
+    public List<String> getRawContentFilesLocations(String workspaceUnitDirectory, String location) throws
+            ContentFilesLocationsRetrievalFailureException {
+        return getContentFilesLocations(workspaceUnitDirectory, location, properties.getWorkspaceRawContentDirectory());
+    }
+
+    /**
+     * Retrieves raw content file of the given name with the help of the given workspace unit directory.
+     *
+     * @param workspaceUnitDirectory given workspace unit directory.
+     * @param location               given location of the content file.
      * @param name                   given name of the content file.
-     * @return content file entity.
-     * @throws ContentFileNotFoundException if the content file not found.
+     * @return raw content file stream.
+     * @throws ContentFileNotFoundException if the raw content file not found.
      */
-    public OutputStream getContentFile(String workspaceUnitDirectory, String name) throws
+    public byte[] getRawContentFile(String workspaceUnitDirectory, String location, String name) throws
             ContentFileNotFoundException {
-        Path contentDirectoryPath = Path.of(workspaceUnitDirectory, properties.getWorkspaceContentDirectory(), name);
-
-        File file = new File(contentDirectoryPath.toString());
+        Path contentDirectoryPath = Path.of(
+                workspaceUnitDirectory, location, properties.getWorkspaceRawContentDirectory(), name);
 
         try {
-            return new FileOutputStream(file);
-        } catch (FileNotFoundException e) {
-            throw new ContentFileNotFoundException(e);
+            return FileUtils.readFileToByteArray(new File(contentDirectoryPath.toString()));
+        } catch (IOException e) {
+            throw new ContentFileNotFoundException(e.getMessage());
         }
     }
 
     /**
-     * Writes metadata file input of the given type to the given workspace unit directory.
+     * Writes additional file input of the given type to the given workspace unit directory.
      *
      * @param workspaceUnitDirectory given workspace unit directory.
-     * @param type                   given type of the metadata file.
-     * @param input                  given metadata file entity input.
-     * @throws MetadataFileWriteFailureException if metadata file cannot be created.
+     * @param location               given location of the additional content file.
+     * @param name                   given name of the additional content file.
+     * @param input                  given additional content file entity input.
+     * @throws AdditionalContentFileWriteFailureException if additional content file cannot be created.
      */
-    private void createMetadataFile(String workspaceUnitDirectory, String type, MetadataFileEntity input)
-            throws MetadataFileWriteFailureException {
+    public void createAdditionalContentFile(
+            String workspaceUnitDirectory, String location, String name, AdditionalContentFileEntity input)
+            throws AdditionalContentFileWriteFailureException {
         ObjectMapper mapper = new ObjectMapper();
 
         File variableFile =
                 new File(
-                        Paths.get(workspaceUnitDirectory, properties.getWorkspaceMetadataDirectory(), type)
-                                .toString());
+                        Paths.get(
+                                workspaceUnitDirectory,
+                                location,
+                                properties.getWorkspaceAdditionalContentDirectory(),
+                                name).toString());
 
         try {
             mapper.writeValue(variableFile, input);
         } catch (IOException e) {
-            throw new MetadataFileWriteFailureException(e.getMessage());
+            throw new AdditionalContentFileWriteFailureException(e.getMessage());
         }
     }
 
     /**
-     * Writes metadata file input of the prs type to the given workspace unit directory.
+     * Retrieves amount of additional content files in the given workspace unit.
      *
      * @param workspaceUnitDirectory given workspace unit directory.
-     * @param input                  given metadata file entity input.
-     * @throws MetadataFileWriteFailureException if metadata file cannot be created.
+     * @param location               given additional content file location.
+     * @throws AdditionalContentFilesAmountRetrievalFailureException if additional content files amount retrieval failed.
      */
-    public void createPRsMetadataFile(String workspaceUnitDirectory, MetadataFileEntity input)
-            throws MetadataFileWriteFailureException {
-        createMetadataFile(workspaceUnitDirectory, properties.getWorkspacePRsMetadataFileName(), input);
+    public Integer getAdditionalContentFilesAmount(String workspaceUnitDirectory, String location) throws
+            AdditionalContentFilesAmountRetrievalFailureException {
+        try {
+            return getFilesAmount(workspaceUnitDirectory, location, properties.getWorkspaceAdditionalContentDirectory());
+        } catch (ContentFilesAmountRetrievalFailureException e) {
+            throw new AdditionalContentFilesAmountRetrievalFailureException(e.getMessage());
+        }
     }
 
     /**
-     * Writes metadata file input of the issues type to the given workspace unit directory.
+     * Checks if additional content file of the given type exists in the given workspace unit directory.
      *
      * @param workspaceUnitDirectory given workspace unit directory.
-     * @param input                  given metadata file entity input.
-     * @throws MetadataFileWriteFailureException if metadata file cannot be created.
+     * @param location               given location of the additional content file.
+     * @param name                   given name of the additional content file.
+     * @return result if additional content file exists in the given workspace unit directory.
      */
-    public void createIssuesMetadataFile(String workspaceUnitDirectory, MetadataFileEntity input)
-            throws MetadataFileWriteFailureException {
-        createMetadataFile(workspaceUnitDirectory, properties.getWorkspaceIssuesMetadataFileName(), input);
-    }
-
-    /**
-     * Writes metadata file input of the releases type to the given workspace unit directory.
-     *
-     * @param workspaceUnitDirectory given workspace unit directory.
-     * @param input                  given metadata file entity input.
-     * @throws MetadataFileWriteFailureException if metadata file cannot be created.
-     */
-    public void createReleasesMetadataFile(String workspaceUnitDirectory, MetadataFileEntity input)
-            throws MetadataFileWriteFailureException {
-        createMetadataFile(workspaceUnitDirectory, properties.getWorkspaceReleasesMetadataFileName(), input);
-    }
-
-    /**
-     * Checks if metadata file of the given type exists in the given workspace unit directory.
-     *
-     * @param workspaceUnitDirectory given workspace unit directory.
-     * @param type                   given type of the metadata file.
-     * @return result if metadata file exists in the given workspace unit directory.
-     */
-    private boolean isMetadataFileExist(String workspaceUnitDirectory, String type) {
+    public Boolean isAdditionalContentFileExist(String workspaceUnitDirectory, String location, String name) {
         return Files.exists(
-                Paths.get(workspaceUnitDirectory, properties.getWorkspaceMetadataDirectory(), type));
+                Paths.get(
+                        workspaceUnitDirectory, location, properties.getWorkspaceAdditionalContentDirectory(), name));
     }
 
     /**
-     * Checks if metadata file of prs type exists in the given workspace unit directory.
+     * Retrieves content files locations of additional type in the given workspace unit.
      *
      * @param workspaceUnitDirectory given workspace unit directory.
-     * @return result if metadata file exists in the given workspace unit directory.
+     * @param location               given file location.
+     * @return a list of additional content locations.
+     * @throws ContentFilesLocationsRetrievalFailureException if files locations retrieval operation failed. .
      */
-    private boolean isPRsMetadataFileExist(String workspaceUnitDirectory) {
-        return isMetadataFileExist(workspaceUnitDirectory, properties.getWorkspacePRsMetadataFileName());
+    public List<String> getAdditionalContentFilesLocations(String workspaceUnitDirectory, String location) throws
+            ContentFilesLocationsRetrievalFailureException {
+        return getContentFilesLocations(
+                workspaceUnitDirectory, location, properties.getWorkspaceAdditionalContentDirectory());
     }
 
     /**
-     * Checks if metadata file of issues type exists in the given workspace unit directory.
+     * Retrieves additional content file content of the given name with the help of the given workspace unit directory.
      *
      * @param workspaceUnitDirectory given workspace unit directory.
-     * @return result if metadata file exists in the given workspace unit directory.
+     * @param location               given location of the additional content file.
+     * @param name                   given name of the additional content file.
+     * @return additional content file entity.
+     * @throws AdditionalContentFileNotFoundException if the additional content file not found.
      */
-    private boolean isIssuesMetadataFileExist(String workspaceUnitDirectory) {
-        return isMetadataFileExist(workspaceUnitDirectory, properties.getWorkspaceIssuesMetadataFileName());
-    }
-
-    /**
-     * Checks if metadata file of releases type exists in the given workspace unit directory.
-     *
-     * @param workspaceUnitDirectory given workspace unit directory.
-     * @return result if metadata file exists in the given workspace unit directory.
-     */
-    private boolean isReleasesMetadataFileExist(String workspaceUnitDirectory) {
-        return isMetadataFileExist(workspaceUnitDirectory, properties.getWorkspaceReleasesMetadataFileName());
-    }
-
-    /**
-     * Retrieves metadata file content of the given type with the help of the given workspace unit directory.
-     *
-     * @param workspaceUnitDirectory given workspace unit directory.
-     * @param type                   given type of the metadata file.
-     * @return metadata file entity.
-     * @throws MetadataFileNotFoundException if the metadata file not found.
-     */
-    public MetadataFileEntity getMetadataFileContent(String workspaceUnitDirectory, String type)
-            throws MetadataFileNotFoundException {
+    public AdditionalContentFileEntity getAdditionalContentFileContent(
+            String workspaceUnitDirectory, String location, String name) throws
+            AdditionalContentFileNotFoundException, AdditionalContentFileReadFailureException {
         ObjectMapper mapper =
                 new ObjectMapper()
                         .configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true)
                         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
                         .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        ObjectReader reader = mapper.reader().forType(new TypeReference<MetadataFileEntity>() {
+        ObjectReader reader = mapper.reader().forType(new TypeReference<AdditionalContentFileEntity>() {
         });
 
         InputStream variableFile;
         try {
             variableFile =
                     new FileInputStream(
-                            Paths.get(workspaceUnitDirectory, properties.getWorkspaceMetadataDirectory(), type)
+                            Paths.get(
+                                            workspaceUnitDirectory,
+                                            location,
+                                            properties.getWorkspaceAdditionalContentDirectory(),
+                                            name)
                                     .toString());
         } catch (FileNotFoundException e) {
-            throw new MetadataFileNotFoundException(e.getMessage());
+            throw new AdditionalContentFileNotFoundException(e.getMessage());
         }
 
         try {
-            return reader.<MetadataFileEntity>readValues(variableFile).readAll().getFirst();
+            return reader.<AdditionalContentFileEntity>readValues(variableFile).readAll().getFirst();
         } catch (IOException e) {
-            logger.fatal(e.getMessage());
+            throw new AdditionalContentFileReadFailureException(e.getMessage());
         }
-
-        return null;
-    }
-
-    /**
-     * Retrieves metadata file content of prs type with the help of the given workspace unit directory.
-     *
-     * @param workspaceUnitDirectory given workspace unit directory.
-     * @return metadata file entity.
-     * @throws MetadataFileNotFoundException if the metadata variable file not found.
-     */
-    public MetadataFileEntity getPRsMetadataFileContent(String workspaceUnitDirectory)
-            throws MetadataFileNotFoundException {
-        return getMetadataFileContent(workspaceUnitDirectory, properties.getWorkspacePRsMetadataFileName());
-    }
-
-    /**
-     * Retrieves metadata file content of issues type with the help of the given workspace unit directory.
-     *
-     * @param workspaceUnitDirectory given workspace unit directory.
-     * @return metadata file entity.
-     * @throws MetadataFileNotFoundException if the metadata variable file not found.
-     */
-    public MetadataFileEntity getIssuesMetadataFileContent(String workspaceUnitDirectory)
-            throws MetadataFileNotFoundException {
-        return getMetadataFileContent(workspaceUnitDirectory, properties.getWorkspaceIssuesMetadataFileName());
-    }
-
-    /**
-     * Retrieves metadata file content of releases type with the help of the given workspace unit directory.
-     *
-     * @param workspaceUnitDirectory given workspace unit directory.
-     * @return metadata file entity.
-     * @throws MetadataFileNotFoundException if the metadata variable file not found.
-     */
-    public MetadataFileEntity getReleasesMetadataFileContent(String workspaceUnitDirectory)
-            throws MetadataFileNotFoundException {
-        return getMetadataFileContent(workspaceUnitDirectory, properties.getWorkspaceReleasesMetadataFileName());
     }
 }

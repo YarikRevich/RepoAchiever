@@ -2,7 +2,7 @@ package com.repoachiever.service.command.external.start;
 
 import com.repoachiever.dto.StartExternalCommandResultDto;
 import com.repoachiever.service.command.common.ICommand;
-import com.repoachiever.service.command.external.start.provider.aws.AWSStartExternalCommandService;
+import com.repoachiever.service.command.external.apply.AWSStartExternalCommandService;
 import com.repoachiever.service.config.ConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

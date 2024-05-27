@@ -16,7 +16,7 @@ public class DockerNetworkCreateCommandService extends SProcess {
         this.command = switch (osType) {
             case WINDOWS -> null;
             case UNIX, MAC, ANY -> String.format(
-                    "docker network inspect %s >/dev/null 2>&1 || docker network create -d bridge %s",
+                    "docker network inspect %s >/dev/null 2>&1 || docker network create --driver overlay --subnet=149.156.139.0/28 %s",
                     networkName,
                     networkName);
         };

@@ -19,10 +19,16 @@ public class TelemetryBinding implements MeterBinder {
     private final AtomicInteger workerAmount = new AtomicInteger();
 
     @Getter
-    private final AtomicInteger clusterAmount = new AtomicInteger();
+    private final AtomicInteger servingClusterAmount = new AtomicInteger();
 
     @Getter
-    private Timer clusterHealthCheck;
+    private final AtomicInteger suspendedClusterAmount = new AtomicInteger();
+
+    @Getter
+    private final AtomicInteger apiServerHealthCheckAmount = new AtomicInteger();
+
+    @Getter
+    private final AtomicInteger clusterHealthCheckAmount = new AtomicInteger();
 
     /**
      * @see MeterBinder
@@ -33,12 +39,20 @@ public class TelemetryBinding implements MeterBinder {
                 .description("Represents amount of allocated workers")
                 .register(meterRegistry);
 
-        Gauge.builder("general.cluster_amount", clusterAmount, AtomicInteger::get)
-                .description("Represents amount of allocated clusters")
+        Gauge.builder("general.serving_cluster_amount", servingClusterAmount, AtomicInteger::get)
+                .description("Represents amount of serving RepoAchiever Cluster allocations")
                 .register(meterRegistry);
 
-        clusterHealthCheck = Timer.builder("general.cluster_health_check")
-                .description("Represents all the performed health check requests for allocated clusters")
+        Gauge.builder("general.suspended_cluster_amount", suspendedClusterAmount, AtomicInteger::get)
+                .description("Represents amount of suspended RepoAchiever Cluster allocations")
+                .register(meterRegistry);
+
+        Gauge.builder("general.api_server_health_check_amount", apiServerHealthCheckAmount, AtomicInteger::get)
+                .description("Represents amount of performed health check requests for RepoAchiever API Server instance")
+                .register(meterRegistry);
+
+        Gauge.builder("general.cluster_health_check_amount", clusterHealthCheckAmount, AtomicInteger::get)
+                .description("Represents amount of performed health check requests for RepoAchiever Cluster allocations")
                 .register(meterRegistry);
     }
 }

@@ -1,8 +1,10 @@
 package com.repoachiever.service.integration.diagnostics.template;
 
 import com.repoachiever.entity.common.PropertiesEntity;
+import com.repoachiever.exception.ApplicationStartGuardFailureException;
 import com.repoachiever.exception.DiagnosticsTemplateProcessingFailureException;
 import com.repoachiever.service.config.ConfigService;
+import com.repoachiever.service.state.StateService;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.template.*;
 import io.quarkus.runtime.Startup;
@@ -29,12 +31,9 @@ import static freemarker.template.Configuration.VERSION_2_3_32;
 /**
  * Service used to perform diagnostics template configuration operations.
  */
-@Startup
-@Priority(value = 180)
+@Startup(value = 600)
 @ApplicationScoped
 public class TemplateConfigService {
-    private static final Logger logger = LogManager.getLogger(TemplateConfigService.class);
-
     @Inject
     PropertiesEntity properties;
 
@@ -43,16 +42,27 @@ public class TemplateConfigService {
 
     /**
      * Performs diagnostics infrastructure configuration templates parsing operations.
+     *
+     * @throws ApplicationStartGuardFailureException         if RepoAchiever API Server application start guard operation fails.
+     * @throws DiagnosticsTemplateProcessingFailureException if RepoAchiever API Server diagnostics template processing
+     *                                                       operation fails.
      */
     @PostConstruct
-    private void process() {
+    private void process() throws
+            ApplicationStartGuardFailureException,
+            DiagnosticsTemplateProcessingFailureException {
+        try {
+            StateService.getStartGuard().await();
+        } catch (InterruptedException e) {
+            throw new ApplicationStartGuardFailureException(e.getMessage());
+        }
+
         if (configService.getConfig().getDiagnostics().getEnabled()) {
             Configuration cfg = new Configuration(VERSION_2_3_32);
             try {
                 cfg.setTemplateLoader(new FileTemplateLoader(new File(properties.getDiagnosticsPrometheusConfigLocation())));
             } catch (IOException e) {
-                logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
-                return;
+                throw new DiagnosticsTemplateProcessingFailureException(e.getMessage());
             }
             cfg.setDefaultEncoding("UTF-8");
 
@@ -61,8 +71,7 @@ public class TemplateConfigService {
             try {
                 template = cfg.getTemplate(properties.getDiagnosticsPrometheusConfigTemplate());
             } catch (IOException e) {
-                logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
-                return;
+                throw new DiagnosticsTemplateProcessingFailureException(e.getMessage());
             }
 
             Writer fileWriter;
@@ -74,8 +83,7 @@ public class TemplateConfigService {
                                         properties.getDiagnosticsPrometheusConfigOutput()).
                                 toFile());
             } catch (IOException e) {
-                logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
-                return;
+                throw new DiagnosticsTemplateProcessingFailureException(e.getMessage());
             }
 
             Map<String, Object> input = new HashMap<>() {
@@ -98,12 +106,12 @@ public class TemplateConfigService {
             try {
                 template.process(input, fileWriter);
             } catch (TemplateException | IOException e) {
-                logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
+                throw new DiagnosticsTemplateProcessingFailureException(e.getMessage());
+
             } finally {
                 try {
                     fileWriter.close();
-                } catch (IOException e) {
-                    logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
+                } catch (IOException ignored) {
                 }
             }
 
@@ -111,15 +119,13 @@ public class TemplateConfigService {
                 cfg.setTemplateLoader(new FileTemplateLoader(
                         new File(properties.getDiagnosticsGrafanaDatasourcesLocation())));
             } catch (IOException e) {
-                logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
-                return;
+                throw new DiagnosticsTemplateProcessingFailureException(e.getMessage());
             }
 
             try {
                 template = cfg.getTemplate(properties.getDiagnosticsGrafanaDatasourcesTemplate());
             } catch (IOException e) {
-                logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
-                return;
+                throw new DiagnosticsTemplateProcessingFailureException(e.getMessage());
             }
 
             try {
@@ -129,8 +135,7 @@ public class TemplateConfigService {
                                         properties.getDiagnosticsGrafanaDatasourcesOutput()).
                                 toFile());
             } catch (IOException e) {
-                logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
-                return;
+                throw new DiagnosticsTemplateProcessingFailureException(e.getMessage());
             }
 
             input = new HashMap<>() {
@@ -147,12 +152,11 @@ public class TemplateConfigService {
             try {
                 template.process(input, fileWriter);
             } catch (TemplateException | IOException e) {
-                logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
+                throw new DiagnosticsTemplateProcessingFailureException(e.getMessage());
             } finally {
                 try {
                     fileWriter.close();
-                } catch (IOException e) {
-                    logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
+                } catch (IOException ignored) {
                 }
             }
 
@@ -160,15 +164,13 @@ public class TemplateConfigService {
                 cfg.setTemplateLoader(new FileTemplateLoader(
                         new File(properties.getDiagnosticsGrafanaDashboardsLocation())));
             } catch (IOException e) {
-                logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
-                return;
+                throw new DiagnosticsTemplateProcessingFailureException(e.getMessage());
             }
 
             try {
                 template = cfg.getTemplate(properties.getDiagnosticsGrafanaDashboardsDiagnosticsTemplate());
             } catch (IOException e) {
-                logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
-                return;
+                throw new DiagnosticsTemplateProcessingFailureException(e.getMessage());
             }
 
             try {
@@ -178,8 +180,7 @@ public class TemplateConfigService {
                                         properties.getDiagnosticsGrafanaDashboardsDiagnosticsOutput()).
                                 toFile());
             } catch (IOException e) {
-                logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
-                return;
+                throw new DiagnosticsTemplateProcessingFailureException(e.getMessage());
             }
 
             input = new HashMap<>() {
@@ -189,24 +190,17 @@ public class TemplateConfigService {
                             put("version", properties.getGitCommitId());
                         }
                     });
-                    put("nodeexporter", new HashMap<String, Object>() {
-                        {
-                            put("port", String.valueOf(
-                                    configService.getConfig().getDiagnostics().getNodeExporter().getPort()));
-                        }
-                    });
                 }
             };
 
             try {
                 template.process(input, fileWriter);
             } catch (TemplateException | IOException e) {
-                logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
+                throw new DiagnosticsTemplateProcessingFailureException(e.getMessage());
             } finally {
                 try {
                     fileWriter.close();
-                } catch (IOException e) {
-                    logger.fatal(new DiagnosticsTemplateProcessingFailureException(e.getMessage()).getMessage());
+                } catch (IOException ignored) {
                 }
             }
         }

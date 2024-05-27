@@ -2,7 +2,7 @@ package com.repoachiever.dto;
 
 import lombok.AllArgsConstructor;
 
-/** */
+/** Represents visualization label body. */
 @AllArgsConstructor(staticName = "of")
 public class VisualizationLabelDto {
   private final String message;

@@ -15,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Represents repository implementation to handle content table.
@@ -31,19 +32,36 @@ public class ContentRepository {
      * Inserts given values into the content table.
      *
      * @param location given content location.
+     * @param additional given content additional option.
      * @param provider given provider used for content retrieval.
+     * @param exporter given exporter used for content retrieval.
      * @param secret   given secret, which allows content retrieval.
      * @throws RepositoryOperationFailureException if operation execution fails.
      */
-    public void insert(String location, Integer provider, Integer secret) throws RepositoryOperationFailureException {
+    public void insert(String location, Boolean additional, Integer provider, Optional<Integer> exporter, Integer secret) throws RepositoryOperationFailureException {
+        String query;
+
+        if (exporter.isPresent()) {
+            query = String.format(
+                    "INSERT INTO %s (location, additional, provider, exporter, secret) VALUES ('%s', %b, %d, %d, %d)",
+                    properties.getDatabaseContentTableName(),
+                    location,
+                    additional,
+                    provider,
+                    exporter.get(),
+                    secret);
+        } else {
+            query = String.format(
+                    "INSERT INTO %s (location, additional, provider, secret) VALUES ('%s', %b, %d, %d)",
+                    properties.getDatabaseContentTableName(),
+                    location,
+                    additional,
+                    provider,
+                    secret);
+        }
+
         try {
-            repositoryExecutor.performQuery(
-                    String.format(
-                            "INSERT INTO %s (location, provider, secret) VALUES ('%s', %d, %d)",
-                            properties.getDatabaseContentTableName(),
-                            location,
-                            provider,
-                            secret));
+            repositoryExecutor.performQuery(query);
 
         } catch (QueryExecutionFailureException | QueryEmptyResultException e) {
             throw new RepositoryOperationFailureException(e.getMessage());
@@ -51,32 +69,74 @@ public class ContentRepository {
     }
 
     /**
-     * Checks if content entity with the given location is present.
+     * Checks if additional is present by location.
      *
-     * @param location given location of the content.
+     * @param location given content location.
      * @return result of the check.
      * @throws RepositoryOperationFailureException if repository operation fails.
      */
-    public Boolean isPresentByLocation(String location) throws RepositoryOperationFailureException {
-        try {
-            ResultSet resultSet = repositoryExecutor.performQueryWithResult(
-                    String.format(
-                            "SELECT t.id FROM %s as t WHERE t.location = '%s'",
-                            properties.getDatabaseContentTableName(),
-                            location));
+    public Boolean isAdditionalPresent(String location) throws
+            RepositoryOperationFailureException {
+        return false;
+    }
 
-            try {
-                resultSet.close();
-            } catch (SQLException e) {
-                throw new RepositoryOperationFailureException(e.getMessage());
-            }
-        } catch (QueryEmptyResultException e) {
-            return false;
-        } catch (QueryExecutionFailureException e) {
+    /**
+     * Retrieves all the persisted content entities with the given provider and secret.
+     *
+     * @return retrieved content entities.
+     * @throws RepositoryOperationFailureException if repository operation fails.
+     */
+    public List<ContentEntity> findByProviderAndSecret(Integer provider, Integer secret) throws
+            RepositoryOperationFailureException {
+        ResultSet resultSet;
+
+        try {
+            resultSet =
+                    repositoryExecutor.performQueryWithResult(
+                            String.format(
+                                    "SELECT t.id, t.location, t.additional, t.exporter FROM %s as t WHERE t.provider = %d AND t.secret = %d",
+                                    properties.getDatabaseContentTableName(),
+                                    provider,
+                                    secret));
+
+        } catch (QueryExecutionFailureException | QueryEmptyResultException e) {
             throw new RepositoryOperationFailureException(e.getMessage());
         }
 
-        return true;
+        List<ContentEntity> result = new ArrayList<>();
+
+        Integer id;
+        String location;
+        Boolean additional;
+        Integer exporterRaw;
+        Optional<Integer> exporter;
+
+        try {
+            while (resultSet.next()) {
+                id = resultSet.getInt("id");
+                location = resultSet.getString("location");
+                additional = resultSet.getBoolean("additional");
+
+                exporterRaw = resultSet.getInt("exporter");
+                if (resultSet.wasNull()) {
+                    exporter = Optional.empty();
+                } else {
+                    exporter = Optional.of(exporterRaw);
+                }
+
+                result.add(ContentEntity.of(id, location, additional, provider, exporter, secret));
+            }
+        } catch (SQLException e) {
+            throw new RepositoryOperationFailureException(e.getMessage());
+        }
+
+        try {
+            resultSet.close();
+        } catch (SQLException e) {
+            throw new RepositoryOperationFailureException(e.getMessage());
+        }
+
+        return result;
     }
 
     /**
@@ -92,7 +152,7 @@ public class ContentRepository {
             resultSet =
                     repositoryExecutor.performQueryWithResult(
                             String.format(
-                                    "SELECT t.id, t.location, t.provider, t.secret FROM %s as t",
+                                    "SELECT t.id, t.location, t.additional, t.provider, t.exporter, t.secret FROM %s as t",
                                     properties.getDatabaseContentTableName()));
 
         } catch (QueryExecutionFailureException | QueryEmptyResultException e) {
@@ -103,17 +163,29 @@ public class ContentRepository {
 
         Integer id;
         String location;
+        Boolean additional;
         Integer provider;
+        Integer exporterRaw;
+        Optional<Integer> exporter;
         Integer secret;
 
         try {
             while (resultSet.next()) {
                 id = resultSet.getInt("id");
                 location = resultSet.getString("location");
+                additional = resultSet.getBoolean("additional");
                 provider = resultSet.getInt("provider");
+
+                exporterRaw = resultSet.getInt("exporter");
+                if (resultSet.wasNull()) {
+                    exporter = Optional.empty();
+                } else {
+                    exporter = Optional.of(exporterRaw);
+                }
+
                 secret = resultSet.getInt("secret");
 
-                result.add(ContentEntity.of(id, location, provider, secret));
+                result.add(ContentEntity.of(id, location, additional, provider, exporter, secret));
             }
         } catch (SQLException e) {
             throw new RepositoryOperationFailureException(e.getMessage());
@@ -131,7 +203,7 @@ public class ContentRepository {
     /**
      * Deletes all entities with the given secret from content table.
      *
-     * @param secret   given secret, which allows content retrieval.
+     * @param secret given secret, which allows content retrieval.
      * @throws RepositoryOperationFailureException if operation execution fails.
      */
     public void deleteBySecret(Integer secret) throws RepositoryOperationFailureException {

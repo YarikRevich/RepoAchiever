@@ -22,6 +22,13 @@ public interface IClusterCommunicationService extends Remote {
     void performServe() throws RemoteException;
 
     /**
+     * Performs RepoAchiever Cluster content retrieval reset operation.
+     *
+     * @throws RemoteException if remote request fails.
+     */
+    void performRetrievalReset() throws RemoteException;
+
+    /**
      * Retrieves latest RepoAchiever Cluster health check states.
      *
      * @return RepoAchiever Cluster health check status.
@@ -37,14 +44,4 @@ public interface IClusterCommunicationService extends Remote {
      * @throws RemoteException if remote request fails.
      */
     String retrieveVersion() throws RemoteException;
-
-    /**
-     * Retrieves amount of allocated workers.
-     *
-     * @return amount of allocated workers.
-     * @throws RemoteException if remote request fails.
-     */
-    Integer retrieveWorkerAmount() throws RemoteException;
 }
-
-// TODO: LOCATE ALL RMI RELATED CLASSES AT THE SAME PATH

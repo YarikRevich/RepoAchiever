@@ -21,12 +21,7 @@ public class SchedulerHelper {
   public static void scheduleTask(Runnable callback, Integer period) {
     ScheduledFuture<?> element =
         scheduledExecutorService.scheduleAtFixedRate(
-                new Runnable() {
-                  @Override
-                  public void run() {
-                    executorService.execute(callback);
-                  }
-                }, 0, period, TimeUnit.MILLISECONDS);
+                () -> executorService.execute(callback), 0, period, TimeUnit.MILLISECONDS);
 
     SchedulerStorage.setThread(UUID.randomUUID(), element);
   }

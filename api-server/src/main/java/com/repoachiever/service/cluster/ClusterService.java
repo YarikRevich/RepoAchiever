@@ -1,5 +1,6 @@
 package com.repoachiever.service.cluster;
 
+import com.repoachiever.model.LocationsUnit;
 import com.repoachiever.dto.CommandExecutorOutputDto;
 import com.repoachiever.entity.common.PropertiesEntity;
 import com.repoachiever.exception.*;
@@ -36,15 +37,15 @@ public class ClusterService {
      * @param separator given content location segregation separator.
      * @return segregated content locations.
      */
-    public List<List<String>> performContentLocationsSegregation(List<String> locations, Integer separator) {
-        List<List<String>> result = new ArrayList<>();
+    public List<List<LocationsUnit>> performContentLocationsSegregation(List<LocationsUnit> locations, Integer separator) {
+        List<List<LocationsUnit>> result = new ArrayList<>();
 
-        List<String> temp = new ArrayList<>();
+        List<LocationsUnit> temp = new ArrayList<>();
 
         Integer counter = 0;
 
-        for (Integer i = 0; i < locations.size(); i++) {
-            temp.add(locations.get(0));
+        for (LocationsUnit location : locations) {
+            temp.add(location);
 
             if (counter.equals(separator - 1)) {
                 result.add(new ArrayList<>(temp));
@@ -76,8 +77,7 @@ public class ClusterService {
         ClusterDeployCommandService clusterDeployCommandService =
                 new ClusterDeployCommandService(
                         clusterContext,
-                        properties.getBinDirectory(),
-                        properties.getBinClusterLocation());
+                        properties.getClusterBinLocation());
 
         CommandExecutorOutputDto clusterDeployCommandOutput;
 

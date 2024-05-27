@@ -1,8 +1,10 @@
 package com.repoachiever.service.integration.diagnostics.telemetry;
 
 import com.repoachiever.entity.common.PropertiesEntity;
+import com.repoachiever.exception.ApplicationStartGuardFailureException;
 import com.repoachiever.exception.TelemetryOperationFailureException;
 import com.repoachiever.service.config.ConfigService;
+import com.repoachiever.service.state.StateService;
 import com.repoachiever.service.telemetry.binding.TelemetryBinding;
 import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
 import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics;
@@ -31,8 +33,7 @@ import java.util.concurrent.Executors;
 /**
  * Service used to perform diagnostics telemetry configuration operations.
  */
-@Startup
-@Priority(value = 200)
+@Startup(value = 500)
 @ApplicationScoped
 public class TelemetryConfigService {
     private static final Logger logger = LogManager.getLogger(TelemetryConfigService.class);
@@ -52,15 +53,25 @@ public class TelemetryConfigService {
 
     /**
      * Performs telemetry metrics server configuration, registering bindings provided by external provider.
+     *
+     * @throws ApplicationStartGuardFailureException if RepoAchiever API Server application start guard operation fails.
+     * @throws TelemetryOperationFailureException    if RepoAchiever API Server telemetry operation fails.
      */
     @PostConstruct
-    private void configure() {
+    private void configure() throws
+            ApplicationStartGuardFailureException,
+            TelemetryOperationFailureException {
+        try {
+            StateService.getStartGuard().await();
+        } catch (InterruptedException e) {
+            throw new ApplicationStartGuardFailureException(e.getMessage());
+        }
+
         try {
             connector = new ServerSocket(
                     configService.getConfig().getDiagnostics().getMetrics().getPort());
         } catch (IOException e) {
-            logger.fatal(new TelemetryOperationFailureException(e.getMessage()).getMessage());
-            return;
+            throw new TelemetryOperationFailureException(e.getMessage());
         }
 
         PrometheusMeterRegistry prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
@@ -87,72 +98,80 @@ public class TelemetryConfigService {
                     connection.setSoTimeout(properties.getDiagnosticsMetricsConnectionTimeout());
                 } catch (SocketException e) {
                     logger.error(new TelemetryOperationFailureException(e.getMessage()).getMessage());
+
                     return;
                 }
 
                 executorService.execute(() -> {
-                        OutputStreamWriter outputStreamWriter;
+                    OutputStreamWriter outputStreamWriter;
 
-                        try {
-                            outputStreamWriter =
-                                    new OutputStreamWriter(connection.getOutputStream(), StandardCharsets.UTF_8);
-                        } catch (IOException e) {
-                            logger.error(new TelemetryOperationFailureException(e.getMessage()).getMessage());
-                            return;
-                        }
+                    try {
+                        outputStreamWriter =
+                                new OutputStreamWriter(connection.getOutputStream(), StandardCharsets.UTF_8);
+                    } catch (IOException e) {
+                        logger.error(new TelemetryOperationFailureException(e.getMessage()).getMessage());
 
-                        BufferedReader inputStreamReader;
-                        try {
-                            inputStreamReader = new BufferedReader(
-                                    new InputStreamReader(connection.getInputStream()));
-                        } catch (IOException e) {
-                            logger.error(new TelemetryOperationFailureException(e.getMessage()).getMessage());
-                            return;
-                        }
+                        return;
+                    }
 
-                        try {
-                            outputStreamWriter.write(
-                                    String.format(
-                                            "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\n%s",
-                                            prometheusRegistry.scrape()));
-                        } catch (IOException ignored) {
-                            return;
-                        }
+                    BufferedReader inputStreamReader;
 
-                        try {
-                            outputStreamWriter.flush();
-                        } catch (IOException e) {
-                            logger.error(new TelemetryOperationFailureException(e.getMessage()).getMessage());
-                            return;
-                        }
+                    try {
+                        inputStreamReader = new BufferedReader(
+                                new InputStreamReader(connection.getInputStream()));
+                    } catch (IOException e) {
+                        logger.error(new TelemetryOperationFailureException(e.getMessage()).getMessage());
 
-                        try {
-                            inputStreamReader.readLine();
-                        } catch (IOException e) {
-                            logger.error(new TelemetryOperationFailureException(e.getMessage()).getMessage());
-                            return;
-                        }
+                        return;
+                    }
 
-                        try {
-                            inputStreamReader.close();
-                        } catch (IOException e) {
-                            logger.error(new TelemetryOperationFailureException(e.getMessage()).getMessage());
-                            return;
-                        }
+                    try {
+                        outputStreamWriter.write(
+                                String.format(
+                                        "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\n%s",
+                                        prometheusRegistry.scrape()));
+                    } catch (IOException ignored) {
+                        return;
+                    }
 
-                        try {
-                            outputStreamWriter.close();
-                        } catch (IOException e) {
-                            logger.error(new TelemetryOperationFailureException(e.getMessage()).getMessage());
-                            return;
-                        }
+                    try {
+                        outputStreamWriter.flush();
+                    } catch (IOException e) {
+                        logger.error(new TelemetryOperationFailureException(e.getMessage()).getMessage());
 
-                        try {
-                            connection.close();
-                        } catch (IOException e) {
-                            logger.error(new TelemetryOperationFailureException(e.getMessage()).getMessage());
-                        }
-                    });
+                        return;
+                    }
+
+                    try {
+                        inputStreamReader.readLine();
+                    } catch (IOException e) {
+                        logger.error(new TelemetryOperationFailureException(e.getMessage()).getMessage());
+
+                        return;
+                    }
+
+                    try {
+                        inputStreamReader.close();
+                    } catch (IOException e) {
+                        logger.error(new TelemetryOperationFailureException(e.getMessage()).getMessage());
+
+                        return;
+                    }
+
+                    try {
+                        outputStreamWriter.close();
+                    } catch (IOException e) {
+                        logger.error(new TelemetryOperationFailureException(e.getMessage()).getMessage());
+
+                        return;
+                    }
+
+                    try {
+                        connection.close();
+                    } catch (IOException e) {
+                        logger.error(new TelemetryOperationFailureException(e.getMessage()).getMessage());
+                    }
+                });
             }
         });
     }

@@ -19,6 +19,33 @@ public class PropertiesEntity {
     @Value(value = "${REPOACHIEVER_CLUSTER_CONTEXT:null}")
     private String clusterContext;
 
+    @Value(value = "${github.connection-probe.timeout}")
+    Integer gitHubConnectionProbeTimeout;
+
+    @Value(value = "${rest-client.github.url}")
+    String restClientGitHubUrl;
+
+    @Value(value = "${rest-client.timeout}")
+    Integer restClientTimeout;
+
+    @Value(value = "${graphql-client.github.url}")
+    String graphQlClientGitHubUrl;
+
+    @Value(value = "${graphql-client.timeout}")
+    Integer graphQlClientTimeout;
+
+    @Value(value = "${graphql-client.github.document.location}")
+    String graphQlClientGitHubDocumentLocation;
+
+    @Value(value = "${github.location.notation}")
+    String gitHubLocationNotation;
+
+    @Value(value = "${github.additional.pull-requests.name}")
+    String gitHubAdditionalPullRequestsName;
+
+    @Value(value = "${communication.api-server.health-check.frequency}")
+    private Integer communicationApiServerHealthCheckFrequency;
+
     @Value(value = "${logging.transfer.frequency}")
     private Integer loggingTransferFrequency;
 

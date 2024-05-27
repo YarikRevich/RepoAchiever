@@ -12,6 +12,7 @@ import com.repoachiever.service.command.nodeexporter.NodeExporterDeployCommandSe
 import com.repoachiever.service.command.prometheus.PrometheusDeployCommandService;
 import com.repoachiever.service.config.ConfigService;
 import com.repoachiever.service.executor.CommandExecutorService;
+import com.repoachiever.service.state.StateService;
 import com.repoachiever.service.telemetry.TelemetryService;
 import io.quarkus.runtime.Startup;
 import jakarta.annotation.PostConstruct;
@@ -27,8 +28,7 @@ import java.util.Objects;
 /**
  * Service used to perform diagnostics infrastructure configuration operations.
  */
-@Startup
-@Priority(value = 190)
+@Startup(value = 700)
 @ApplicationScoped
 public class DiagnosticsConfigService {
     private static final Logger logger = LogManager.getLogger(DiagnosticsConfigService.class);
@@ -47,9 +47,30 @@ public class DiagnosticsConfigService {
 
     /**
      * Creates Docker diagnostics network and deploys diagnostics infrastructure instances with pre-defined configurations.
+     *
+     * @throws ApplicationStartGuardFailureException if RepoAchiever API Server application start guard operation fails.
+     * @throws DockerIsNotAvailableException if Docker is not available.
+     * @throws DockerInspectRemovalFailureException if Docker container removal operation fails.
+     * @throws DockerNetworkCreateFailureException if Docker network creation operation fails.
+     * @throws NodeExporterDeploymentFailureException if Prometheus Node Exporter deployment operation fails.
+     * @throws PrometheusDeploymentFailureException if Prometheus deployment operation fails.
+     * @throws GrafanaDeploymentFailureException if Grafana deployment operation fails.
      */
     @PostConstruct
-    private void process() {
+    private void process() throws
+            ApplicationStartGuardFailureException,
+            DockerIsNotAvailableException,
+            DockerInspectRemovalFailureException,
+            DockerNetworkCreateFailureException,
+            NodeExporterDeploymentFailureException,
+            PrometheusDeploymentFailureException,
+            GrafanaDeploymentFailureException {
+        try {
+            StateService.getStartGuard().await();
+        } catch (InterruptedException e) {
+            throw new ApplicationStartGuardFailureException(e.getMessage());
+        }
+
         if (configService.getConfig().getDiagnostics().getEnabled()) {
             CommandExecutorOutputDto dockerAvailabilityCommandOutput;
 
@@ -57,8 +78,7 @@ public class DiagnosticsConfigService {
                 dockerAvailabilityCommandOutput =
                         commandExecutorService.executeCommand(dockerAvailabilityCheckCommandService);
             } catch (CommandExecutorException e) {
-                logger.fatal(new DockerIsNotAvailableException(e.getMessage()).getMessage());
-                return;
+                throw new DockerIsNotAvailableException(e.getMessage());
             }
 
             String dockerAvailabilityCommandErrorOutput = dockerAvailabilityCommandOutput.getErrorOutput();
@@ -66,8 +86,7 @@ public class DiagnosticsConfigService {
             if ((Objects.nonNull(dockerAvailabilityCommandErrorOutput) &&
                     !dockerAvailabilityCommandErrorOutput.isEmpty()) ||
                     dockerAvailabilityCommandOutput.getNormalOutput().isEmpty()) {
-                logger.fatal(new DockerIsNotAvailableException(dockerAvailabilityCommandErrorOutput).getMessage());
-                return;
+                throw new DockerIsNotAvailableException(dockerAvailabilityCommandErrorOutput);
             }
 
             DockerInspectRemoveCommandService dockerInspectRemoveCommandService =
@@ -79,18 +98,16 @@ public class DiagnosticsConfigService {
                 dockerInspectRemoveCommandOutput =
                         commandExecutorService.executeCommand(dockerInspectRemoveCommandService);
             } catch (CommandExecutorException e) {
-                logger.fatal(new DockerInspectRemovalFailureException(e.getMessage()).getMessage());
-                return;
+                throw new DockerInspectRemovalFailureException(e.getMessage());
             }
 
             String dockerInspectRemoveCommandErrorOutput = dockerInspectRemoveCommandOutput.getErrorOutput();
 
             if (Objects.nonNull(dockerInspectRemoveCommandErrorOutput) &&
                     !dockerInspectRemoveCommandErrorOutput.isEmpty()) {
-                logger.fatal(new DockerInspectRemovalFailureException(
-                        dockerInspectRemoveCommandErrorOutput).getMessage());
+                throw new DockerInspectRemovalFailureException(
+                        dockerInspectRemoveCommandErrorOutput);
             }
-
 
             dockerInspectRemoveCommandService =
                     new DockerInspectRemoveCommandService(properties.getDiagnosticsPrometheusNodeExporterDockerName());
@@ -99,16 +116,14 @@ public class DiagnosticsConfigService {
                 dockerInspectRemoveCommandOutput =
                         commandExecutorService.executeCommand(dockerInspectRemoveCommandService);
             } catch (CommandExecutorException e) {
-                logger.fatal(new DockerInspectRemovalFailureException(e.getMessage()).getMessage());
-                return;
+                throw new DockerInspectRemovalFailureException(e.getMessage());
             }
 
             dockerInspectRemoveCommandErrorOutput = dockerInspectRemoveCommandOutput.getErrorOutput();
 
             if (Objects.nonNull(dockerInspectRemoveCommandErrorOutput) &&
                     !dockerInspectRemoveCommandErrorOutput.isEmpty()) {
-                logger.fatal(new DockerInspectRemovalFailureException(
-                        dockerInspectRemoveCommandErrorOutput).getMessage());
+                throw new DockerInspectRemovalFailureException(dockerInspectRemoveCommandErrorOutput);
             }
 
             dockerInspectRemoveCommandService =
@@ -118,16 +133,14 @@ public class DiagnosticsConfigService {
                 dockerInspectRemoveCommandOutput =
                         commandExecutorService.executeCommand(dockerInspectRemoveCommandService);
             } catch (CommandExecutorException e) {
-                logger.fatal(new DockerInspectRemovalFailureException(e.getMessage()).getMessage());
-                return;
+                throw new DockerInspectRemovalFailureException(e.getMessage());
             }
 
             dockerInspectRemoveCommandErrorOutput = dockerInspectRemoveCommandOutput.getErrorOutput();
 
             if (Objects.nonNull(dockerInspectRemoveCommandErrorOutput) &&
                     !dockerInspectRemoveCommandErrorOutput.isEmpty()) {
-                logger.fatal(new DockerInspectRemovalFailureException(
-                        dockerInspectRemoveCommandErrorOutput).getMessage());
+                throw new DockerInspectRemovalFailureException(dockerInspectRemoveCommandErrorOutput);
             }
 
             DockerNetworkCreateCommandService dockerNetworkCreateCommandService =
@@ -139,23 +152,22 @@ public class DiagnosticsConfigService {
                 dockerNetworkCreateCommandOutput =
                         commandExecutorService.executeCommand(dockerNetworkCreateCommandService);
             } catch (CommandExecutorException e) {
-                logger.fatal(new DockerNetworkCreateFailureException(e.getMessage()).getMessage());
-                return;
+                throw new DockerNetworkCreateFailureException(e.getMessage());
             }
 
             String dockerNetworkCreateCommandErrorOutput = dockerNetworkCreateCommandOutput.getErrorOutput();
 
             if (Objects.nonNull(dockerNetworkCreateCommandErrorOutput) &&
                     !dockerNetworkCreateCommandErrorOutput.isEmpty()) {
-                logger.fatal(new DockerNetworkCreateFailureException(
-                        dockerNetworkCreateCommandErrorOutput).getMessage());
+                throw new DockerNetworkCreateFailureException(dockerNetworkCreateCommandErrorOutput);
             }
 
             NodeExporterDeployCommandService nodeExporterDeployCommandService =
                     new NodeExporterDeployCommandService(
                             properties.getDiagnosticsPrometheusNodeExporterDockerName(),
                             properties.getDiagnosticsPrometheusNodeExporterDockerImage(),
-                            configService.getConfig().getDiagnostics().getNodeExporter().getPort());
+                            configService.getConfig().getDiagnostics().getNodeExporter().getPort(),
+                            properties.getDiagnosticsCommonDockerNetworkName());
 
             CommandExecutorOutputDto nodeExporterDeployCommandOutput;
 
@@ -163,16 +175,14 @@ public class DiagnosticsConfigService {
                 nodeExporterDeployCommandOutput =
                         commandExecutorService.executeCommand(nodeExporterDeployCommandService);
             } catch (CommandExecutorException e) {
-                logger.fatal(new NodeExporterDeploymentFailureException(e.getMessage()).getMessage());
-                return;
+                throw new NodeExporterDeploymentFailureException(e.getMessage());
             }
 
             String nodeExporterDeployCommandErrorOutput = nodeExporterDeployCommandOutput.getErrorOutput();
 
             if (Objects.nonNull(nodeExporterDeployCommandErrorOutput) &&
                     !nodeExporterDeployCommandErrorOutput.isEmpty()) {
-                logger.fatal(new NodeExporterDeploymentFailureException(
-                        nodeExporterDeployCommandErrorOutput).getMessage());
+                throw new NodeExporterDeploymentFailureException(nodeExporterDeployCommandErrorOutput);
             }
 
             PrometheusDeployCommandService prometheusDeployCommandService =
@@ -180,6 +190,7 @@ public class DiagnosticsConfigService {
                             properties.getDiagnosticsPrometheusDockerName(),
                             properties.getDiagnosticsPrometheusDockerImage(),
                             configService.getConfig().getDiagnostics().getPrometheus().getPort(),
+                            properties.getDiagnosticsCommonDockerNetworkName(),
                             properties.getDiagnosticsPrometheusConfigLocation(),
                             properties.getDiagnosticsPrometheusInternalLocation());
 
@@ -189,16 +200,14 @@ public class DiagnosticsConfigService {
                 prometheusDeployCommandOutput =
                         commandExecutorService.executeCommand(prometheusDeployCommandService);
             } catch (CommandExecutorException e) {
-                logger.fatal(new PrometheusDeploymentFailureException(e.getMessage()).getMessage());
-                return;
+                throw new PrometheusDeploymentFailureException(e.getMessage());
             }
 
             String prometheusDeployCommandErrorOutput = prometheusDeployCommandOutput.getErrorOutput();
 
             if (Objects.nonNull(prometheusDeployCommandErrorOutput) &&
                     !prometheusDeployCommandErrorOutput.isEmpty()) {
-                logger.fatal(new PrometheusDeploymentFailureException(
-                        prometheusDeployCommandErrorOutput).getMessage());
+                throw new PrometheusDeploymentFailureException(prometheusDeployCommandErrorOutput);
             }
 
             GrafanaDeployCommandService grafanaDeployCommandService =
@@ -206,6 +215,7 @@ public class DiagnosticsConfigService {
                             properties.getDiagnosticsGrafanaDockerName(),
                             properties.getDiagnosticsGrafanaDockerImage(),
                             configService.getConfig().getDiagnostics().getGrafana().getPort(),
+                            properties.getDiagnosticsCommonDockerNetworkName(),
                             properties.getDiagnosticsGrafanaConfigLocation(),
                             properties.getDiagnosticsGrafanaInternalLocation());
 
@@ -215,16 +225,14 @@ public class DiagnosticsConfigService {
                 grafanaDeployCommandOutput =
                         commandExecutorService.executeCommand(grafanaDeployCommandService);
             } catch (CommandExecutorException e) {
-                logger.fatal(new PrometheusDeploymentFailureException(e.getMessage()).getMessage());
-                return;
+                throw new GrafanaDeploymentFailureException(e.getMessage());
             }
 
             String grafanaDeployCommandErrorOutput = grafanaDeployCommandOutput.getErrorOutput();
 
             if (Objects.nonNull(grafanaDeployCommandErrorOutput) &&
                     !grafanaDeployCommandErrorOutput.isEmpty()) {
-                logger.fatal(new PrometheusDeploymentFailureException(
-                        grafanaDeployCommandErrorOutput).getMessage());
+                throw new GrafanaDeploymentFailureException(grafanaDeployCommandErrorOutput);
             }
         }
     }
@@ -270,6 +278,7 @@ public class DiagnosticsConfigService {
             if (Objects.nonNull(dockerNetworkRemoveCommandErrorOutput) &&
                     !dockerNetworkRemoveCommandErrorOutput.isEmpty()) {
                 logger.fatal(new DockerNetworkRemoveFailureException(dockerNetworkRemoveCommandErrorOutput).getMessage());
+                return;
             }
 
             DockerInspectRemoveCommandService dockerInspectRemoveCommandService =
@@ -291,6 +300,7 @@ public class DiagnosticsConfigService {
                     !dockerInspectRemoveCommandErrorOutput.isEmpty()) {
                 logger.fatal(new DockerInspectRemovalFailureException(
                         dockerInspectRemoveCommandErrorOutput).getMessage());
+                return;
             }
 
             dockerInspectRemoveCommandService =
@@ -310,6 +320,7 @@ public class DiagnosticsConfigService {
                     !dockerInspectRemoveCommandErrorOutput.isEmpty()) {
                 logger.fatal(new DockerInspectRemovalFailureException(
                         dockerInspectRemoveCommandErrorOutput).getMessage());
+                return;
             }
 
             dockerInspectRemoveCommandService =

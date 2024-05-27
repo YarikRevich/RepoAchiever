@@ -14,7 +14,7 @@ public class VersionMismatchException extends IOException {
     super(
         new Formatter()
             .format(
-                "API Server version is different from the version of the client: %s",
+                "RepoAchiever API Server version is different from the version of the client: %s",
                 Arrays.stream(message).toArray())
             .toString());
   }

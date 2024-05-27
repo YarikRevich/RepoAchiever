@@ -29,16 +29,52 @@ public class ClusterContextEntity {
     public Metadata metadata;
 
     /**
-     * Represents filter section elected for a specific RepoAchiever Cluster allocation.
+     * Represents RepoAchiever Cluster configuration used for content management.
      */
     @AllArgsConstructor(staticName = "of")
-    public static class Filter {
+    public static class Content {
+        /**
+         * Represents RepoAchiever Cluster configuration used for locations management.
+         */
+        @AllArgsConstructor(staticName = "of")
+        public static class Location {
+            @JsonProperty("name")
+            public String name;
+
+            @JsonProperty("additional")
+            public Boolean additional;
+        }
+
         @JsonProperty("locations")
-        public List<String> locations;
+        public List<Location> locations;
+
+        /**
+         * Represents all supported content formats, which can be used by RepoAchiever Cluster allocation.
+         */
+        public enum Format {
+            @JsonProperty("zip")
+            ZIP("zip"),
+
+            @JsonProperty("tar")
+            TAR("tar");
+
+            private final String value;
+
+            Format(String value) {
+                this.value = value;
+            }
+
+            public String toString() {
+                return value;
+            }
+        }
+
+        @JsonProperty("format")
+        public Format format;
     }
 
-    @JsonProperty("filter")
-    public Filter filter;
+    @JsonProperty("content")
+    public Content content;
 
     /**
      * Represents external service configurations for RepoAchiever Cluster allocation used to retrieve content.
@@ -49,8 +85,11 @@ public class ClusterContextEntity {
          * Represents all supported service providers, which can be used by RepoAchiever Cluster allocation.
          */
         public enum Provider {
-            LOCAL("git-local"),
-            GITHUB("git-github");
+            @JsonProperty("exporter")
+            EXPORTER("exporter"),
+
+            @JsonProperty("git-github")
+            GIT_GITHUB("git-github");
 
             private final String value;
 
@@ -65,6 +104,18 @@ public class ClusterContextEntity {
 
         @JsonProperty("provider")
         public Provider provider;
+
+        /**
+         * Represents configuration used for communication with RepoAchiever Exporter.
+         */
+        @AllArgsConstructor(staticName = "of")
+        public static class Exporter {
+            @JsonProperty("host")
+            public String host;
+        }
+
+        @JsonProperty("exporter")
+        public Exporter exporter;
 
         /**
          * Represents credentials used for external service communication by RepoAchiever Cluster allocation.
@@ -99,34 +150,10 @@ public class ClusterContextEntity {
     public Communication communication;
 
     /**
-     * Represents RepoAchiever Cluster configuration used for content management.
-     */
-    @AllArgsConstructor(staticName = "of")
-    public static class Content {
-        @JsonProperty("format")
-        public String format;
-    }
-
-    @JsonProperty("content")
-    public Content content;
-
-    /**
      * Represents RepoAchiever API Server resources configuration section.
      */
     @AllArgsConstructor(staticName = "of")
     public static class Resource {
-        /**
-         * Represents RepoAchiever API Server configuration used for RepoAchiever Cluster.
-         */
-        @AllArgsConstructor(staticName = "of")
-        public static class Cluster {
-            @JsonProperty("max-workers")
-            public Integer maxWorkers;
-        }
-
-        @JsonProperty("cluster")
-        public Cluster cluster;
-
         /**
          * Represents RepoAchiever API Server configuration used for RepoAchiever Worker.
          */

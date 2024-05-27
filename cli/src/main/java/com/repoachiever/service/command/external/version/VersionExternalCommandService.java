@@ -1,41 +1,46 @@
 package com.repoachiever.service.command.external.version;
 
+import com.repoachiever.entity.ConfigEntity;
 import com.repoachiever.entity.PropertiesEntity;
-import com.repoachiever.exception.ApiServerException;
-import com.repoachiever.model.ApplicationInfoResult;
-import com.repoachiever.service.client.command.HealthCheckClientCommandService;
-import com.repoachiever.service.client.command.VersionClientCommandService;
+import com.repoachiever.exception.*;
+import com.repoachiever.model.VersionInfoResult;
+import com.repoachiever.service.client.info.version.VersionInfoClientService;
 import com.repoachiever.service.command.common.ICommand;
 import com.repoachiever.service.visualization.state.VisualizationState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-/** Represents version external command service. */
+/**
+ * Represents version external command service.
+ */
 @Service
-public class VersionExternalCommandService implements ICommand {
-  @Autowired PropertiesEntity properties;
+public class VersionExternalCommandService implements ICommand<ConfigEntity> {
+    @Autowired
+    private PropertiesEntity properties;
 
-  @Autowired private VersionClientCommandService versionClientCommandService;
+    @Autowired
+    private VisualizationState visualizationState;
 
-  @Autowired private HealthCheckClientCommandService healthCheckClientCommandService;
+    /**
+     * @see ICommand
+     */
+    public void process(ConfigEntity config) throws ApiServerOperationFailureException {
+        visualizationState.getLabel().pushNext();
 
-  @Autowired private VisualizationState visualizationState;
+        VersionInfoClientService versionInfoClientService =
+                new VersionInfoClientService(config.getApiServer().getHost());
 
-  /**
-   * @see ICommand
-   */
-  public void process() throws ApiServerException {
-    visualizationState.getLabel().pushNext();
+        try {
+            VersionInfoResult versionInfoResult = versionInfoClientService.process(null);
 
-    try {
-      ApplicationInfoResult applicationInfoResult = versionClientCommandService.process(null);
+            visualizationState.addResult(
+                    String.format(
+                            "API Server version: %s", versionInfoResult.getExternalApi().getHash()));
+        } finally {
+            visualizationState.addResult(
+                    String.format("Client version: %s", properties.getGitCommitId()));
+        }
 
-      visualizationState.addResult(
-          String.format(
-              "API Server version: %s", applicationInfoResult.getExternalApi().getHash()));
-    } finally {
-      visualizationState.addResult(
-          String.format("Client version: %s", properties.getGitCommitId()));
+        visualizationState.getLabel().pushNext();
     }
-  }
 }

@@ -2,13 +2,24 @@ package com.repoachiever.resource;
 
 import com.repoachiever.api.InfoResourceApi;
 import com.repoachiever.entity.common.PropertiesEntity;
-import com.repoachiever.model.ClusterInfoUnit;
+import com.repoachiever.exception.CredentialsAreNotValidException;
+import com.repoachiever.exception.CredentialsFieldIsNotValidException;
+import com.repoachiever.exception.ProviderIsNotAvailableException;
+import com.repoachiever.model.TopologyInfoApplication;
 import com.repoachiever.model.VersionExternalApiInfoResult;
+import com.repoachiever.model.TopologyInfoUnit;
 import com.repoachiever.model.VersionInfoResult;
+import com.repoachiever.resource.common.ResourceConfigurationHelper;
+import com.repoachiever.service.cluster.ClusterService;
+import com.repoachiever.service.cluster.facade.ClusterFacade;
+import com.repoachiever.service.vendor.VendorFacade;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
+import lombok.SneakyThrows;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Contains implementation of InfoResource.
@@ -17,6 +28,15 @@ import java.util.List;
 public class InfoResource implements InfoResourceApi {
     @Inject
     PropertiesEntity properties;
+
+    @Inject
+    ClusterFacade clusterFacade;
+
+    @Inject
+    VendorFacade vendorFacade;
+
+    @Inject
+    ResourceConfigurationHelper resourceConfigurationHelper;
 
     /**
      * Implementation for declared in OpenAPI configuration v1InfoVersionGet method.
@@ -31,26 +51,32 @@ public class InfoResource implements InfoResourceApi {
     }
 
     /**
-     * Implementation for declared in OpenAPI configuration v1InfoClusterGet method.
+     * Implementation for declared in OpenAPI configuration v1InfoTopologyPost method.
      *
-     * @return cluster information result.
+     * @return topology information result.
      */
+    @SneakyThrows
     @Override
-    public List<ClusterInfoUnit> v1InfoClusterGet() {
-        // TODO: call cluster service to retrieve data from clusters.
+    public List<TopologyInfoUnit> v1InfoTopologyPost(TopologyInfoApplication topologyInfoApplication) {
+        if (Objects.isNull(topologyInfoApplication)) {
+            throw new BadRequestException();
+        }
 
-        return null;
-    }
+        if (!resourceConfigurationHelper.isExternalCredentialsFieldValid(
+                topologyInfoApplication.getProvider(),
+                topologyInfoApplication.getCredentials().getExternal())) {
+            throw new CredentialsFieldIsNotValidException();
+        }
 
-    /**
-     * Implementation for declared in OpenAPI configuration v1InfoTelemetryGet method.
-     *
-     * @return telemetry information result.
-     */
-    @Override
-    public String v1InfoTelemetryGet() {
-        // TODO: call telemetry service to retrieve data.
+        if (!vendorFacade.isVendorAvailable(topologyInfoApplication.getProvider())) {
+            throw new ProviderIsNotAvailableException();
+        }
 
-        return null;
+        if (!vendorFacade.isExternalCredentialsValid(
+                topologyInfoApplication.getProvider(), topologyInfoApplication.getCredentials().getExternal())) {
+            throw new CredentialsAreNotValidException();
+        }
+
+        return clusterFacade.retrieveTopology(topologyInfoApplication);
     }
 }

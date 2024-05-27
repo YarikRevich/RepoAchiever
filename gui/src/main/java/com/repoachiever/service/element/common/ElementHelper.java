@@ -32,7 +32,7 @@ public class ElementHelper {
    * @param src1 given first object.
    * @param src2 given second object.
    */
-  public static boolean areElementsEqual(Object src1, Object src2) {
+  public static Boolean areElementsEqual(Object src1, Object src2) {
     UUID firstElementId = ElementStorage.getElementId(src1);
 
     if (Objects.isNull(firstElementId)) {

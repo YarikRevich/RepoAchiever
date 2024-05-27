@@ -8,9 +8,9 @@ import org.springframework.context.ApplicationEvent;
 /** Represents connection status event used for state management. */
 @Getter
 public class ConnectionStatusEvent extends ApplicationEvent implements IEvent {
-  private final boolean connectionEstablished;
+  private final Boolean connectionEstablished;
 
-  public ConnectionStatusEvent(boolean connectionEstablished) {
+  public ConnectionStatusEvent(Boolean connectionEstablished) {
     super(connectionEstablished);
 
     this.connectionEstablished = connectionEstablished;

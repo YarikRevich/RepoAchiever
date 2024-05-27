@@ -26,7 +26,7 @@ public class ClusterCommunicationConfigService {
     private ConfigService configService;
 
     @Autowired
-    private PropertiesEntity properties;
+    private ClusterCommunicationResource clusterCommunicationResource;
 
     /**
      * Performs setup of RepoAchiever Cluster communication provider.
@@ -49,7 +49,7 @@ public class ClusterCommunicationConfigService {
                         CommunicationProviderConfigurationHelper.getBindName(
                                 configService.getConfig().getCommunication().getPort(),
                                 configService.getConfig().getMetadata().getName()),
-                        new ClusterCommunicationResource(properties));
+                        clusterCommunicationResource);
             } catch (RemoteException e) {
                 logger.fatal(e.getMessage());
             }

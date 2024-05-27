@@ -8,11 +8,17 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * Represents RepoAchiever Cluster context entity to JSON converter.
+ * Represents RepoAchiever Cluster context entity to Json converter.
  */
 public class ClusterContextToJsonConverter {
     private static final Logger logger = LogManager.getLogger(ClusterContextToJsonConverter.class);
 
+    /**
+     * Converts given context content to Json.
+     *
+     * @param content given context content to be converted.
+     * @return converted context content.
+     */
     public static String convert(ClusterContextEntity content) {
         ObjectMapper mapper =
                 new ObjectMapper()

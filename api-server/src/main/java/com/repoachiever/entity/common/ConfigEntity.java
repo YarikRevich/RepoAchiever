@@ -3,6 +3,7 @@ package com.repoachiever.entity.common;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
@@ -48,10 +49,32 @@ public class ConfigEntity {
      */
     @Getter
     public static class Content {
+        /**
+         * Represents all supported content formats, which can be used by RepoAchiever Cluster allocation.
+         */
+        @Getter
+        public enum Format {
+            @JsonProperty("zip")
+            ZIP("zip"),
+
+            @JsonProperty("tar")
+            TAR("tar");
+
+            private final String value;
+
+            Format(String value) {
+                this.value = value;
+            }
+
+            public String toString() {
+                return value;
+            }
+        }
+
+        @Valid
         @NotNull
-        @Pattern(regexp = "(^zip$)|(^tar$)")
         @JsonProperty("format")
-        public String format;
+        public Format format;
     }
 
     @Valid
@@ -160,8 +183,14 @@ public class ConfigEntity {
         @Getter
         public static class Cluster {
             @NotNull
+            @Min(1)
             @JsonProperty("max-workers")
             public Integer maxWorkers;
+
+            @NotNull
+            @Min(1)
+            @JsonProperty("max-versions")
+            public Integer maxVersions;
         }
 
         @Valid
