@@ -39,19 +39,19 @@ public class TelemetryService {
      */
     @PostConstruct
     private void configure() {
-        executorService.scheduleAtFixedRate(() -> {
+        executorService.scheduleWithFixedDelay(() -> {
             if (!apiServerHealthCheckQueue.isEmpty()) {
                 apiServerHealthCheckQueue.poll().run();
             }
         }, 0, properties.getDiagnosticsScrapeDelay(), TimeUnit.MILLISECONDS);
 
-        executorService.scheduleAtFixedRate(() -> {
+        executorService.scheduleWithFixedDelay(() -> {
             if (!clusterHealthCheckQueue.isEmpty()) {
                 clusterHealthCheckQueue.poll().run();
             }
         }, 0, properties.getDiagnosticsScrapeDelay(), TimeUnit.MILLISECONDS);
 
-        executorService.scheduleAtFixedRate(() -> {
+        executorService.scheduleWithFixedDelay(() -> {
             if (!clusterStateQueue.isEmpty()) {
                 clusterStateQueue.poll().run();
             }

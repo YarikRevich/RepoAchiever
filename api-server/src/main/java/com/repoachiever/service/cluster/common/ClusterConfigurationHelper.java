@@ -31,7 +31,7 @@ public class ClusterConfigurationHelper {
     public static Boolean waitForStart(Callable<Boolean> callback, Integer frequency, Integer timeout) {
         CountDownLatch waiter = new CountDownLatch(1);
 
-        ScheduledFuture<?> awaitTask = scheduledExecutorService.scheduleAtFixedRate(() -> {
+        ScheduledFuture<?> awaitTask = scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
                 if (callback.call()) {
                     waiter.countDown();

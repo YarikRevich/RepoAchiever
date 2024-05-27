@@ -24,6 +24,8 @@ public class ClusterDeployCommandService extends SProcess {
                     ClusterConfigurationHelper.getEnvironmentVariables(clusterContext),
                     Path.of(clusterBinLocation));
         };
+
+        System.out.println(command);
     }
 
     @Override

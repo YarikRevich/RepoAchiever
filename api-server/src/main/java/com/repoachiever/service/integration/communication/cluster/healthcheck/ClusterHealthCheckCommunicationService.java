@@ -58,7 +58,7 @@ public class ClusterHealthCheckCommunicationService {
             throw new ApplicationStartGuardFailureException(e.getMessage());
         }
 
-        scheduledExecutorService.scheduleAtFixedRate(() -> {
+        scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
                 clusterFacade.reApplyUnhealthy();
             } catch (ClusterUnhealthyReapplicationFailureException e) {

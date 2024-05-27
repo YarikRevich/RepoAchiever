@@ -30,6 +30,15 @@ public class StateService {
     @Getter
     private final static AtomicBoolean suspended = new AtomicBoolean();
 
+    /**
+     * Represents vendor availability state used to identify timeout restrictions for external API calls.
+     */
+    @Getter
+    private static AtomicBoolean vendorAvailability = new AtomicBoolean(true);
+
+    /**
+     * Represents a list of suspenders, which are used to control content retrieval process.
+     */
     @Getter
     private final static List<SuspenderDto> suspenders = new ArrayList<>();
 

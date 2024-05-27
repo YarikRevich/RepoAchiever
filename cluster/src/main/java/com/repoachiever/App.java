@@ -10,6 +10,7 @@ import com.repoachiever.service.integration.logging.state.LoggingStateService;
 import com.repoachiever.service.executor.CommandExecutorService;
 import com.repoachiever.service.integration.logging.transfer.LoggingTransferService;
 import com.repoachiever.service.integration.scheduler.SchedulerConfigService;
+import com.repoachiever.service.integration.vendor.VendorConfigService;
 import com.repoachiever.service.vendor.VendorFacade;
 import com.repoachiever.service.vendor.common.VendorConfigurationHelper;
 import com.repoachiever.service.vendor.git.github.GitGitHubVendorService;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Component;
         VendorConfigurationHelper.class,
         GitGitHubVendorService.class,
         VendorFacade.class,
+        VendorConfigService.class,
         SchedulerConfigService.class,
         ApiServerHealthCheckCommunicationService.class,
         ClusterCommunicationResource.class,

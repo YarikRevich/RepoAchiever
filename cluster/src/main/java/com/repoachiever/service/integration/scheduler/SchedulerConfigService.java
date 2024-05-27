@@ -14,7 +14,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.swing.plaf.nimbus.State;
 import java.io.InputStream;
 import java.util.Objects;
 import java.util.concurrent.*;
@@ -90,6 +89,8 @@ public class SchedulerConfigService {
 
                         return;
                     }
+
+                    StateService.getVendorAvailability().set(true);
 
                     Integer commitAmount;
 

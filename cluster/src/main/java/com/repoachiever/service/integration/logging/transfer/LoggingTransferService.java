@@ -34,7 +34,7 @@ public class LoggingTransferService {
      */
     @PostConstruct
     private void process() {
-        scheduledExecutorService.scheduleAtFixedRate(() -> {
+        scheduledExecutorService.scheduleWithFixedDelay(() -> {
             if (!StateService.getExit()) {
                 while (!StateService.getLogMessagesQueue().isEmpty()) {
                     try {

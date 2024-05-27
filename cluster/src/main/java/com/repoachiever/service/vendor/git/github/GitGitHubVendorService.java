@@ -13,6 +13,7 @@ import com.repoachiever.logging.common.LoggingConfigurationHelper;
 import com.repoachiever.service.config.ConfigService;
 import com.repoachiever.service.integration.communication.cluster.ClusterCommunicationConfigService;
 import com.repoachiever.service.integration.scheduler.SchedulerConfigService;
+import com.repoachiever.service.state.StateService;
 import com.repoachiever.service.vendor.common.VendorConfigurationHelper;
 import jakarta.annotation.PostConstruct;
 import jakarta.ws.rs.core.HttpHeaders;
@@ -48,6 +49,8 @@ import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Service used to represent GitHub external service operations.
@@ -68,6 +71,9 @@ public class GitGitHubVendorService {
     private WebClient restClient;
 
     private String document;
+
+    private final ScheduledExecutorService scheduledExecutorService =
+            Executors.newScheduledThreadPool(0, Thread.ofVirtual().factory());
 
     /**
      * Performs initial GraphQL client and HTTP client configuration.
@@ -265,23 +271,56 @@ public class GitGitHubVendorService {
      */
     public InputStream getCommitContent(String owner, String name, String format, String commitHash) throws
             GitHubContentRetrievalFailureException {
-        DataBuffer response = restClient
-                .get()
-                .uri(uriBuilder -> uriBuilder
-                        .path(
-                                String.format("/repos/%s/%s/%s/%s", owner, name, format, commitHash))
-                        .build())
-                .retrieve()
-                .bodyToMono(DataBuffer.class)
-//                .timeout(Duration.ofSeconds(properties.getRestClientTimeout()))
-//                .onErrorResume(element -> Mono.empty())
-                .block();
+        AtomicReference<DataBuffer> dataBufferAtomic = new AtomicReference<>(null);
 
-        if (Objects.isNull(response)) {
+        Thread task = Thread.ofVirtual().start(() -> {
+            DataBuffer response = restClient
+                    .get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path(
+                                    String.format("/repos/%s/%s/%s/%s", owner, name, format, commitHash))
+                            .build())
+                    .retrieve()
+                    .bodyToMono(DataBuffer.class)
+                    .block();
+
+            dataBufferAtomic.set(response);
+        });
+
+        CountDownLatch awaiter = new CountDownLatch(1);
+
+        ScheduledFuture<?> manager = scheduledExecutorService.scheduleWithFixedDelay(
+                () -> {
+                    if (awaiter.getCount() == 0) {
+                        return;
+                    }
+
+                    if (!Objects.isNull(dataBufferAtomic.get())) {
+                        awaiter.countDown();
+
+                        return;
+                    }
+
+                    if (!StateService.getVendorAvailability().get()) {
+                        task.interrupt();
+
+                        awaiter.countDown();
+                    }
+                }, 0, properties.getRestClientDynamicTimeoutAwaiterFrequency(), TimeUnit.MILLISECONDS);
+
+        try {
+            awaiter.await();
+        } catch (InterruptedException e) {
+            throw new GitHubContentRetrievalFailureException(e.getMessage());
+        }
+
+        manager.cancel(true);
+
+        if (Objects.isNull(dataBufferAtomic.get())) {
             throw new GitHubContentRetrievalFailureException(new GitHubContentIsEmptyException().getMessage());
         }
 
-        return response.asInputStream();
+        return dataBufferAtomic.get().asInputStream();
     }
 
     /**

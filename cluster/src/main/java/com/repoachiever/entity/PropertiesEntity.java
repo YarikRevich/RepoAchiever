@@ -28,6 +28,12 @@ public class PropertiesEntity {
     @Value(value = "${rest-client.timeout}")
     Integer restClientTimeout;
 
+    @Value(value = "${rest-client.dynamic-timeout}")
+    Integer restClientDynamicTimeout;
+
+    @Value(value = "${rest-client.dynamic-timeout.awaiter.frequency}")
+    Integer restClientDynamicTimeoutAwaiterFrequency;
+
     @Value(value = "${graphql-client.github.url}")
     String graphQlClientGitHubUrl;
 

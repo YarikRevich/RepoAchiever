@@ -29,7 +29,7 @@ public class LoggingStateService {
      */
     @PostConstruct
     private void process() {
-        scheduledExecutorService.scheduleAtFixedRate(() -> {
+        scheduledExecutorService.scheduleWithFixedDelay(() -> {
             if (StateService.getExit()) {
                 ((ConfigurableApplicationContext) applicationContext).close();
                 System.exit(1);

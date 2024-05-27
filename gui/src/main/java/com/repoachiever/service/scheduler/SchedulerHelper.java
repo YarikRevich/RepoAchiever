@@ -20,7 +20,7 @@ public class SchedulerHelper {
    */
   public static void scheduleTask(Runnable callback, Integer period) {
     ScheduledFuture<?> element =
-        scheduledExecutorService.scheduleAtFixedRate(
+        scheduledExecutorService.scheduleWithFixedDelay(
                 () -> executorService.execute(callback), 0, period, TimeUnit.MILLISECONDS);
 
     SchedulerStorage.setThread(UUID.randomUUID(), element);

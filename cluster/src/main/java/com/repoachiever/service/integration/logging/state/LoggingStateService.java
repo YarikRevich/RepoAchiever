@@ -29,12 +29,12 @@ public class LoggingStateService {
      */
     @PostConstruct
     private void process() {
-        scheduledExecutorService.scheduleAtFixedRate(() -> {
+        scheduledExecutorService.scheduleWithFixedDelay(() -> {
             if (StateService.getExit()) {
                 CountDownLatch finalizer = new CountDownLatch(1);
 
                 ScheduledFuture<?> finalizerFeature =
-                        scheduledExecutorService.scheduleAtFixedRate(() -> {
+                        scheduledExecutorService.scheduleWithFixedDelay(() -> {
                                     if (StateService.getLogMessagesQueue().isEmpty()) {
                                         finalizer.countDown();
                                     }

@@ -20,8 +20,6 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 public class ApiServerHealthCheckCommunicationService {
-    private static final Logger logger = LogManager.getLogger(ApiServerHealthCheckCommunicationService.class);
-
     @Autowired
     private ApplicationContext applicationContext;
 
@@ -40,7 +38,7 @@ public class ApiServerHealthCheckCommunicationService {
      */
     @PostConstruct
     private void process() {
-        scheduledExecutorService.scheduleAtFixedRate(() -> {
+        scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
                 if (!apiServerCommunicationResource.retrieveHealthCheck()) {
                     ((ConfigurableApplicationContext) applicationContext).close();
