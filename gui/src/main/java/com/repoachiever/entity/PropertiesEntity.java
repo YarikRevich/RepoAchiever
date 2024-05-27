@@ -14,6 +14,9 @@ import org.springframework.core.io.ClassPathResource;
 public class PropertiesEntity {
   private static final String GIT_CONFIG_PROPERTIES_FILE = "git.properties";
 
+  @Value(value = "${config.default.location}")
+  private String configDefaultLocation;
+
   @Value(value = "${window.main.name}")
   private String windowMainName;
 

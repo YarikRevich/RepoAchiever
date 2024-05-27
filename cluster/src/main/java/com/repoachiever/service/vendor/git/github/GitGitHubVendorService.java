@@ -33,6 +33,7 @@ import org.springframework.http.client.reactive.JdkClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -53,8 +54,6 @@ import java.util.Objects;
  */
 @Service
 public class GitGitHubVendorService {
-    private static final Logger logger = LogManager.getLogger(GitGitHubVendorService.class);
-
     @Autowired
     private PropertiesEntity properties;
 
@@ -97,6 +96,10 @@ public class GitGitHubVendorService {
             }
 
             this.restClient = WebClient.builder()
+                    .exchangeStrategies(ExchangeStrategies.builder()
+                            .codecs(codecs -> codecs.defaultCodecs()
+                                    .maxInMemorySize(-1))
+                            .build())
                     .baseUrl(properties.getRestClientGitHubUrl())
                     .clientConnector(new ReactorClientHttpConnector(
                             HttpClient.create().followRedirect(true)))
@@ -105,18 +108,6 @@ public class GitGitHubVendorService {
                             vendorConfigurationHelper.getWrappedToken(
                                     configService.getConfig().getService().getCredentials().getToken()))
                     .build();
-
-//            this.restClient = RestClient.builder()
-//                    .requestFactory(ClientHttpRequestFactories.get(new ClientHttpRequestFactorySettings(
-//                            Duration.ofSeconds(properties.getRestClientTimeout()),
-//                            Duration.ofSeconds(properties.getRestClientTimeout()),
-//                            false)))
-//                    .baseUrl(properties.getRestClientGitHubUrl())
-//                    .defaultHeader(
-//                            HttpHeaders.AUTHORIZATION,
-//                            vendorConfigurationHelper.getWrappedToken(
-//                                    configService.getConfig().getService().getCredentials().getToken()))
-//                    .build();
         }
     }
 
@@ -282,8 +273,8 @@ public class GitGitHubVendorService {
                         .build())
                 .retrieve()
                 .bodyToMono(DataBuffer.class)
-                .timeout(Duration.ofSeconds(properties.getRestClientTimeout()))
-                .onErrorResume(element -> Mono.empty())
+//                .timeout(Duration.ofSeconds(properties.getRestClientTimeout()))
+//                .onErrorResume(element -> Mono.empty())
                 .block();
 
         if (Objects.isNull(response)) {
@@ -324,8 +315,8 @@ public class GitGitHubVendorService {
     /**
      * Retrieves additional content from the repository with the given name and given commit hash.
      *
-     * @param owner      given repository owner.
-     * @param name       given repository name.
+     * @param owner given repository owner.
+     * @param name  given repository name.
      * @return retrieved pull requests content from the repository with the given name and given commit hash as an input stream.
      * @throws GitHubContentRetrievalFailureException if GitHub REST API client content retrieval fails.
      */

@@ -2,8 +2,8 @@ package com.repoachiever.service.swap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.repoachiever.exception.SwapFileCreationFailedException;
-import com.repoachiever.exception.SwapFileDeletionFailedException;
+import com.repoachiever.exception.SwapFileCreationFailureException;
+import com.repoachiever.exception.SwapFileDeletionFailureException;
 import com.repoachiever.model.TopicLogsUnit;
 import java.io.File;
 import java.io.IOException;
@@ -16,17 +16,19 @@ import org.springframework.stereotype.Service;
 /** Represents service responsible for temporate swap file creation. */
 @Service
 public class SwapService {
+
   /**
    * Creates temporate swap file with the given properties.
    *
    * @param swapRootPath given swap file root path.
    * @param content given swap file content.
    * @return absolute path to the swap file.
-   * @throws SwapFileCreationFailedException if swap file creation failed.
+   * @throws SwapFileCreationFailureException if swap file creation failed.
    */
   public String createSwapFile(String swapRootPath, List<TopicLogsUnit> content)
-      throws SwapFileCreationFailedException {
+      throws SwapFileCreationFailureException {
     ObjectMapper mapper = new ObjectMapper();
+
     mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 
     String absoluteSwapFilePath =
@@ -37,7 +39,7 @@ public class SwapService {
     try {
       mapper.writeValue(swapFile, content);
     } catch (IOException e) {
-      throw new SwapFileCreationFailedException(e.getMessage());
+      throw new SwapFileCreationFailureException(e.getMessage());
     }
 
     return absoluteSwapFilePath;
@@ -47,13 +49,13 @@ public class SwapService {
    * Deletes temporate swap file.
    *
    * @param swapFilePath given location of the swap file to be removed.
-   * @throws SwapFileDeletionFailedException if swap file deletion failed.
+   * @throws SwapFileDeletionFailureException if swap file deletion failed.
    */
-  public void deleteSwapFile(String swapFilePath) throws SwapFileDeletionFailedException {
+  public void deleteSwapFile(String swapFilePath) throws SwapFileDeletionFailureException {
     try {
       Files.deleteIfExists(Paths.get(swapFilePath));
     } catch (IOException e) {
-      throw new SwapFileDeletionFailedException(e.getMessage());
+      throw new SwapFileDeletionFailureException(e.getMessage());
     }
   }
 }

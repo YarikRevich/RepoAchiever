@@ -1,7 +1,7 @@
 package com.repoachiever.service.client.observer;
 
 import com.repoachiever.entity.PropertiesEntity;
-import com.repoachiever.exception.ApiServerException;
+import com.repoachiever.exception.ApiServerOperationFailureException;
 import com.repoachiever.model.HealthCheckResult;
 import com.repoachiever.service.client.command.HealthCheckClientCommandService;
 import com.repoachiever.service.client.command.ReadinessCheckClientCommandService;
@@ -24,8 +24,6 @@ public class ResourceObserver {
 
   @Autowired private HealthCheckClientCommandService healthCommandService;
 
-  @Autowired private ReadinessCheckClientCommandService readinessCommandService;
-
   /** Sends healthcheck requests to API Server and updates connection status. */
   @PostConstruct
   private void handleHealthCommand() {
@@ -41,7 +39,7 @@ public class ResourceObserver {
                   case UP -> new ConnectionStatusEvent(true);
                   case DOWN -> new ConnectionStatusEvent(false);
                 };
-          } catch (ApiServerException e) {
+          } catch (ApiServerOperationFailureException e) {
             connectionStatusEvent = new ConnectionStatusEvent(false);
           }
 
