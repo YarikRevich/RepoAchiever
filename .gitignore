@@ -33,3 +33,7 @@ replay_pid*
 # Idea
 
 .idea/
+
+# MacOS
+
+.DS_Store
