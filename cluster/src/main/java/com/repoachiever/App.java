@@ -7,7 +7,6 @@ import com.repoachiever.service.config.ConfigService;
 import com.repoachiever.service.integration.communication.apiserver.healthcheck.ApiServerHealthCheckCommunicationService;
 import com.repoachiever.service.integration.communication.cluster.ClusterCommunicationConfigService;
 import com.repoachiever.service.integration.logging.state.LoggingStateService;
-import com.repoachiever.service.executor.CommandExecutorService;
 import com.repoachiever.service.integration.logging.transfer.LoggingTransferService;
 import com.repoachiever.service.integration.scheduler.SchedulerConfigService;
 import com.repoachiever.service.integration.vendor.VendorConfigService;
@@ -26,7 +25,6 @@ import org.springframework.stereotype.Component;
 @Component
 @Import({
         ConfigService.class,
-        CommandExecutorService.class,
         PropertiesEntity.class,
         VendorConfigurationHelper.class,
         GitGitHubVendorService.class,

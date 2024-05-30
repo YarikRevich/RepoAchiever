@@ -6,7 +6,7 @@ import com.repoachiever.service.element.progressbar.settings.SettingsCircleProgr
 import com.repoachiever.service.element.scene.settings.SettingsGeneralScene;
 import com.repoachiever.service.element.storage.ElementStorage;
 import com.repoachiever.service.element.text.common.IElement;
-import com.repoachiever.service.scheduler.SchedulerHelper;
+import com.repoachiever.service.scheduler.SchedulerConfigurationHelper;
 import java.util.UUID;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 /** SettingsStage represents settings window. */
 @Service
 public class SettingsStage implements IElement<Stage> {
-  UUID id = UUID.randomUUID();
+  private final UUID id = UUID.randomUUID();
 
   public SettingsStage(
       @Autowired PropertiesEntity properties,
@@ -59,7 +59,7 @@ public class SettingsStage implements IElement<Stage> {
               event -> {
                 ElementHelper.toggleElementVisibility(settingsCircleProgressBar.getContent());
 
-                SchedulerHelper.scheduleTimer(
+                SchedulerConfigurationHelper.scheduleTimer(
                     () ->
                         ElementHelper.toggleElementVisibility(
                             settingsCircleProgressBar.getContent()),

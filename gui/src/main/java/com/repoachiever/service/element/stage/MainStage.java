@@ -9,7 +9,7 @@ import com.repoachiever.service.element.storage.ElementStorage;
 import com.repoachiever.service.element.text.common.IElement;
 import com.repoachiever.service.event.payload.MainWindowHeightUpdateEvent;
 import com.repoachiever.service.event.payload.MainWindowWidthUpdateEvent;
-import com.repoachiever.service.scheduler.SchedulerHelper;
+import com.repoachiever.service.scheduler.SchedulerConfigurationHelper;
 import java.util.UUID;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 /** MainStage represents main window. */
 @Service
 public class MainStage implements IElement<Stage> {
-  UUID id = UUID.randomUUID();
+  private final UUID id = UUID.randomUUID();
 
   public MainStage(
       @Autowired PropertiesEntity properties,
@@ -87,7 +87,7 @@ public class MainStage implements IElement<Stage> {
               event -> {
                 ElementHelper.toggleElementVisibility(mainCircleProgressBar.getContent());
 
-                SchedulerHelper.scheduleTimer(
+                SchedulerConfigurationHelper.scheduleTimer(
                     () -> ElementHelper.toggleElementVisibility(mainCircleProgressBar.getContent()),
                     properties.getSpinnerInitialDelay());
               });

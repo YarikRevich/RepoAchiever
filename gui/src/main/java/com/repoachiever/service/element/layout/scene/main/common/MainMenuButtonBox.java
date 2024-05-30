@@ -11,10 +11,12 @@ import com.repoachiever.service.element.scene.main.start.MainStartScene;
 import com.repoachiever.service.element.stage.SettingsStage;
 import com.repoachiever.service.element.storage.ElementStorage;
 import com.repoachiever.service.element.text.common.IElement;
-import com.repoachiever.service.event.payload.DeploymentStateRetrievalEvent;
+import com.repoachiever.service.event.payload.WithdrawEvent;
 import com.repoachiever.service.event.state.LocalState;
-import com.repoachiever.service.scheduler.SchedulerHelper;
+import com.repoachiever.service.scheduler.SchedulerConfigurationHelper;
+
 import java.util.UUID;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.layout.*;
@@ -23,81 +25,77 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-/** Represents common menu box. */
+/**
+ * Represents common menu box.
+ */
 @Service
 public class MainMenuButtonBox implements IElement<VBox> {
-  UUID id = UUID.randomUUID();
+    private final UUID id = UUID.randomUUID();
 
-  @Lazy @Autowired private MainStartScene startScene;
+    @Lazy
+    @Autowired
+    private MainStartScene startScene;
 
-  @Lazy @Autowired private MainDeploymentScene deploymentScene;
+    @Lazy
+    @Autowired
+    private MainDeploymentScene deploymentScene;
 
-  @Lazy @Autowired private ErrorAlert errorAlert;
+    @Lazy
+    @Autowired
+    private ErrorAlert errorAlert;
 
-  public MainMenuButtonBox(
-      @Autowired PropertiesEntity properties,
-      @Autowired ApplicationEventPublisher applicationEventPublisher,
-      @Autowired SettingsStage settingsStage,
-      @Autowired MainStartCircleProgressBar mainStartCircleProgressBar,
-      @Autowired MainDeploymentCircleProgressBar mainDeploymentCircleProgressBar) {
-    VBox vbox =
-        new VBox(
-            20,
-            new BasicButton(
-                    "Start",
-                    properties,
-                    () -> {
-                      ElementHelper.switchScene(getContent().getScene(), startScene.getContent());
+    public MainMenuButtonBox(
+            @Autowired PropertiesEntity properties,
+            @Autowired MainStartCircleProgressBar mainStartCircleProgressBar) {
+        VBox vbox =
+                new VBox(
+                        20,
+                        new BasicButton(
+                                "Start",
+                                properties,
+                                () -> {
+                                    ElementHelper.switchScene(getContent().getScene(), startScene.getContent());
 
-                      ElementHelper.toggleElementVisibility(
-                          mainStartCircleProgressBar.getContent());
+                                    ElementHelper.toggleElementVisibility(
+                                            mainStartCircleProgressBar.getContent());
 
-                      SchedulerHelper.scheduleTimer(
-                          () ->
-                              ElementHelper.toggleElementVisibility(
-                                  mainStartCircleProgressBar.getContent()),
-                          properties.getSpinnerInitialDelay());
-                    })
-                .getContent(),
-            new BasicButton(
-                    "Deployment",
-                    properties,
-                    () -> {
-                      if (LocalState.getConnectionEstablished()) {
-                        if (!ElementHelper.areElementsEqual(
-                            getContent().getScene(), deploymentScene.getContent())) {
-                          ElementHelper.switchScene(
-                              getContent().getScene(), deploymentScene.getContent());
+                                    SchedulerConfigurationHelper.scheduleTimer(
+                                            () ->
+                                                    ElementHelper.toggleElementVisibility(
+                                                            mainStartCircleProgressBar.getContent()),
+                                            properties.getSpinnerInitialDelay());
+                                })
+                                .getContent(),
+                        new BasicButton(
+                                "Application",
+                                properties,
+                                () -> {
+                                    if (!ElementHelper.areElementsEqual(
+                                            getContent().getScene(), deploymentScene.getContent())) {
+                                        ElementHelper.switchScene(
+                                                getContent().getScene(), deploymentScene.getContent());
+                                    }
+                                })
+                                .getContent());
+        vbox.setPadding(new Insets(10, 0, 10, 0));
+        vbox.setAlignment(Pos.TOP_CENTER);
+        vbox.setFillWidth(true);
 
-                          applicationEventPublisher.publishEvent(
-                              new DeploymentStateRetrievalEvent());
-                        }
-                      } else {
-                        ElementHelper.showAlert(
-                            errorAlert.getContent(),
-                            properties.getAlertApiServerUnavailableMessage());
-                      }
-                    })
-                .getContent());
-    vbox.setPadding(new Insets(10, 0, 10, 0));
-    vbox.setAlignment(Pos.TOP_CENTER);
-    vbox.setFillWidth(true);
+        vbox.setStyle(
+                String.format(
+                        "-fx-background-color: rgb(%d, %d, %d); " + "-fx-background-radius: 10;",
+                        properties.getCommonSceneMenuBackgroundColorR(),
+                        properties.getCommonSceneMenuBackgroundColorG(),
+                        properties.getCommonSceneMenuBackgroundColorB()));
 
-    vbox.setStyle(
-        String.format(
-            "-fx-background-color: rgb(%d, %d, %d); " + "-fx-background-radius: 10;",
-            properties.getCommonSceneMenuBackgroundColorR(),
-            properties.getCommonSceneMenuBackgroundColorG(),
-            properties.getCommonSceneMenuBackgroundColorB()));
+        ElementStorage.setElement(id, vbox);
+    }
 
-    ElementStorage.setElement(id, vbox);
-  }
-
-  /**
-   * @see IElement
-   */
-  @Override
-  public VBox getContent() {
-    return ElementStorage.getElement(id);
-  }
+    /**
+     * @see IElement
+     */
+    @Override
+    public VBox getContent() {
+        return ElementStorage.getElement(id);
+    }
 }

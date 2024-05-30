@@ -8,19 +8,10 @@ import com.repoachiever.service.element.stage.SettingsStage;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+/** Represents main start menu button box used for global menu visualization. */
 @Service
 public class MainStartMenuButtonBox extends MainMenuButtonBox {
-  public MainStartMenuButtonBox(
-      PropertiesEntity properties,
-      ApplicationEventPublisher applicationEventPublisher,
-      SettingsStage settingsStage,
-      MainStartCircleProgressBar mainStartCircleProgressBar,
-      MainDeploymentCircleProgressBar mainDeploymentCircleProgressBar) {
-    super(
-        properties,
-        applicationEventPublisher,
-        settingsStage,
-        mainStartCircleProgressBar,
-        mainDeploymentCircleProgressBar);
+  public MainStartMenuButtonBox(PropertiesEntity properties, MainStartCircleProgressBar mainStartCircleProgressBar) {
+    super(properties, mainStartCircleProgressBar);
   }
 }

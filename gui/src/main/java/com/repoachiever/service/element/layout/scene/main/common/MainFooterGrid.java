@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 /** Represents common footer used in all the scenes. */
 @Service
 public class MainFooterGrid implements IElement<GridPane> {
-  UUID id = UUID.randomUUID();
+  private final UUID id = UUID.randomUUID();
 
   public MainFooterGrid(
       @Autowired PropertiesEntity properties, @Autowired BuildVersionText buildVersionText) {

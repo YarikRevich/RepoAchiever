@@ -20,10 +20,7 @@ public class ElementHelper {
    * @param next given next scene.
    */
   public static void switchScene(Scene prev, Scene next) {
-    Platform.runLater(
-        () -> {
-          ((Stage) prev.getWindow()).setScene(next);
-        });
+    Platform.runLater(() -> ((Stage) prev.getWindow()).setScene(next));
   }
 
   /**

@@ -51,7 +51,6 @@ import picocli.CommandLine;
         HealthCheckInternalCommandService.class,
         ApplyExternalCommandService.class,
         WithdrawExternalCommandService.class,
-        ConfigService.class,
         BuildProperties.class,
         PropertiesEntity.class,
         ApplyCommandVisualizationLabel.class,

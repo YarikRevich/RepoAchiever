@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 /** Represents error related alert. */
 @Service
 public class ErrorAlert implements IElement<Alert> {
-  UUID id = UUID.randomUUID();
+  private final UUID id = UUID.randomUUID();
 
   public ErrorAlert() {
     Platform.runLater(
@@ -24,7 +24,7 @@ public class ErrorAlert implements IElement<Alert> {
           alert.setTitle("Error occurred");
 
           ElementButtonKt.theme(
-              (Button) alert.getDialogPane().lookupButton(ButtonType.OK), ElementButton.redButton);
+              (Button) alert.getDialogPane().lookupButton(ButtonType.OK), ElementButton.greenButton);
           alert.getDialogPane().getStylesheets().add(CssResources.globalCssFile);
           alert.getDialogPane().getStylesheets().add(CssResources.buttonCssFile);
           alert.getDialogPane().getStylesheets().add(CssResources.textFieldCssFile);

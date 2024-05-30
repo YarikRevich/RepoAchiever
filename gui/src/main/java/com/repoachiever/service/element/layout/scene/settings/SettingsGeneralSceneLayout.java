@@ -15,11 +15,12 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 /** Represents general settings layout of the settings stage. */
-@Component
+@Service
 public class SettingsGeneralSceneLayout implements IElementResizable, IElement<GridPane> {
-  UUID id = UUID.randomUUID();
+  private final UUID id = UUID.randomUUID();
 
   public SettingsGeneralSceneLayout(
       @Autowired PropertiesEntity properties,

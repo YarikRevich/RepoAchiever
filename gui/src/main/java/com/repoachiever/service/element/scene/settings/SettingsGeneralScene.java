@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class SettingsGeneralScene implements IElement<Scene> {
-  UUID id = UUID.randomUUID();
+  private final UUID id = UUID.randomUUID();
 
   public SettingsGeneralScene(
       @Autowired PropertiesEntity properties,

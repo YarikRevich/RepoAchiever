@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class GraphVisualizer
     implements IElementResizable, IElement<SmartGraphPanel<String, String>> {
-  UUID id = UUID.randomUUID();
+  private final UUID id = UUID.randomUUID();
 
   public GraphVisualizer(@Autowired PropertiesEntity properties)
       throws SmartGraphCssFileNotFoundException, SmartGraphPropertiesFileNotFoundException {

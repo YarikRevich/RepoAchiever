@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 /** Represents common menu box. */
 @Service
 public class SettingsMenuButtonBox implements IElement<VBox> {
-  UUID id = UUID.randomUUID();
+  private final UUID id = UUID.randomUUID();
 
   @Lazy @Autowired private MainStartScene startScene;
 

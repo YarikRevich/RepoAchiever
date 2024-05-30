@@ -17,11 +17,17 @@ import org.springframework.stereotype.Service;
 /** Represents circular progress bar indicator. */
 @Service
 public class CircleProgressBar implements IElementResizable, IElement<VBox> {
-  UUID id = UUID.randomUUID();
+  private final UUID id = UUID.randomUUID();
 
   public CircleProgressBar(@Autowired PropertiesEntity properties) {
     ProgressIndicator progressBar = new ProgressIndicator();
-    progressBar.setStyle("-fx-progress-color: red;");
+
+    progressBar.setStyle(
+            String.format(
+                    "-fx-progress-color: rgb(%d, %d, %d);",
+                    properties.getSpinnerColorR(),
+                    properties.getSpinnerColorG(),
+                    properties.getSpinnerColorB()));
     progressBar.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
 
     VBox vbox = new VBox(progressBar);

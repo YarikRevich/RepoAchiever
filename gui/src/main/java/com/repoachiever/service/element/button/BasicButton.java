@@ -15,7 +15,7 @@ import javafx.scene.control.Button;
 
 /** Represents basic button. */
 public class BasicButton implements IElementResizable, IElement<Button> {
-  UUID id = UUID.randomUUID();
+  private final UUID id = UUID.randomUUID();
 
   private final PropertiesEntity properties;
 
@@ -23,7 +23,7 @@ public class BasicButton implements IElementResizable, IElement<Button> {
     this.properties = properties;
 
     Button basicButton = new Button();
-    ElementButtonKt.theme(basicButton, ElementButton.redButton);
+    ElementButtonKt.theme(basicButton, ElementButton.greenButton);
     basicButton.getStylesheets().add(CssResources.globalCssFile);
     basicButton.getStylesheets().add(CssResources.buttonCssFile);
     basicButton.getStylesheets().add(CssResources.textFieldCssFile);

@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ConnectionStatusImageView
     implements IElementActualizable, IElementResizable, IElement<BorderPane> {
-  UUID id = UUID.randomUUID();
+  private final UUID id = UUID.randomUUID();
 
   private static final String CONNECTION_STATUS_ESTABLISH_FAILED = "connection is not established";
 
@@ -74,6 +74,7 @@ public class ConnectionStatusImageView
     Platform.runLater(
         () -> {
           BorderPane borderPane = getContent();
+
           SplitPane splitPane = (SplitPane) borderPane.getRight();
           Button button = (Button) splitPane.getItems().get(0);
 
@@ -83,12 +84,14 @@ public class ConnectionStatusImageView
                 ConnectionStatusImageCollection.getSuccessfulConnectionStatusImage(
                     ElementHelper.getCircularElementSize(
                         LocalState.getMainWindowWidth(), properties.getStatusImageScale())));
+
           } else {
             splitPane.getTooltip().setText(CONNECTION_STATUS_ESTABLISH_FAILED);
             button.setGraphic(
                 ConnectionStatusImageCollection.getFailedConnectionStatusImage(
                     ElementHelper.getCircularElementSize(
                         LocalState.getMainWindowWidth(), properties.getStatusImageScale())));
+
           }
         });
   }

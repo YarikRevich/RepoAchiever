@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 /** Represents tab menu bar. */
 @Service
 public class TabMenuBar implements IElement<MenuBar> {
-  UUID id = UUID.randomUUID();
+  private final UUID id = UUID.randomUUID();
 
   public TabMenuBar() {
     Menu preferenciesMenu = new Menu("Preferences");

@@ -59,6 +59,15 @@ public class PropertiesEntity {
   @Value(value = "${spinner.initial.delay}")
   private Integer spinnerInitialDelay;
 
+  @Value(value = "${spinner.color.r}")
+  private Integer spinnerColorR;
+
+  @Value(value = "${spinner.color.g}")
+  private Integer spinnerColorG;
+
+  @Value(value = "${spinner.color.b}")
+  private Integer spinnerColorB;
+
   @Value(value = "${button.basic.size.width}")
   private Double basicButtonSizeWidth;
 
@@ -134,20 +143,26 @@ public class PropertiesEntity {
   @Value(value = "${image.icon.name}")
   private String imageIconName;
 
-  @Value(value = "${image.arrow.name}")
-  private String imageArrowName;
+  @Value(value = "${image.apply.name}")
+  private String imageApplyName;
+
+  @Value(value = "${image.withdraw.name}")
+  private String imageWithdrawName;
+
+  @Value(value = "${image.retrieve-content.name}")
+  private String imageRetrieveContentName;
+
+  @Value(value = "${image.clean.name}")
+  private String imageCleanName;
+
+  @Value(value = "${image.clean-all.name}")
+  private String imageCleanAllName;
 
   @Value(value = "${image.edit.name}")
   private String imageEditName;
 
-  @Value(value = "${image.refresh.name}")
-  private String imageRefreshName;
-
-  @Value(value = "${image.start.name}")
-  private String imageStartName;
-
-  @Value(value = "${image.stop.name}")
-  private String imageStopName;
+  @Value(value = "${image.open.name}")
+  private String imageOpenName;
 
   @Value(value = "${image.bar.width}")
   private Integer imageBarWidth;
@@ -155,8 +170,35 @@ public class PropertiesEntity {
   @Value(value = "${image.bar.height}")
   private Integer imageBarHeight;
 
-  @Value(value = "${list-view.stub.name}")
-  private String listViewStubName;
+  @Value(value = "${button.apply.description}")
+  private String buttonApplyDescription;
+
+  @Value(value = "${button.withdraw.description}")
+  private String buttonWithdrawDescription;
+
+  @Value(value = "${button.retrieve-content.description}")
+  private String buttonRetrieveContentDescription;
+
+  @Value(value = "${button.clean.description}")
+  private String buttonCleanDescription;
+
+  @Value(value = "${button.clean-all.description}")
+  private String buttonCleanAllDescription;
+
+  @Value(value = "${button.edit.description}")
+  private String buttonEditDescription;
+
+  @Value(value = "${button.open.description}")
+  private String buttonOpenDescription;
+
+  @Value(value = "${list-view.empty.name}")
+  private String listViewEmptyName;
+
+  @Value(value = "${list-view.not-opened.name}")
+  private String listViewNotOpenedName;
+
+  @Value(value = "${label.welcome.message}")
+  private String labelWelcomeMessage;
 
   @Value(value = "${alert.api-server-unavailable.message}")
   private String alertApiServerUnavailableMessage;
@@ -179,17 +221,11 @@ public class PropertiesEntity {
   @Value(value = "${graph.properties.location}")
   private String graphPropertiesLocation;
 
-  @Value(value = "${config.root}")
-  private String configRootPath;
+  @Value(value = "${config.default.directory}")
+  private String configDefaultDirectory;
 
   @Value(value = "${swap.root}")
-  private String swapRootPath;
-
-  @Value(value = "${config.user.file}")
-  private String configUserFilePath;
-
-  @Value(value = "${api-server.directory}")
-  private String apiServerDirectory;
+  private String swapRoot;
 
   @Value(value = "${git.commit.id.abbrev}")
   private String gitCommitId;

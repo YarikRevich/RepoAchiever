@@ -14,13 +14,11 @@ import org.springframework.stereotype.Service;
 /** Represents landing announcement text presented at start scene. */
 @Service
 public class LandingAnnouncementText implements IElementResizable, IElement<Label> {
-  UUID id = UUID.randomUUID();
+  private final UUID id = UUID.randomUUID();
 
   public LandingAnnouncementText(@Autowired PropertiesEntity properties) {
-    Label label =
-        new Label(
-            "Welcome to ResourceTracker GUI!\n"
-                + "This application was developed to interact with API Server");
+    Label label = new Label(properties.getLabelWelcomeMessage());
+
     label.setFont(FontLoader.getFont20());
     label.setAlignment(Pos.TOP_CENTER);
     label.setTextAlignment(TextAlignment.CENTER);

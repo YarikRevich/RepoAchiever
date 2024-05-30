@@ -18,10 +18,9 @@ import org.springframework.stereotype.Service;
 /** Represents start scene layout of the main stage. */
 @Service
 public class MainStartSceneLayout implements IElementResizable, IElement<GridPane> {
-  UUID id = UUID.randomUUID();
+  private final UUID id = UUID.randomUUID();
 
   public MainStartSceneLayout(
-      @Autowired PropertiesEntity properties,
       @Autowired MainStartMenuButtonBox mainStartMenuButtonBox,
       @Autowired LandingAnnouncementText landingAnnouncementText,
       @Autowired MainStartHeaderGrid mainStartHeaderGrid,
