@@ -68,12 +68,17 @@ public class StateService {
      */
     public static ClusterAllocationDto getClusterAllocationByWorkspaceUnitKeyAndName(
             String workspaceUnitKey, String name) {
-        return clusterAllocations.
-                stream()
+        List<ClusterAllocationDto> result = clusterAllocations
+                .stream()
                 .filter(element -> Objects.equals(element.getWorkspaceUnitKey(), workspaceUnitKey) &&
                         Objects.equals(element.getName(), name))
-                .toList()
-                .getFirst();
+                .toList();
+
+        if (result.isEmpty()) {
+            return null;
+        }
+
+        return result.getFirst();
     }
 
     /**

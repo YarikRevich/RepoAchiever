@@ -24,7 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
-/** Represents apply image. */
+/** Represents apply image view. */
 @Service
 public class ApplyImageView implements IElementResizable, IElement<BorderPane> {
   private final UUID id = UUID.randomUUID();

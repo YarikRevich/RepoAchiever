@@ -21,6 +21,7 @@ public class ErrorAlert implements IElement<Alert> {
     Platform.runLater(
         () -> {
           Alert alert = new Alert(Alert.AlertType.ERROR);
+
           alert.setTitle("Error occurred");
 
           ElementButtonKt.theme(

@@ -158,6 +158,9 @@ public class PropertiesEntity {
   @Value(value = "${image.clean-all.name}")
   private String imageCleanAllName;
 
+  @Value(value = "${image.download.name}")
+  private String imageDownloadName;
+
   @Value(value = "${image.edit.name}")
   private String imageEditName;
 
@@ -185,11 +188,20 @@ public class PropertiesEntity {
   @Value(value = "${button.clean-all.description}")
   private String buttonCleanAllDescription;
 
+  @Value(value = "${button.download.description}")
+  private String buttonDownloadDescription;
+
   @Value(value = "${button.edit.description}")
   private String buttonEditDescription;
 
   @Value(value = "${button.open.description}")
   private String buttonOpenDescription;
+
+  @Value(value = "${label.connection-status-success.description}")
+  private String labelConnectionStatusSuccessDescription;
+
+  @Value(value = "${label.connection-status-failure.description}")
+  private String labelConnectionStatusFailureDescription;
 
   @Value(value = "${list-view.empty.name}")
   private String listViewEmptyName;
@@ -200,14 +212,17 @@ public class PropertiesEntity {
   @Value(value = "${label.welcome.message}")
   private String labelWelcomeMessage;
 
+  @Value(value = "${alert.config-not-opened.message}")
+  private String alertConfigNotOpenedMessage;
+
   @Value(value = "${alert.api-server-unavailable.message}")
   private String alertApiServerUnavailableMessage;
 
-  @Value(value = "${alert.deployment-finished.message}")
-  private String alertDeploymentFinishedMessage;
+  @Value(value = "${alert.application-finished.message}")
+  private String alertApplicationFinishedMessage;
 
-  @Value(value = "${alert.destruction-finished.message}")
-  private String alertDestructionFinishedMessage;
+  @Value(value = "${alert.withdrawal-finished.message}")
+  private String alertWithdrawalFinishedMessage;
 
   @Value(value = "${alert.version-mismatch.message}")
   private String alertVersionMismatchMessage;

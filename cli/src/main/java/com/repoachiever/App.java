@@ -53,6 +53,7 @@ import picocli.CommandLine;
         WithdrawExternalCommandService.class,
         BuildProperties.class,
         PropertiesEntity.class,
+        ConfigService.class,
         ApplyCommandVisualizationLabel.class,
         WithdrawCommandVisualizationLabel.class,
         CleanCommandVisualizationLabel.class,

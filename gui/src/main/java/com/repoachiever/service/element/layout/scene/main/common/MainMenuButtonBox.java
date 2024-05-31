@@ -4,15 +4,11 @@ import com.repoachiever.entity.PropertiesEntity;
 import com.repoachiever.service.element.alert.ErrorAlert;
 import com.repoachiever.service.element.button.BasicButton;
 import com.repoachiever.service.element.common.ElementHelper;
-import com.repoachiever.service.element.progressbar.main.deployment.MainDeploymentCircleProgressBar;
 import com.repoachiever.service.element.progressbar.main.start.MainStartCircleProgressBar;
 import com.repoachiever.service.element.scene.main.deployment.MainDeploymentScene;
 import com.repoachiever.service.element.scene.main.start.MainStartScene;
-import com.repoachiever.service.element.stage.SettingsStage;
 import com.repoachiever.service.element.storage.ElementStorage;
 import com.repoachiever.service.element.text.common.IElement;
-import com.repoachiever.service.event.payload.WithdrawEvent;
-import com.repoachiever.service.event.state.LocalState;
 import com.repoachiever.service.scheduler.SchedulerConfigurationHelper;
 
 import java.util.UUID;
@@ -21,7 +17,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.layout.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 

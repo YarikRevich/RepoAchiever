@@ -26,14 +26,14 @@ import java.io.InputStream;
 import java.util.Objects;
 import java.util.UUID;
 
-/** Represents clean image. */
-@Service
+/** Represents clean image view. */
 public class CleanImageView implements IElementResizable, IElement<BorderPane> {
   private final UUID id = UUID.randomUUID();
 
   public CleanImageView(
-      @Autowired PropertiesEntity properties,
-      @Autowired ApplicationEventPublisher applicationEventPublisher)
+          PropertiesEntity properties,
+          ApplicationEventPublisher applicationEventPublisher,
+          String location)
       throws ApplicationImageFileNotFoundException {
     Button button = new Button();
 
@@ -41,9 +41,9 @@ public class CleanImageView implements IElementResizable, IElement<BorderPane> {
     button.getStylesheets().add(CssResources.globalCssFile);
     button.getStylesheets().add(CssResources.buttonCssFile);
     button.getStylesheets().add(CssResources.textFieldCssFile);
-//
-//    button.setOnMouseClicked(
-//        event -> applicationEventPublisher.publishEvent(new CleanEvent()));
+
+    button.setOnMouseClicked(
+        event -> applicationEventPublisher.publishEvent(new CleanEvent(location)));
 
     InputStream imageSource =
         getClass().getClassLoader().getResourceAsStream(properties.getImageCleanName());

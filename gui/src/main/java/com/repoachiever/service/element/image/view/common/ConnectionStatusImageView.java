@@ -7,7 +7,7 @@ import com.repoachiever.service.element.storage.ElementStorage;
 import com.repoachiever.service.element.text.common.IElement;
 import com.repoachiever.service.element.text.common.IElementActualizable;
 import com.repoachiever.service.element.text.common.IElementResizable;
-import com.repoachiever.service.event.state.LocalState;
+import com.repoachiever.service.state.StateService;
 import java.util.Objects;
 import java.util.UUID;
 import javafx.application.Platform;
@@ -21,15 +21,11 @@ import javafx.scene.paint.Color;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-/** Represents connection status image. */
+/** Represents connection status image view. */
 @Service
 public class ConnectionStatusImageView
     implements IElementActualizable, IElementResizable, IElement<BorderPane> {
   private final UUID id = UUID.randomUUID();
-
-  private static final String CONNECTION_STATUS_ESTABLISH_FAILED = "connection is not established";
-
-  private static final String CONNECTION_STATUS_ESTABLISH_SUCCEEDED = "connection is established";
 
   private final PropertiesEntity properties;
 
@@ -39,7 +35,7 @@ public class ConnectionStatusImageView
     button.setAlignment(Pos.CENTER_RIGHT);
 
     SplitPane splitPane = new SplitPane(button);
-    splitPane.setTooltip(new Tooltip(CONNECTION_STATUS_ESTABLISH_FAILED));
+    splitPane.setTooltip(new Tooltip(properties.getLabelConnectionStatusFailureDescription()));
 
     splitPane.setBackground(
         Background.fill(
@@ -78,19 +74,19 @@ public class ConnectionStatusImageView
           SplitPane splitPane = (SplitPane) borderPane.getRight();
           Button button = (Button) splitPane.getItems().get(0);
 
-          if (LocalState.getConnectionEstablished()) {
-            splitPane.getTooltip().setText(CONNECTION_STATUS_ESTABLISH_SUCCEEDED);
+          if (StateService.getConnectionEstablished()) {
+            splitPane.getTooltip().setText(properties.getLabelConnectionStatusSuccessDescription());
             button.setGraphic(
                 ConnectionStatusImageCollection.getSuccessfulConnectionStatusImage(
                     ElementHelper.getCircularElementSize(
-                        LocalState.getMainWindowWidth(), properties.getStatusImageScale())));
+                        StateService.getMainWindowWidth(), properties.getStatusImageScale())));
 
           } else {
-            splitPane.getTooltip().setText(CONNECTION_STATUS_ESTABLISH_FAILED);
+            splitPane.getTooltip().setText(properties.getLabelConnectionStatusFailureDescription());
             button.setGraphic(
                 ConnectionStatusImageCollection.getFailedConnectionStatusImage(
                     ElementHelper.getCircularElementSize(
-                        LocalState.getMainWindowWidth(), properties.getStatusImageScale())));
+                        StateService.getMainWindowWidth(), properties.getStatusImageScale())));
 
           }
         });
@@ -111,7 +107,7 @@ public class ConnectionStatusImageView
             button.setGraphic(
                 ConnectionStatusImageCollection.getFailedConnectionStatusImage(
                     ElementHelper.getCircularElementSize(
-                        LocalState.getMainWindowWidth(), properties.getStatusImageScale())));
+                        StateService.getMainWindowWidth(), properties.getStatusImageScale())));
           }
         });
   }

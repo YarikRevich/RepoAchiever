@@ -55,25 +55,25 @@ public class BaseCommandService {
     private ApplyExternalCommandService applyExternalCommandService;
 
     @Autowired
-    private WithdrawExternalCommandService withdrawCommandService;
+    private WithdrawExternalCommandService withdrawExternalCommandService;
 
     @Autowired
-    private CleanExternalCommandService cleanCommandService;
+    private CleanExternalCommandService cleanExternalCommandService;
 
     @Autowired
     private CleanAllExternalCommandService cleanAllExternalCommandService;
 
     @Autowired
-    private ContentExternalCommandService contentCommandService;
+    private ContentExternalCommandService contentExternalCommandService;
 
     @Autowired
-    private DownloadExternalCommandService downloadCommandService;
+    private DownloadExternalCommandService downloadExternalCommandService;
 
     @Autowired
-    private TopologyExternalCommandService topologyCommandService;
+    private TopologyExternalCommandService topologyExternalCommandService;
 
     @Autowired
-    private VersionExternalCommandService versionCommandService;
+    private VersionExternalCommandService versionExternalCommandService;
 
     @Autowired
     private HealthCheckInternalCommandService healthCheckInternalCommandService;
@@ -188,7 +188,7 @@ public class BaseCommandService {
         }
 
         try {
-            withdrawCommandService.process(configService.getConfig());
+            withdrawExternalCommandService.process(configService.getConfig());
         } catch (ApiServerOperationFailureException e) {
             logger.fatal(e.getMessage());
 
@@ -236,7 +236,7 @@ public class BaseCommandService {
         }
 
         try {
-            cleanCommandService.process(CleanExternalCommandDto.of(configService.getConfig(), location));
+            cleanExternalCommandService.process(CleanExternalCommandDto.of(configService.getConfig(), location));
         } catch (ApiServerOperationFailureException e) {
             logger.fatal(e.getMessage());
 
@@ -326,7 +326,7 @@ public class BaseCommandService {
         }
 
         try {
-            contentCommandService.process(configService.getConfig());
+            contentExternalCommandService.process(configService.getConfig());
         } catch (ApiServerOperationFailureException e) {
             logger.fatal(e.getMessage());
 
@@ -376,7 +376,7 @@ public class BaseCommandService {
         }
 
         try {
-            downloadCommandService.process(DownloadExternalCommandDto.of(configService.getConfig(), outputLocation, location));
+            downloadExternalCommandService.process(DownloadExternalCommandDto.of(configService.getConfig(), outputLocation, location));
         } catch (ApiServerOperationFailureException e) {
             logger.fatal(e.getMessage());
 
@@ -421,7 +421,7 @@ public class BaseCommandService {
         }
 
         try {
-            topologyCommandService.process(configService.getConfig());
+            topologyExternalCommandService.process(configService.getConfig());
         } catch (ApiServerOperationFailureException e) {
             logger.fatal(e.getMessage());
 
@@ -466,7 +466,7 @@ public class BaseCommandService {
         }
 
         try {
-            versionCommandService.process(configService.getConfig());
+            versionExternalCommandService.process(configService.getConfig());
         } catch (ApiServerOperationFailureException e) {
             logger.fatal(e.getMessage());
 

@@ -1,6 +1,5 @@
 package com.repoachiever.service.element.layout.scene.main.application;
 
-import com.repoachiever.entity.PropertiesEntity;
 import com.repoachiever.service.element.layout.common.ContentGrid;
 import com.repoachiever.service.element.layout.scene.main.application.common.MainApplicationContentGrid;
 import com.repoachiever.service.element.layout.scene.main.application.common.MainApplicationFooterGrid;
@@ -9,7 +8,7 @@ import com.repoachiever.service.element.layout.scene.main.application.common.Mai
 import com.repoachiever.service.element.storage.ElementStorage;
 import com.repoachiever.service.element.text.common.IElement;
 import com.repoachiever.service.element.text.common.IElementResizable;
-import com.repoachiever.service.event.state.LocalState;
+import com.repoachiever.service.state.StateService;
 import java.util.UUID;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -71,7 +70,7 @@ public class MainApplicationSceneLayout implements IElementResizable, IElement<G
    */
   @Override
   public void handlePrefWidth() {
-    getContent().setPrefWidth(LocalState.getMainWindowWidth());
+    getContent().setPrefWidth(StateService.getMainWindowWidth());
   }
 
   /**
@@ -79,6 +78,6 @@ public class MainApplicationSceneLayout implements IElementResizable, IElement<G
    */
   @Override
   public void handlePrefHeight() {
-    getContent().setPrefHeight(LocalState.getMainWindowHeight());
+    getContent().setPrefHeight(StateService.getMainWindowHeight());
   }
 }

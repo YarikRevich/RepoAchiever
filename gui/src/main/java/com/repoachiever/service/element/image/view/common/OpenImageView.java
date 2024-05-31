@@ -30,7 +30,7 @@ import java.io.InputStream;
 import java.util.Objects;
 import java.util.UUID;
 
-/** Represents open image. */
+/** Represents open image view. */
 @Service
 public class OpenImageView implements IElementResizable, IElement<BorderPane> {
   private final UUID id = UUID.randomUUID();
@@ -53,7 +53,8 @@ public class OpenImageView implements IElementResizable, IElement<BorderPane> {
 
     button.setOnMouseClicked(event -> {
       File file = fileChooser.showOpenDialog(deploymentScene.getContent().getWindow());
-      if (file != null) {
+
+      if (Objects.nonNull(file)) {
         applicationEventPublisher.publishEvent(new OpenEvent(file));
       }
     });

@@ -24,7 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
-/** Represents  withdraw image. */
+/** Represents  withdraw image view. */
 @Service
 public class WithdrawImageView implements IElementResizable, IElement<BorderPane> {
   private final UUID id = UUID.randomUUID();

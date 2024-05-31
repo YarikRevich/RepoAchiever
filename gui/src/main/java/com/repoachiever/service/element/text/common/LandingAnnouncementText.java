@@ -3,7 +3,7 @@ package com.repoachiever.service.element.text.common;
 import com.repoachiever.entity.PropertiesEntity;
 import com.repoachiever.service.element.font.FontLoader;
 import com.repoachiever.service.element.storage.ElementStorage;
-import com.repoachiever.service.event.state.LocalState;
+import com.repoachiever.service.state.StateService;
 import java.util.UUID;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -48,7 +48,7 @@ public class LandingAnnouncementText implements IElementResizable, IElement<Labe
    */
   @Override
   public void handlePrefWidth() {
-    getContent().setMaxWidth(LocalState.getMainWindowWidth());
+    getContent().setMaxWidth(StateService.getMainWindowWidth());
   }
 
   /**
@@ -56,6 +56,6 @@ public class LandingAnnouncementText implements IElementResizable, IElement<Labe
    */
   @Override
   public void handlePrefHeight() {
-    getContent().setMaxHeight(LocalState.getMainWindowHeight());
+    getContent().setMaxHeight(StateService.getMainWindowHeight());
   }
 }

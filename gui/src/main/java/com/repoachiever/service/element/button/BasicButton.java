@@ -5,7 +5,7 @@ import com.repoachiever.service.element.common.ElementHelper;
 import com.repoachiever.service.element.storage.ElementStorage;
 import com.repoachiever.service.element.text.common.IElement;
 import com.repoachiever.service.element.text.common.IElementResizable;
-import com.repoachiever.service.event.state.LocalState;
+import com.repoachiever.service.state.StateService;
 import ink.bluecloud.css.CssResources;
 import ink.bluecloud.css.ElementButton;
 import ink.bluecloud.css.ElementButtonKt;
@@ -23,6 +23,7 @@ public class BasicButton implements IElementResizable, IElement<Button> {
     this.properties = properties;
 
     Button basicButton = new Button();
+
     ElementButtonKt.theme(basicButton, ElementButton.greenButton);
     basicButton.getStylesheets().add(CssResources.globalCssFile);
     basicButton.getStylesheets().add(CssResources.buttonCssFile);
@@ -50,8 +51,8 @@ public class BasicButton implements IElementResizable, IElement<Button> {
   public void handlePrefWidth() {
     Rectangle2D size =
         ElementHelper.getSizeWithScale(
-            LocalState.getMainWindowWidth(),
-            LocalState.getMainWindowHeight(),
+            StateService.getMainWindowWidth(),
+            StateService.getMainWindowHeight(),
             properties.getBasicButtonSizeWidth(),
             properties.getBasicButtonSizeHeight());
 
@@ -65,8 +66,8 @@ public class BasicButton implements IElementResizable, IElement<Button> {
   public void handlePrefHeight() {
     Rectangle2D size =
         ElementHelper.getSizeWithScale(
-            LocalState.getMainWindowWidth(),
-            LocalState.getMainWindowHeight(),
+            StateService.getMainWindowWidth(),
+            StateService.getMainWindowHeight(),
             properties.getBasicButtonSizeWidth(),
             properties.getBasicButtonSizeHeight());
 

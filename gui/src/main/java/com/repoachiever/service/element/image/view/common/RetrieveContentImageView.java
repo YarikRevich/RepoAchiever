@@ -6,7 +6,7 @@ import com.repoachiever.service.element.storage.ElementStorage;
 import com.repoachiever.service.element.text.common.IElement;
 import com.repoachiever.service.element.text.common.IElementActualizable;
 import com.repoachiever.service.element.text.common.IElementResizable;
-import com.repoachiever.service.event.payload.WithdrawEvent;
+import com.repoachiever.service.event.payload.RetrieveContentEvent;
 import ink.bluecloud.css.CssResources;
 import ink.bluecloud.css.ElementButton;
 import ink.bluecloud.css.ElementButtonKt;
@@ -24,7 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
-/** Represents retrieve content image. */
+/** Represents retrieve content image view. */
 @Service
 public class RetrieveContentImageView implements IElementResizable, IElement<BorderPane> {
   private final UUID id = UUID.randomUUID();
@@ -41,7 +41,7 @@ public class RetrieveContentImageView implements IElementResizable, IElement<Bor
     button.getStylesheets().add(CssResources.textFieldCssFile);
 
     button.setOnMouseClicked(
-        event -> applicationEventPublisher.publishEvent(new WithdrawEvent()));
+        event -> applicationEventPublisher.publishEvent(new RetrieveContentEvent()));
 
     InputStream imageSource =
         getClass().getClassLoader().getResourceAsStream(properties.getImageRetrieveContentName());

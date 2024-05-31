@@ -22,6 +22,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -409,23 +410,25 @@ public class ClusterFacade {
         ClusterAllocationDto clusterAllocation = StateService
                 .getClusterAllocationByWorkspaceUnitKeyAndName(workspaceUnitKey, contentCleanup.getLocation());
 
-        logger.info(
-                String.format(
-                        "Setting RepoAchiever Cluster allocation to suspend state: '%s'",
-                        clusterAllocation.getName()));
+        if (Objects.nonNull(clusterAllocation)) {
+            logger.info(
+                    String.format(
+                            "Setting RepoAchiever Cluster allocation to suspend state: '%s'",
+                            clusterAllocation.getName()));
 
-        try {
-            clusterCommunicationResource.performSuspend(clusterAllocation.getName());
+            try {
+                clusterCommunicationResource.performSuspend(clusterAllocation.getName());
 
-        } catch (ClusterOperationFailureException e) {
-            logger.fatal(new ClusterCleanupFailureException(e.getMessage()).getMessage());
+            } catch (ClusterOperationFailureException e) {
+                logger.fatal(new ClusterCleanupFailureException(e.getMessage()).getMessage());
 
-            return;
+                return;
+            }
+
+            telemetryService.decreaseServingClustersAmount();
+
+            telemetryService.increaseSuspendedClustersAmount();
         }
-
-        telemetryService.decreaseServingClustersAmount();
-
-        telemetryService.increaseSuspendedClustersAmount();
 
         try {
             workspaceFacade.removeContent(workspaceUnitKey, contentCleanup.getLocation());
@@ -435,34 +438,36 @@ public class ClusterFacade {
             throw new ClusterCleanupFailureException(e.getMessage());
         }
 
-        logger.info(
-                String.format(
-                        "Resetting RepoAchiever Cluster content retrieval: '%s'", clusterAllocation.getName()));
+        if (Objects.nonNull(clusterAllocation)) {
+            logger.info(
+                    String.format(
+                            "Resetting RepoAchiever Cluster content retrieval: '%s'", clusterAllocation.getName()));
 
-        try {
-            clusterCommunicationResource.performRetrievalReset(clusterAllocation.getName());
-        } catch (ClusterOperationFailureException e) {
-            logger.fatal(new ClusterCleanupFailureException(e.getMessage()).getMessage());
+            try {
+                clusterCommunicationResource.performRetrievalReset(clusterAllocation.getName());
+            } catch (ClusterOperationFailureException e) {
+                logger.fatal(new ClusterCleanupFailureException(e.getMessage()).getMessage());
 
-            return;
+                return;
+            }
+
+            logger.info(
+                    String.format(
+                            "Setting RepoAchiever Cluster suspended allocation to serve state: '%s'",
+                            clusterAllocation.getName()));
+
+            try {
+                clusterCommunicationResource.performServe(clusterAllocation.getName());
+            } catch (ClusterOperationFailureException e) {
+                logger.fatal(new ClusterCleanupFailureException(e.getMessage()).getMessage());
+
+                return;
+            }
+
+            telemetryService.decreaseSuspendedClustersAmount();
+
+            telemetryService.increaseServingClustersAmount();
         }
-
-        logger.info(
-                String.format(
-                        "Setting RepoAchiever Cluster suspended allocation to serve state: '%s'",
-                        clusterAllocation.getName()));
-
-        try {
-            clusterCommunicationResource.performServe(clusterAllocation.getName());
-        } catch (ClusterOperationFailureException e) {
-            logger.fatal(new ClusterCleanupFailureException(e.getMessage()).getMessage());
-
-            return;
-        }
-
-        telemetryService.decreaseSuspendedClustersAmount();
-
-        telemetryService.increaseServingClustersAmount();
 
         StateService.getTopologyStateGuard().unlock();
     }

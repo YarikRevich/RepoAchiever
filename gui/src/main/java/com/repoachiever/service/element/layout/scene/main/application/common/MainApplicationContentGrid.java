@@ -5,7 +5,7 @@ import com.repoachiever.service.element.list.ListVisualizer;
 import com.repoachiever.service.element.storage.ElementStorage;
 import com.repoachiever.service.element.text.common.IElement;
 import com.repoachiever.service.element.text.common.IElementResizable;
-import com.repoachiever.service.event.state.LocalState;
+import com.repoachiever.service.state.StateService;
 import java.util.UUID;
 import javafx.scene.layout.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +54,7 @@ public class MainApplicationContentGrid implements IElementResizable, IElement<G
    */
   @Override
   public void handlePrefWidth() {
-    getContent().setMaxWidth(LocalState.getMainWindowWidth());
+    getContent().setMaxWidth(StateService.getMainWindowWidth());
   }
 
   /**
@@ -62,6 +62,6 @@ public class MainApplicationContentGrid implements IElementResizable, IElement<G
    */
   @Override
   public void handlePrefHeight() {
-    getContent().setMaxHeight(LocalState.getMainWindowHeight());
+    getContent().setMaxHeight(StateService.getMainWindowHeight());
   }
 }

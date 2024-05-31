@@ -5,7 +5,7 @@ import com.repoachiever.service.element.image.view.common.*;
 import com.repoachiever.service.element.storage.ElementStorage;
 import com.repoachiever.service.element.text.common.IElement;
 import com.repoachiever.service.element.text.common.IElementResizable;
-import com.repoachiever.service.event.state.LocalState;
+import com.repoachiever.service.state.StateService;
 
 import java.util.UUID;
 
@@ -26,7 +26,6 @@ public class MainApplicationBarGrid implements IElementResizable, IElement<GridP
             @Autowired ApplyImageView applyImageView,
             @Autowired WithdrawImageView withdrawImageView,
             @Autowired RetrieveContentImageView retrieveContentImageView,
-            @Autowired CleanImageView cleanImageView,
             @Autowired CleanAllImageView cleanAllImageView,
             @Autowired EditImageView editImageView,
             @Autowired OpenImageView openImageView) {
@@ -64,20 +63,15 @@ public class MainApplicationBarGrid implements IElementResizable, IElement<GridP
 
         ColumnConstraints column7 = new ColumnConstraints();
         column7.setHgrow(Priority.ALWAYS);
-        column7.setPercentWidth(10);
+        column7.setPercentWidth(40);
 
-        ColumnConstraints column8 = new ColumnConstraints();
-        column8.setHgrow(Priority.ALWAYS);
-        column8.setPercentWidth(30);
-
-        grid.getColumnConstraints().addAll(column1, column2, column3, column4, column5, column6, column7, column8);
+        grid.getColumnConstraints().addAll(column1, column2, column3, column4, column5, column6, column7);
 
         grid.addRow(
                 0,
                 applyImageView.getContent(),
                 withdrawImageView.getContent(),
                 retrieveContentImageView.getContent(),
-                cleanImageView.getContent(),
                 cleanAllImageView.getContent(),
                 editImageView.getContent(),
                 openImageView.getContent());
@@ -99,7 +93,7 @@ public class MainApplicationBarGrid implements IElementResizable, IElement<GridP
      */
     @Override
     public void handlePrefWidth() {
-        getContent().setPrefWidth(LocalState.getMainWindowWidth());
+        getContent().setPrefWidth(StateService.getMainWindowWidth());
     }
 
     /**
@@ -107,6 +101,6 @@ public class MainApplicationBarGrid implements IElementResizable, IElement<GridP
      */
     @Override
     public void handlePrefHeight() {
-        getContent().setPrefHeight(LocalState.getMainWindowHeight());
+        getContent().setPrefHeight(StateService.getMainWindowHeight());
     }
 }

@@ -26,7 +26,7 @@ import java.io.InputStream;
 import java.util.Objects;
 import java.util.UUID;
 
-/** Represents cleanall image. */
+/** Represents cleanall image view. */
 @Service
 public class CleanAllImageView implements IElementResizable, IElement<BorderPane> {
   private final UUID id = UUID.randomUUID();

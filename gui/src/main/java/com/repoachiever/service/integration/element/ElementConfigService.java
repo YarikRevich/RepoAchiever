@@ -4,7 +4,7 @@ import com.repoachiever.entity.PropertiesEntity;
 import com.repoachiever.service.element.storage.ElementStorage;
 import com.repoachiever.service.element.text.common.IElementActualizable;
 import com.repoachiever.service.element.text.common.IElementResizable;
-import com.repoachiever.service.event.state.LocalState;
+import com.repoachiever.service.state.StateService;
 import com.repoachiever.service.scheduler.SchedulerConfigurationHelper;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,20 +31,20 @@ public class ElementConfigService {
 
         SchedulerConfigurationHelper.scheduleTask(
                 () -> {
-                    if (LocalState.isWindowWidthChanged()) {
+                    if (StateService.isWindowWidthChanged()) {
                         ElementStorage.getResizables().forEach(IElementResizable::handlePrefWidth);
 
-                        LocalState.synchronizeWindowWidth();
+                        StateService.synchronizeWindowWidth();
                     }
                 },
                 properties.getProcessWindowWidthPeriod());
 
         SchedulerConfigurationHelper.scheduleTask(
                 () -> {
-                    if (LocalState.isWindowHeightChanged()) {
+                    if (StateService.isWindowHeightChanged()) {
                         ElementStorage.getResizables().forEach(IElementResizable::handlePrefHeight);
 
-                        LocalState.synchronizeWindowHeight();
+                        StateService.synchronizeWindowHeight();
                     }
                 },
                 properties.getProcessWindowHeightPeriod());
