@@ -150,17 +150,45 @@ public class SchedulerConfigService {
                                                     element.getName(),
                                                     record)));
 
+                            Boolean downloadTelemetryIncreasePresent = true;
+
+                            try {
+                                apiServerCommunicationResource.performDownloadTelemetryIncrease();
+                            } catch (ApiServerOperationFailureException e) {
+                                logger.info(
+                                        LoggingConfigurationHelper.getTransferableMessage(
+                                                String.format(
+                                                        "Failed to perform download telemetry increase for '%s' location: %s",
+                                                        element.getName(),
+                                                        e.getMessage())));
+
+                                downloadTelemetryIncreasePresent = false;
+                            }
+
                             DataBuffer contentStream;
 
                             try {
                                 contentStream = vendorFacade.getRecordRawContent(element.getName(), record);
-                            } catch (LocationDefinitionsAreNotValidException e) {
+                            } catch (LocationDefinitionsAreNotValidException e1) {
                                 logger.info(
                                         LoggingConfigurationHelper.getTransferableMessage(
                                                 String.format(
                                                         "Skipping retrieval of content for '%s' location: %s",
                                                         element.getName(),
-                                                        e.getMessage())));
+                                                        e1.getMessage())));
+
+                                if (downloadTelemetryIncreasePresent) {
+                                    try {
+                                        apiServerCommunicationResource.performDownloadTelemetryDecrease();
+                                    } catch (ApiServerOperationFailureException e2) {
+                                        logger.info(
+                                                LoggingConfigurationHelper.getTransferableMessage(
+                                                        String.format(
+                                                                "Failed to perform download telemetry increase for '%s' location: %s",
+                                                                element.getName(),
+                                                                e2.getMessage())));
+                                    }
+                                }
 
                                 StateService.removeSuspenderByName(element.getName());
 
@@ -175,9 +203,35 @@ public class SchedulerConfigService {
                                                         element.getName(),
                                                         e.getMessage())));
 
+                                if (downloadTelemetryIncreasePresent) {
+                                    try {
+                                        apiServerCommunicationResource.performDownloadTelemetryDecrease();
+                                    } catch (ApiServerOperationFailureException e2) {
+                                        logger.info(
+                                                LoggingConfigurationHelper.getTransferableMessage(
+                                                        String.format(
+                                                                "Failed to perform download telemetry increase for '%s' location: %s",
+                                                                element.getName(),
+                                                                e2.getMessage())));
+                                    }
+                                }
+
                                 awaiter.countDown();
 
                                 return;
+                            }
+
+                            if (downloadTelemetryIncreasePresent) {
+                                try {
+                                    apiServerCommunicationResource.performDownloadTelemetryDecrease();
+                                } catch (ApiServerOperationFailureException e2) {
+                                    logger.info(
+                                            LoggingConfigurationHelper.getTransferableMessage(
+                                                    String.format(
+                                                            "Failed to perform download telemetry increase for '%s' location: %s",
+                                                            element.getName(),
+                                                            e2.getMessage())));
+                                }
                             }
 
                             logger.info(

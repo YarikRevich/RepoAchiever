@@ -47,6 +47,20 @@ public class StateService {
     private final static List<ClusterAllocationDto> clusterAllocations = new ArrayList<>();
 
     /**
+     * Retrieves RepoAchiever Cluster allocations with the given name.
+     *
+     * @param name given name.
+     * @return filtered RepoAchiever Cluster allocations according to the given name.
+     */
+    public static ClusterAllocationDto getClusterAllocationsByName(String name) {
+        return clusterAllocations.
+                stream()
+                .filter(element -> Objects.equals(element.getName(), name))
+                .toList()
+                .getFirst();
+    }
+
+    /**
      * Retrieves RepoAchiever Cluster allocations with the given workspace unit key.
      *
      * @param workspaceUnitKey given workspace unit key.

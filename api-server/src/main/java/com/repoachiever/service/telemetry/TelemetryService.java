@@ -32,11 +32,13 @@ public class TelemetryService {
 
     private final ConcurrentLinkedQueue<Runnable> clusterHealthCheckQueue = new ConcurrentLinkedQueue<>();
 
+    private final ConcurrentLinkedQueue<Runnable> clusterDownloadQueue = new ConcurrentLinkedQueue<>();
+
     private final ConcurrentLinkedQueue<Runnable> rawContentUploadQueue = new ConcurrentLinkedQueue<>();
 
     private final ConcurrentLinkedQueue<Runnable> additionalContentUploadQueue = new ConcurrentLinkedQueue<>();
 
-    private final static ScheduledExecutorService executorService = Executors.newScheduledThreadPool(5);
+    private final static ScheduledExecutorService executorService = Executors.newScheduledThreadPool(6);
 
     /**
      * Starts telemetries listener, which handles incoming telemetries to be processed in a sequential way.
@@ -62,9 +64,13 @@ public class TelemetryService {
         }, 0, properties.getDiagnosticsScrapeDelay(), TimeUnit.MILLISECONDS);
 
         executorService.scheduleWithFixedDelay(() -> {
-            if (!rawContentUploadQueue.isEmpty()) {
-                System.out.println("RECEIVED");
+            if (!clusterDownloadQueue.isEmpty()) {
+                clusterDownloadQueue.poll().run();
+            }
+        }, 0, properties.getDiagnosticsScrapeDelay(), TimeUnit.MILLISECONDS);
 
+        executorService.scheduleWithFixedDelay(() -> {
+            if (!rawContentUploadQueue.isEmpty()) {
                 rawContentUploadQueue.poll().run();
             }
         }, 0, properties.getDiagnosticsScrapeDelay(), TimeUnit.MILLISECONDS);
@@ -74,24 +80,6 @@ public class TelemetryService {
                 additionalContentUploadQueue.poll().run();
             }
         }, 0, properties.getDiagnosticsScrapeDelay(), TimeUnit.MILLISECONDS);
-    }
-
-    /**
-     * Increases allocated workers amount counter.
-     */
-    public void increaseWorkersAmount() {
-        if (configService.getConfig().getDiagnostics().getEnabled()) {
-            clusterStateQueue.add(() -> telemetryBinding.getWorkerAmount().set(telemetryBinding.getWorkerAmount().get() + 1));
-        }
-    }
-
-    /**
-     * Decreases allocated workers amount counter.
-     */
-    public void decreaseWorkersAmount() {
-        if (configService.getConfig().getDiagnostics().getEnabled()) {
-            clusterStateQueue.add(() -> telemetryBinding.getWorkerAmount().set(telemetryBinding.getWorkerAmount().get() - 1));
-        }
     }
 
     /**
@@ -167,12 +155,28 @@ public class TelemetryService {
     }
 
     /**
+     * Increases downloads for RepoAchiever Cluster allocations amount counter.
+     */
+    public void increaseClusterDownloadAmount() {
+        if (configService.getConfig().getDiagnostics().getEnabled()) {
+            clusterDownloadQueue.add(() -> telemetryBinding.getClusterDownloadAmount().set(telemetryBinding.getClusterDownloadAmount().get() + 1));
+        }
+    }
+
+    /**
+     * Decreases downloads for RepoAchiever Cluster allocations amount counter.
+     */
+    public void decreaseClusterDownloadAmount() {
+        if (configService.getConfig().getDiagnostics().getEnabled()) {
+            clusterDownloadQueue.add(() -> telemetryBinding.getClusterDownloadAmount().set(telemetryBinding.getClusterDownloadAmount().get() - 1));
+        }
+    }
+
+    /**
      * Increases raw content uploads for RepoAchiever Cluster allocations amount counter.
      */
     public void increaseRawContentUploadAmount() {
         if (configService.getConfig().getDiagnostics().getEnabled()) {
-            System.out.println("GOT DATA");
-
             rawContentUploadQueue.add(() -> telemetryBinding.getRawContentUploadAmount().set(telemetryBinding.getRawContentUploadAmount().get() + 1));
         }
     }

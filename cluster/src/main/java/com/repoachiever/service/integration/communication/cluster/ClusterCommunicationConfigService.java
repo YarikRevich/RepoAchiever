@@ -40,6 +40,7 @@ public class ClusterCommunicationConfigService {
                     configService.getConfig().getCommunication().getPort());
         } catch (RemoteException e) {
             logger.fatal(new CommunicationConfigurationFailureException(e.getMessage()).getMessage());
+
             return;
         }
 

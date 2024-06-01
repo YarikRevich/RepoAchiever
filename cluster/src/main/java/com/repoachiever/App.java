@@ -5,6 +5,7 @@ import com.repoachiever.resource.communication.ClusterCommunicationResource;
 import com.repoachiever.service.apiserver.resource.ApiServerCommunicationResource;
 import com.repoachiever.service.config.ConfigService;
 import com.repoachiever.service.integration.communication.apiserver.healthcheck.ApiServerHealthCheckCommunicationService;
+import com.repoachiever.service.integration.communication.apiserver.lock.ApiServerLockCommunicationService;
 import com.repoachiever.service.integration.communication.cluster.ClusterCommunicationConfigService;
 import com.repoachiever.service.integration.logging.state.LoggingStateService;
 import com.repoachiever.service.integration.logging.transfer.LoggingTransferService;
@@ -32,6 +33,7 @@ import org.springframework.stereotype.Component;
         VendorConfigService.class,
         SchedulerConfigService.class,
         ApiServerHealthCheckCommunicationService.class,
+        ApiServerLockCommunicationService.class,
         ClusterCommunicationResource.class,
         ClusterCommunicationConfigService.class,
         ApiServerCommunicationResource.class,

@@ -21,10 +21,10 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class ApiServerHealthCheckCommunicationService {
     @Autowired
-    private ApplicationContext applicationContext;
+    private PropertiesEntity properties;
 
     @Autowired
-    private PropertiesEntity properties;
+    private ApplicationContext applicationContext;
 
     @Autowired
     private ApiServerCommunicationResource apiServerCommunicationResource;

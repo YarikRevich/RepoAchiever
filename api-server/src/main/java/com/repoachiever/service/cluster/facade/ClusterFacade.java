@@ -271,7 +271,7 @@ public class ClusterFacade {
                 }
             }
 
-            candidates.add(ClusterAllocationDto.of(name, workspaceUnitKey, locations, pid, context));
+            candidates.add(ClusterAllocationDto.of(name, false, workspaceUnitKey, locations, pid, context));
         }
 
         for (ClusterAllocationDto candidate : candidates) {
@@ -628,6 +628,8 @@ public class ClusterFacade {
      * @throws ClusterUnhealthyReapplicationFailureException if RepoAchiever Cluster unhealthy allocation reapplication fails.
      */
     public void reApplyUnhealthy() throws ClusterUnhealthyReapplicationFailureException {
+        telemetryService.increaseClusterHealthCheckAmount();
+
         StateService.getTopologyStateGuard().lock();
 
         List<ClusterAllocationDto> removables = new ArrayList<>();
@@ -687,6 +689,8 @@ public class ClusterFacade {
         if (removables.isEmpty()) {
             StateService.getTopologyStateGuard().unlock();
 
+            telemetryService.decreaseClusterHealthCheckAmount();
+
             return;
         }
 
@@ -701,11 +705,14 @@ public class ClusterFacade {
             } catch (ClusterDeploymentFailureException e) {
                 StateService.getTopologyStateGuard().unlock();
 
+                telemetryService.decreaseClusterHealthCheckAmount();
+
                 throw new ClusterUnhealthyReapplicationFailureException(e.getMessage());
             }
 
             candidates.add(ClusterAllocationDto.of(
                     removable.getName(),
+                    false,
                     removable.getWorkspaceUnitKey(),
                     removable.getLocations(),
                     pid,
@@ -723,6 +730,8 @@ public class ClusterFacade {
             } catch (ClusterOperationFailureException e1) {
                 StateService.getTopologyStateGuard().unlock();
 
+                telemetryService.decreaseClusterHealthCheckAmount();
+
                 throw new ClusterUnhealthyReapplicationFailureException(e1.getMessage());
             }
 
@@ -735,5 +744,7 @@ public class ClusterFacade {
         StateService.addClusterAllocations(candidates);
 
         StateService.getTopologyStateGuard().unlock();
+
+        telemetryService.decreaseClusterHealthCheckAmount();
     }
 }

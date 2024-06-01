@@ -185,6 +185,37 @@ public class ApiServerCommunicationResource extends UnicastRemoteObject implemen
      * @see IApiServerCommunicationService
      */
     @Override
+    public void performDownloadTelemetryIncrease() throws RemoteException {
+        telemetryService.increaseClusterDownloadAmount();
+    }
+
+    /**
+     * @see IApiServerCommunicationService
+     */
+    @Override
+    public void performDownloadTelemetryDecrease() throws RemoteException {
+        telemetryService.decreaseClusterDownloadAmount();
+    }
+
+    /**
+     * @see IApiServerCommunicationService
+     */
+    @Override
+    public void performLockClusterAllocation(String name) throws RemoteException {
+    }
+
+    /**
+     * @see IApiServerCommunicationService
+     */
+    @Override
+    public Boolean retrieveClusterAllocationLocked(String name) throws RemoteException {
+        return false;
+    }
+
+    /**
+     * @see IApiServerCommunicationService
+     */
+    @Override
     public Boolean retrieveHealthCheck() throws RemoteException {
         telemetryService.increaseApiServerHealthCheckAmount();
 
