@@ -83,21 +83,6 @@ public class ConfigEntity {
     public Content content;
 
     /**
-     * Represents RepoAchiever API Server configuration used for database setup.
-     */
-    @Getter
-    public static class Database {
-        @NotNull
-        @JsonProperty("re-init")
-        public Boolean reInit;
-    }
-
-    @Valid
-    @NotNull
-    @JsonProperty("database")
-    public Database database;
-
-    /**
      * Represents RepoAchiever API Server configuration used for diagnostics.
      */
     @Getter

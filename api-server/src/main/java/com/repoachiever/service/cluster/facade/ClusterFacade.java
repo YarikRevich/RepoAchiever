@@ -465,18 +465,6 @@ public class ClusterFacade {
         if (Objects.nonNull(clusterAllocation)) {
             logger.info(
                     String.format(
-                            "Resetting RepoAchiever Cluster content retrieval: '%s'", clusterAllocation.getName()));
-
-            try {
-                clusterCommunicationResource.performRetrievalReset(clusterAllocation.getName());
-            } catch (ClusterOperationFailureException e) {
-                logger.fatal(new ClusterCleanupFailureException(e.getMessage()).getMessage());
-
-                return;
-            }
-
-            logger.info(
-                    String.format(
                             "Setting RepoAchiever Cluster suspended allocation to serve state: '%s'",
                             clusterAllocation.getName()));
 
@@ -542,18 +530,6 @@ public class ClusterFacade {
         }
 
         for (ClusterAllocationDto suspended : suspends) {
-            logger.info(
-                    String.format(
-                            "Resetting RepoAchiever Cluster content retrieval: '%s'", suspended.getName()));
-
-            try {
-                clusterCommunicationResource.performRetrievalReset(suspended.getName());
-            } catch (ClusterOperationFailureException e) {
-                logger.fatal(new ClusterCleanupFailureException(e.getMessage()).getMessage());
-
-                return;
-            }
-
             logger.info(
                     String.format(
                             "Setting RepoAchiever Cluster suspended allocation to serve state: '%s'",

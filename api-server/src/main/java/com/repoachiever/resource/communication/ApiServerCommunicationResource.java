@@ -55,6 +55,8 @@ public class ApiServerCommunicationResource extends UnicastRemoteObject implemen
     @Override
     public void performRawContentUpload(
             String workspaceUnitKey, String location, String name, RemoteInputStream content) throws RemoteException {
+        telemetryService.increaseRawContentUploadAmount();
+
         StateService.getCommunicationGuard().lock();
 
         InputStream contentRaw;
@@ -62,6 +64,10 @@ public class ApiServerCommunicationResource extends UnicastRemoteObject implemen
         try {
             contentRaw = RemoteInputStreamClient.wrap(content);
         } catch (IOException e) {
+            StateService.getCommunicationGuard().unlock();
+
+            telemetryService.decreaseRawContentUploadAmount();
+
             throw new RuntimeException(e);
         }
 
@@ -70,10 +76,14 @@ public class ApiServerCommunicationResource extends UnicastRemoteObject implemen
         } catch (RawContentCreationFailureException e) {
             StateService.getCommunicationGuard().unlock();
 
+            telemetryService.decreaseRawContentUploadAmount();
+
             throw new RemoteException(e.getMessage());
         }
 
         StateService.getCommunicationGuard().unlock();
+
+        telemetryService.decreaseRawContentUploadAmount();
     }
 
     /**
@@ -105,10 +115,16 @@ public class ApiServerCommunicationResource extends UnicastRemoteObject implemen
     @Override
     public void performAdditionalContentUpload(
             String workspaceUnitKey, String location, String name, String data) throws RemoteException {
+        telemetryService.increaseAdditionalContentUploadAmount();
+
         StateService.getCommunicationGuard().lock();
 
         Map<String, String> rawData = JsonToAdditionalContentDataConverter.convert(data);
         if (Objects.isNull(rawData)) {
+            StateService.getCommunicationGuard().unlock();
+
+            telemetryService.decreaseAdditionalContentUploadAmount();
+
             throw new RemoteException();
         }
 
@@ -124,10 +140,14 @@ public class ApiServerCommunicationResource extends UnicastRemoteObject implemen
         } catch (AdditionalContentCreationFailureException e) {
             StateService.getCommunicationGuard().unlock();
 
+            telemetryService.decreaseAdditionalContentUploadAmount();
+
             throw new RemoteException(e.getMessage());
         }
 
         StateService.getCommunicationGuard().unlock();
+
+        telemetryService.decreaseAdditionalContentUploadAmount();
     }
 
     /**

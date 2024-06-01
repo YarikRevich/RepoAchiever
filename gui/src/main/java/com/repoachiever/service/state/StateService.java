@@ -74,7 +74,7 @@ public class StateService {
      * @return result of the check.
      */
     @SneakyThrows
-    public static synchronized Boolean isWindowHeightChanged() {
+    public static Boolean isWindowHeightChanged() {
         if (Objects.isNull(prevMainWindowHeight) && !Objects.isNull(mainWindowHeight)) {
             return true;
         } else if (Objects.isNull(prevMainWindowHeight)) {
@@ -92,7 +92,7 @@ public class StateService {
      * @return result of the check.
      */
     @SneakyThrows
-    public static synchronized Boolean isWindowWidthChanged() {
+    public static Boolean isWindowWidthChanged() {
         if (Objects.isNull(prevMainWindowWidth) && !Objects.isNull(mainWindowWidth)) {
             return true;
         } else if (Objects.isNull(prevMainWindowWidth)) {
@@ -107,14 +107,14 @@ public class StateService {
     /**
      * Synchronizes main window height.
      */
-    public static synchronized void synchronizeWindowHeight() {
+    public static void synchronizeWindowHeight() {
         prevMainWindowHeight = mainWindowHeight;
     }
 
     /**
      * Synchronizes main window width.
      */
-    public static synchronized void synchronizeWindowWidth() {
+    public static void synchronizeWindowWidth() {
         prevMainWindowWidth = mainWindowWidth;
     }
 }

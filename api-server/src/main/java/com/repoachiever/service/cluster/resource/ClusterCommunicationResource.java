@@ -93,22 +93,6 @@ public class ClusterCommunicationResource {
     }
 
     /**
-     * Performs RepoAchiever Cluster content retrieval reset operation.
-     *
-     * @param name given name of RepoAchiever Cluster.
-     * @throws ClusterOperationFailureException if RepoAchiever Cluster operation fails.
-     */
-    public void performRetrievalReset(String name) throws ClusterOperationFailureException {
-        IClusterCommunicationService allocation = retrieveAllocation(name);
-
-        try {
-            allocation.performRetrievalReset();
-        } catch (RemoteException e) {
-            throw new ClusterOperationFailureException(e.getMessage());
-        }
-    }
-
-    /**
      * Retrieves health check status of the RepoAchiever Cluster with the given name.
      *
      * @param name given name of RepoAchiever Cluster.

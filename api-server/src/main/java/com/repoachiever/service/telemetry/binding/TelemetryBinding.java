@@ -30,6 +30,12 @@ public class TelemetryBinding implements MeterBinder {
     @Getter
     private final AtomicInteger clusterHealthCheckAmount = new AtomicInteger();
 
+    @Getter
+    private final AtomicInteger rawContentUploadAmount = new AtomicInteger();
+
+    @Getter
+    private final AtomicInteger additionalContentUploadAmount = new AtomicInteger();
+
     /**
      * @see MeterBinder
      */
@@ -53,6 +59,14 @@ public class TelemetryBinding implements MeterBinder {
 
         Gauge.builder("general.cluster_health_check_amount", clusterHealthCheckAmount, AtomicInteger::get)
                 .description("Represents amount of performed health check requests for RepoAchiever Cluster allocations")
+                .register(meterRegistry);
+
+        Gauge.builder("general.raw_content_upload_amount", rawContentUploadAmount, AtomicInteger::get)
+                .description("Represents amount of performed raw content upload requests for RepoAchiever Cluster allocations")
+                .register(meterRegistry);
+
+        Gauge.builder("general.additional_content_upload_amount", additionalContentUploadAmount, AtomicInteger::get)
+                .description("Represents amount of performed additional content upload requests for RepoAchiever Cluster allocations")
                 .register(meterRegistry);
     }
 }
