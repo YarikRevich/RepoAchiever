@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 /** */
 @Service
 public class MainHeaderGrid implements IElement<GridPane> {
-  UUID id = UUID.randomUUID();
+  private final UUID id = UUID.randomUUID();
 
   public MainHeaderGrid(
       @Autowired PropertiesEntity properties,

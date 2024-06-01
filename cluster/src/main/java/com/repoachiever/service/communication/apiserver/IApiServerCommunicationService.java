@@ -69,6 +69,37 @@ public interface IApiServerCommunicationService extends Remote {
     void performLogsTransfer(String name, String message) throws RemoteException;
 
     /**
+     * Handles incoming download telemetry amount increase.
+     *
+     * @throws RemoteException if remote request fails.
+     */
+    void performDownloadTelemetryIncrease() throws RemoteException;
+
+    /**
+     * Handles incoming download telemetry amount decrease.
+     *
+     * @throws RemoteException if remote request fails.
+     */
+    void performDownloadTelemetryDecrease() throws RemoteException;
+
+    /**
+     * Handles RepoAchiever Cluster allocation lock.
+     *
+     * @param name given RepoAchiever Cluster allocation name.
+     * @throws RemoteException if remote request fails.
+     */
+    void performLockClusterAllocation(String name) throws RemoteException;
+
+    /**
+     * Retrieves RepoAchiever Cluster allocation lock state.
+     *
+     * @param name given RepoAchiever Cluster allocation name.
+     * @return RepoAchiever Cluster allocation lock state.
+     * @throws RemoteException if remote request fails.
+     */
+    Boolean retrieveClusterAllocationLocked(String name) throws RemoteException;
+
+    /**
      * Retrieves latest RepoAchiever API Server health check states.
      *
      * @return RepoAchiever API Server health check status.

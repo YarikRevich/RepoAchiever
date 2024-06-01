@@ -3,6 +3,7 @@ package com.repoachiever.dto;
 import com.repoachiever.model.LocationsUnit;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
@@ -16,6 +17,12 @@ public class ClusterAllocationDto {
      * Represents name of RepoAchiever Cluster allocation.
      */
     private String name;
+
+    /**
+     * Represents lock state of RepoAchiever Cluster allocation.
+     */
+    @Setter
+    private Boolean locked;
 
     /**
      * Represents workspace unit key used to target RepoAchiever Cluster results.

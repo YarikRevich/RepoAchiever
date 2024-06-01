@@ -22,6 +22,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -75,6 +76,17 @@ public class ClusterFacade {
             throw new ClusterContentRetrievalFailureException(e.getMessage());
         }
 
+        List<RepositoryContentLocationUnitDto> repositoryContentLocations;
+
+        try {
+            repositoryContentLocations =
+                    repositoryFacade.retrieveLocations(contentRetrievalApplication);
+        } catch (ContentLocationsRetrievalFailureException e) {
+            StateService.getTopologyStateGuard().unlock();
+
+            throw new ClusterContentRetrievalFailureException(e.getMessage());
+        }
+
         ContentRetrievalResult result = new ContentRetrievalResult();
 
         for (String locationUnit : locationUnits) {
@@ -88,6 +100,7 @@ public class ClusterFacade {
                 throw new ClusterContentRetrievalFailureException(e.getMessage());
             }
 
+
             List<String> additionalContentUnits;
 
             try {
@@ -99,15 +112,10 @@ public class ClusterFacade {
                 throw new ClusterContentRetrievalFailureException(e.getMessage());
             }
 
-            Boolean active = false;
-
-            try {
-                active = repositoryFacade.isContentLocationValid(
-                        locationUnit,
-                        contentRetrievalApplication.getProvider(),
-                        contentRetrievalApplication.getCredentials());
-            } catch (ContentValidationFailureException ignored) {
-            }
+            Boolean active =
+                    repositoryContentLocations
+                            .stream()
+                            .anyMatch(element -> Objects.equals(element.getLocation(), locationUnit));
 
             result.addLocationsItem(
                     ContentRetrievalUnit.of(
@@ -115,6 +123,23 @@ public class ClusterFacade {
                             active,
                             ContentRetrievalUnitRaw.of(rawContentUnits),
                             ContentRetrievalUnitAdditional.of(additionalContentUnits)));
+        }
+
+        for (RepositoryContentLocationUnitDto repositoryContentLocation : repositoryContentLocations) {
+            if (!result
+                    .getLocations()
+                    .stream()
+                    .anyMatch(element ->
+                            Objects.equals(
+                                    element.getName(), repositoryContentLocation.getLocation()))) {
+                result.addLocationsItem(
+                        ContentRetrievalUnit.of(
+                                repositoryContentLocation.getLocation(),
+                                true,
+                                ContentRetrievalUnitRaw.of(new ArrayList<>()),
+                                ContentRetrievalUnitAdditional.of(new ArrayList<>())));
+
+            }
         }
 
         StateService.getTopologyStateGuard().unlock();
@@ -246,7 +271,7 @@ public class ClusterFacade {
                 }
             }
 
-            candidates.add(ClusterAllocationDto.of(name, workspaceUnitKey, locations, pid, context));
+            candidates.add(ClusterAllocationDto.of(name, false, workspaceUnitKey, locations, pid, context));
         }
 
         for (ClusterAllocationDto candidate : candidates) {
@@ -409,23 +434,25 @@ public class ClusterFacade {
         ClusterAllocationDto clusterAllocation = StateService
                 .getClusterAllocationByWorkspaceUnitKeyAndName(workspaceUnitKey, contentCleanup.getLocation());
 
-        logger.info(
-                String.format(
-                        "Setting RepoAchiever Cluster allocation to suspend state: '%s'",
-                        clusterAllocation.getName()));
+        if (Objects.nonNull(clusterAllocation)) {
+            logger.info(
+                    String.format(
+                            "Setting RepoAchiever Cluster allocation to suspend state: '%s'",
+                            clusterAllocation.getName()));
 
-        try {
-            clusterCommunicationResource.performSuspend(clusterAllocation.getName());
+            try {
+                clusterCommunicationResource.performSuspend(clusterAllocation.getName());
 
-        } catch (ClusterOperationFailureException e) {
-            logger.fatal(new ClusterCleanupFailureException(e.getMessage()).getMessage());
+            } catch (ClusterOperationFailureException e) {
+                logger.fatal(new ClusterCleanupFailureException(e.getMessage()).getMessage());
 
-            return;
+                return;
+            }
+
+            telemetryService.decreaseServingClustersAmount();
+
+            telemetryService.increaseSuspendedClustersAmount();
         }
-
-        telemetryService.decreaseServingClustersAmount();
-
-        telemetryService.increaseSuspendedClustersAmount();
 
         try {
             workspaceFacade.removeContent(workspaceUnitKey, contentCleanup.getLocation());
@@ -435,34 +462,24 @@ public class ClusterFacade {
             throw new ClusterCleanupFailureException(e.getMessage());
         }
 
-        logger.info(
-                String.format(
-                        "Resetting RepoAchiever Cluster content retrieval: '%s'", clusterAllocation.getName()));
+        if (Objects.nonNull(clusterAllocation)) {
+            logger.info(
+                    String.format(
+                            "Setting RepoAchiever Cluster suspended allocation to serve state: '%s'",
+                            clusterAllocation.getName()));
 
-        try {
-            clusterCommunicationResource.performRetrievalReset(clusterAllocation.getName());
-        } catch (ClusterOperationFailureException e) {
-            logger.fatal(new ClusterCleanupFailureException(e.getMessage()).getMessage());
+            try {
+                clusterCommunicationResource.performServe(clusterAllocation.getName());
+            } catch (ClusterOperationFailureException e) {
+                logger.fatal(new ClusterCleanupFailureException(e.getMessage()).getMessage());
 
-            return;
+                return;
+            }
+
+            telemetryService.decreaseSuspendedClustersAmount();
+
+            telemetryService.increaseServingClustersAmount();
         }
-
-        logger.info(
-                String.format(
-                        "Setting RepoAchiever Cluster suspended allocation to serve state: '%s'",
-                        clusterAllocation.getName()));
-
-        try {
-            clusterCommunicationResource.performServe(clusterAllocation.getName());
-        } catch (ClusterOperationFailureException e) {
-            logger.fatal(new ClusterCleanupFailureException(e.getMessage()).getMessage());
-
-            return;
-        }
-
-        telemetryService.decreaseSuspendedClustersAmount();
-
-        telemetryService.increaseServingClustersAmount();
 
         StateService.getTopologyStateGuard().unlock();
     }
@@ -513,18 +530,6 @@ public class ClusterFacade {
         }
 
         for (ClusterAllocationDto suspended : suspends) {
-            logger.info(
-                    String.format(
-                            "Resetting RepoAchiever Cluster content retrieval: '%s'", suspended.getName()));
-
-            try {
-                clusterCommunicationResource.performRetrievalReset(suspended.getName());
-            } catch (ClusterOperationFailureException e) {
-                logger.fatal(new ClusterCleanupFailureException(e.getMessage()).getMessage());
-
-                return;
-            }
-
             logger.info(
                     String.format(
                             "Setting RepoAchiever Cluster suspended allocation to serve state: '%s'",
@@ -623,6 +628,8 @@ public class ClusterFacade {
      * @throws ClusterUnhealthyReapplicationFailureException if RepoAchiever Cluster unhealthy allocation reapplication fails.
      */
     public void reApplyUnhealthy() throws ClusterUnhealthyReapplicationFailureException {
+        telemetryService.increaseClusterHealthCheckAmount();
+
         StateService.getTopologyStateGuard().lock();
 
         List<ClusterAllocationDto> removables = new ArrayList<>();
@@ -682,6 +689,8 @@ public class ClusterFacade {
         if (removables.isEmpty()) {
             StateService.getTopologyStateGuard().unlock();
 
+            telemetryService.decreaseClusterHealthCheckAmount();
+
             return;
         }
 
@@ -696,11 +705,14 @@ public class ClusterFacade {
             } catch (ClusterDeploymentFailureException e) {
                 StateService.getTopologyStateGuard().unlock();
 
+                telemetryService.decreaseClusterHealthCheckAmount();
+
                 throw new ClusterUnhealthyReapplicationFailureException(e.getMessage());
             }
 
             candidates.add(ClusterAllocationDto.of(
                     removable.getName(),
+                    false,
                     removable.getWorkspaceUnitKey(),
                     removable.getLocations(),
                     pid,
@@ -718,6 +730,8 @@ public class ClusterFacade {
             } catch (ClusterOperationFailureException e1) {
                 StateService.getTopologyStateGuard().unlock();
 
+                telemetryService.decreaseClusterHealthCheckAmount();
+
                 throw new ClusterUnhealthyReapplicationFailureException(e1.getMessage());
             }
 
@@ -730,5 +744,7 @@ public class ClusterFacade {
         StateService.addClusterAllocations(candidates);
 
         StateService.getTopologyStateGuard().unlock();
+
+        telemetryService.decreaseClusterHealthCheckAmount();
     }
 }

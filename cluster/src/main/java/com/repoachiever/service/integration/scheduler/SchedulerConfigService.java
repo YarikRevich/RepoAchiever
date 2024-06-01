@@ -12,10 +12,9 @@ import jakarta.annotation.PostConstruct;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.stereotype.Component;
 
-import javax.swing.plaf.nimbus.State;
-import java.io.InputStream;
 import java.util.Objects;
 import java.util.concurrent.*;
 
@@ -71,57 +70,39 @@ public class SchedulerConfigService {
 
                 ScheduledFuture<?> execution = operationScheduledExecutorService.scheduleWithFixedDelay(() -> {
                     if (StateService.getSuspended().get()) {
-                        return;
-                    }
-
-                    StateService.resetSuspenderByName(element.getName());
-
-                    CountDownLatch awaiter = StateService.getSuspenderAwaiterByName(element.getName());
-
-                    if (!vendorFacade.isVendorAvailable()) {
                         logger.info(
                                 LoggingConfigurationHelper.getTransferableMessage(
-                                        String.format("Remote provider '%s' is not available: '%s'",
-                                                configService.getConfig().getService().getProvider().toString(),
+                                        String.format("Skipping execution for '%s' location due to suspension",
                                                 element.getName())
                                 ));
 
-                        awaiter.countDown();
-
                         return;
                     }
-
-                    Integer commitAmount;
 
                     try {
-                        commitAmount = vendorFacade.getRecordAmount(element.getName());
-                    } catch (LocationDefinitionsAreNotValidException e) {
                         logger.info(
                                 LoggingConfigurationHelper.getTransferableMessage(
-                                        String.format(
-                                                "Skipping retrieval of content for '%s' location: %s",
-                                                element.getName(),
-                                                e.getMessage())));
+                                        String.format("Entering execution for '%s' location", element.getName())));
 
-                        StateService.removeSuspenderByName(element.getName());
+                        StateService.resetSuspenderByName(element.getName());
 
-                        closable.countDown();
+                        CountDownLatch awaiter = StateService.getSuspenderAwaiterByName(element.getName());
 
-                        return;
-                    } catch (GitHubContentRetrievalFailureException e) {
-                        logger.info(
-                                LoggingConfigurationHelper.getTransferableMessage(
-                                        String.format(
-                                                "Failed to retrieve content for '%s' location: %s",
-                                                element.getName(),
-                                                e.getMessage())));
+                        if (!vendorFacade.isVendorAvailable()) {
+                            logger.info(
+                                    LoggingConfigurationHelper.getTransferableMessage(
+                                            String.format("Remote provider '%s' is not available: '%s'",
+                                                    configService.getConfig().getService().getProvider().toString(),
+                                                    element.getName())
+                                    ));
 
-                        awaiter.countDown();
+                            awaiter.countDown();
 
-                        return;
-                    }
+                            return;
+                        }
 
-                    if (StateService.isContentUpdateHeadCounterBelow(element.getName(), commitAmount)) {
+                        StateService.getVendorAvailability().set(true);
+
                         String record;
 
                         try {
@@ -169,17 +150,45 @@ public class SchedulerConfigService {
                                                     element.getName(),
                                                     record)));
 
-                            InputStream contentStream;
+                            Boolean downloadTelemetryIncreasePresent = true;
+
+                            try {
+                                apiServerCommunicationResource.performDownloadTelemetryIncrease();
+                            } catch (ApiServerOperationFailureException e) {
+                                logger.info(
+                                        LoggingConfigurationHelper.getTransferableMessage(
+                                                String.format(
+                                                        "Failed to perform download telemetry increase for '%s' location: %s",
+                                                        element.getName(),
+                                                        e.getMessage())));
+
+                                downloadTelemetryIncreasePresent = false;
+                            }
+
+                            DataBuffer contentStream;
 
                             try {
                                 contentStream = vendorFacade.getRecordRawContent(element.getName(), record);
-                            } catch (LocationDefinitionsAreNotValidException e) {
+                            } catch (LocationDefinitionsAreNotValidException e1) {
                                 logger.info(
                                         LoggingConfigurationHelper.getTransferableMessage(
                                                 String.format(
                                                         "Skipping retrieval of content for '%s' location: %s",
                                                         element.getName(),
-                                                        e.getMessage())));
+                                                        e1.getMessage())));
+
+                                if (downloadTelemetryIncreasePresent) {
+                                    try {
+                                        apiServerCommunicationResource.performDownloadTelemetryDecrease();
+                                    } catch (ApiServerOperationFailureException e2) {
+                                        logger.info(
+                                                LoggingConfigurationHelper.getTransferableMessage(
+                                                        String.format(
+                                                                "Failed to perform download telemetry increase for '%s' location: %s",
+                                                                element.getName(),
+                                                                e2.getMessage())));
+                                    }
+                                }
 
                                 StateService.removeSuspenderByName(element.getName());
 
@@ -194,9 +203,35 @@ public class SchedulerConfigService {
                                                         element.getName(),
                                                         e.getMessage())));
 
+                                if (downloadTelemetryIncreasePresent) {
+                                    try {
+                                        apiServerCommunicationResource.performDownloadTelemetryDecrease();
+                                    } catch (ApiServerOperationFailureException e2) {
+                                        logger.info(
+                                                LoggingConfigurationHelper.getTransferableMessage(
+                                                        String.format(
+                                                                "Failed to perform download telemetry increase for '%s' location: %s",
+                                                                element.getName(),
+                                                                e2.getMessage())));
+                                    }
+                                }
+
                                 awaiter.countDown();
 
                                 return;
+                            }
+
+                            if (downloadTelemetryIncreasePresent) {
+                                try {
+                                    apiServerCommunicationResource.performDownloadTelemetryDecrease();
+                                } catch (ApiServerOperationFailureException e2) {
+                                    logger.info(
+                                            LoggingConfigurationHelper.getTransferableMessage(
+                                                    String.format(
+                                                            "Failed to perform download telemetry increase for '%s' location: %s",
+                                                            element.getName(),
+                                                            e2.getMessage())));
+                                }
                             }
 
                             logger.info(
@@ -228,85 +263,87 @@ public class SchedulerConfigService {
                                                     "Raw content transfer finished for '%s' location and '%s' record",
                                                     element.getName(),
                                                     record)));
-
-                            StateService.setContentUpdatesHeadCounter(element.getName(), commitAmount);
                         }
-                    }
 
-                    AdditionalContentDto additionalContent;
-
-                    try {
-                        additionalContent = vendorFacade.getAdditionalContent(element.getName());
-                    } catch (LocationDefinitionsAreNotValidException e) {
-                        logger.info(
-                                LoggingConfigurationHelper.getTransferableMessage(
-                                        String.format(
-                                                "Skipping retrieval of content for '%s' location: %s",
-                                                element.getName(),
-                                                e.getMessage())));
-
-                        StateService.removeSuspenderByName(element.getName());
-
-                        closable.countDown();
-
-                        return;
-                    } catch (GitHubContentRetrievalFailureException e) {
-                        logger.info(
-                                LoggingConfigurationHelper.getTransferableMessage(
-                                        String.format(
-                                                "Failed to retrieve content for '%s' location: %s",
-                                                element.getName(),
-                                                e.getMessage())));
-
-                        awaiter.countDown();
-
-                        return;
-                    }
-
-                    if (Objects.nonNull(additionalContent)) {
-                        Boolean additionalContentPresent = false;
+                        AdditionalContentDto additionalContent;
 
                         try {
-                            additionalContentPresent =
-                                    apiServerCommunicationResource.retrieveAdditionalContentPresent(
-                                            element.getName(), additionalContent.getHash());
-                        } catch (ApiServerOperationFailureException ignored) {
-                        }
-
-                        if (!additionalContentPresent) {
+                            additionalContent = vendorFacade.getAdditionalContent(element.getName());
+                        } catch (LocationDefinitionsAreNotValidException e) {
                             logger.info(
                                     LoggingConfigurationHelper.getTransferableMessage(
                                             String.format(
-                                                    "Transferring downloaded additional content for '%s' location and '%s' hash",
+                                                    "Skipping retrieval of content for '%s' location: %s",
                                                     element.getName(),
-                                                    additionalContent.getHash())));
+                                                    e.getMessage())));
+
+                            StateService.removeSuspenderByName(element.getName());
+
+                            closable.countDown();
+
+                            return;
+                        } catch (GitHubContentRetrievalFailureException e) {
+                            logger.info(
+                                    LoggingConfigurationHelper.getTransferableMessage(
+                                            String.format(
+                                                    "Failed to retrieve content for '%s' location: %s",
+                                                    element.getName(),
+                                                    e.getMessage())));
+
+                            awaiter.countDown();
+
+                            return;
+                        }
+
+                        if (Objects.nonNull(additionalContent)) {
+                            Boolean additionalContentPresent = false;
 
                             try {
-                                apiServerCommunicationResource.performAdditionalContentUpload(
-                                        element.getName(), additionalContent.getHash(), additionalContent.getData());
-                            } catch (ApiServerOperationFailureException e) {
+                                additionalContentPresent =
+                                        apiServerCommunicationResource.retrieveAdditionalContentPresent(
+                                                element.getName(), additionalContent.getHash());
+                            } catch (ApiServerOperationFailureException ignored) {
+                            }
+
+                            if (!additionalContentPresent) {
                                 logger.info(
                                         LoggingConfigurationHelper.getTransferableMessage(
                                                 String.format(
-                                                        "Failed to perform additional content uploading for '%s' location: %s",
+                                                        "Transferring downloaded additional content for '%s' location and '%s' hash",
                                                         element.getName(),
-                                                        e.getMessage())));
+                                                        additionalContent.getHash())));
 
-                                awaiter.countDown();
+                                try {
+                                    apiServerCommunicationResource.performAdditionalContentUpload(
+                                            element.getName(), additionalContent.getHash(), additionalContent.getData());
+                                } catch (ApiServerOperationFailureException e) {
+                                    logger.info(
+                                            LoggingConfigurationHelper.getTransferableMessage(
+                                                    String.format(
+                                                            "Failed to perform additional content uploading for '%s' location: %s",
+                                                            element.getName(),
+                                                            e.getMessage())));
 
-                                return;
+                                    awaiter.countDown();
+
+                                    return;
+                                }
+
+                                logger.info(
+                                        LoggingConfigurationHelper.getTransferableMessage(
+                                                String.format(
+                                                        "Additional content transfer finished for '%s' location and '%s' hash",
+                                                        element.getName(),
+                                                        additionalContent.getHash())));
                             }
-
-                            logger.info(
-                                    LoggingConfigurationHelper.getTransferableMessage(
-                                            String.format(
-                                                    "Additional content transfer finished for '%s' location and '%s' hash",
-                                                    element.getName(),
-                                                    additionalContent.getHash())));
                         }
-                    }
 
-                    awaiter.countDown();
+                        awaiter.countDown();
+                    } finally {
+                        logger.info(
+                                LoggingConfigurationHelper.getTransferableMessage(
+                                        String.format("Exiting execution for '%s' location", element.getName())));
+                    }
                 }, 0, period, TimeUnit.MILLISECONDS);
 
                 try {

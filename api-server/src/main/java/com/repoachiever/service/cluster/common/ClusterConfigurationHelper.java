@@ -8,7 +8,7 @@ import java.util.concurrent.*;
  */
 public class ClusterConfigurationHelper {
     private final static ScheduledExecutorService scheduledExecutorService =
-            Executors.newScheduledThreadPool(2);
+            Executors.newScheduledThreadPool(0, Thread.ofVirtual().factory());
 
     /**
      * Composes name for RepoAchiever Cluster using pre-defined prefix and UUID.
@@ -31,7 +31,7 @@ public class ClusterConfigurationHelper {
     public static Boolean waitForStart(Callable<Boolean> callback, Integer frequency, Integer timeout) {
         CountDownLatch waiter = new CountDownLatch(1);
 
-        ScheduledFuture<?> awaitTask = scheduledExecutorService.scheduleAtFixedRate(() -> {
+        ScheduledFuture<?> awaitTask = scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
                 if (callback.call()) {
                     waiter.countDown();

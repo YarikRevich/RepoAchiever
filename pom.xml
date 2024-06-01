@@ -20,7 +20,6 @@
     <module>cli</module>
     <module>gui</module>
     <module>api-server</module>
-    <module>exporter</module>
   </modules>
 
   <properties>

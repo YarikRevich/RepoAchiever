@@ -13,11 +13,6 @@ content:
   # Represents format used for content download requests.
   format: "zip"
 
-# Represents section used for RepoAchiever API Server database configuration.
-database:
-  # Enables re-initialization of database if core user configuration has been changed.
-  re-init: true
-
 # Represents section used for RepoAchiever API Server diagnostics configuration.
 diagnostics:
   # Enables diagnostics functionality.

@@ -5,7 +5,7 @@ import com.repoachiever.service.element.common.ElementHelper;
 import com.repoachiever.service.element.storage.ElementStorage;
 import com.repoachiever.service.element.text.common.IElement;
 import com.repoachiever.service.element.text.common.IElementResizable;
-import com.repoachiever.service.event.state.LocalState;
+import com.repoachiever.service.state.StateService;
 import java.util.UUID;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
@@ -17,11 +17,17 @@ import org.springframework.stereotype.Service;
 /** Represents circular progress bar indicator. */
 @Service
 public class CircleProgressBar implements IElementResizable, IElement<VBox> {
-  UUID id = UUID.randomUUID();
+  private final UUID id = UUID.randomUUID();
 
   public CircleProgressBar(@Autowired PropertiesEntity properties) {
     ProgressIndicator progressBar = new ProgressIndicator();
-    progressBar.setStyle("-fx-progress-color: red;");
+
+    progressBar.setStyle(
+            String.format(
+                    "-fx-progress-color: rgb(%d, %d, %d);",
+                    properties.getSpinnerColorR(),
+                    properties.getSpinnerColorG(),
+                    properties.getSpinnerColorB()));
     progressBar.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
 
     VBox vbox = new VBox(progressBar);
@@ -47,7 +53,7 @@ public class CircleProgressBar implements IElementResizable, IElement<VBox> {
   public void handlePrefWidth() {
     Point2D centralPoint =
         ElementHelper.getCentralPoint(
-            LocalState.getMainWindowWidth(), LocalState.getMainWindowHeight());
+            StateService.getMainWindowWidth(), StateService.getMainWindowHeight());
 
     getContent().setTranslateX(centralPoint.getX() - 30);
   }
@@ -59,7 +65,7 @@ public class CircleProgressBar implements IElementResizable, IElement<VBox> {
   public void handlePrefHeight() {
     Point2D centralPoint =
         ElementHelper.getCentralPoint(
-            LocalState.getMainWindowWidth(), LocalState.getMainWindowHeight());
+            StateService.getMainWindowWidth(), StateService.getMainWindowHeight());
 
     getContent().setTranslateY(centralPoint.getY() - 30);
   }

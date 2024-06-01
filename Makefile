@@ -29,7 +29,9 @@ lint: ## Run Apache Spotless linter
 
 .PHONY: create-local-client
 create-local-client: ## Create ResourceTracker local directory for client
-	@mkdir -p $(HOME)/.repoachiever/config
+.PHONY: create-local-client
+create-local-client: ## Create ResourceTracker local directory for client
+	@mkdir -p $(HOME)/.repoachiever/config/swap
 
 .PHONY: create-local-api-server
 create-local-api-server: ## Create ResourceTracker local directory for API Server

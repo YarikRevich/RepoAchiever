@@ -7,6 +7,8 @@ import com.repoachiever.service.element.progressbar.main.start.MainStartCirclePr
 import com.repoachiever.service.element.storage.ElementStorage;
 import com.repoachiever.service.element.text.common.IElement;
 import java.util.UUID;
+
+import com.repoachiever.service.state.StateService;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.paint.Color;
@@ -16,7 +18,7 @@ import org.springframework.stereotype.Service;
 /** */
 @Service
 public class MainStartScene implements IElement<Scene> {
-  UUID id = UUID.randomUUID();
+  private final UUID id = UUID.randomUUID();
 
   public MainStartScene(
       @Autowired PropertiesEntity properties,

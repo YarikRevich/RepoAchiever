@@ -33,7 +33,7 @@ public class VisualizationService {
      * Starts progress visualization processor.
      */
     public void process() {
-        scheduledExecutorService.scheduleAtFixedRate(
+        scheduledExecutorService.scheduleWithFixedDelay(
                 () -> {
                     if (visualizationState.getLabel().isNext()) {
                         logger.info(visualizationState.getLabel().getCurrent());

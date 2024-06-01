@@ -39,8 +39,6 @@ public class JsonToGitHubPullRequestsConverter {
         try {
             List<List<Object>> values = reader.<List<Object>>readValues(data).readAll();
             if (values.isEmpty()) {
-                logger.fatal(new JsonToGitHubPullRequestsFailureException().getMessage());
-
                 return null;
             }
 

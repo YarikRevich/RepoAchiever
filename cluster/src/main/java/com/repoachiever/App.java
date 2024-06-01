@@ -5,11 +5,12 @@ import com.repoachiever.resource.communication.ClusterCommunicationResource;
 import com.repoachiever.service.apiserver.resource.ApiServerCommunicationResource;
 import com.repoachiever.service.config.ConfigService;
 import com.repoachiever.service.integration.communication.apiserver.healthcheck.ApiServerHealthCheckCommunicationService;
+import com.repoachiever.service.integration.communication.apiserver.lock.ApiServerLockCommunicationService;
 import com.repoachiever.service.integration.communication.cluster.ClusterCommunicationConfigService;
 import com.repoachiever.service.integration.logging.state.LoggingStateService;
-import com.repoachiever.service.executor.CommandExecutorService;
 import com.repoachiever.service.integration.logging.transfer.LoggingTransferService;
 import com.repoachiever.service.integration.scheduler.SchedulerConfigService;
+import com.repoachiever.service.integration.vendor.VendorConfigService;
 import com.repoachiever.service.vendor.VendorFacade;
 import com.repoachiever.service.vendor.common.VendorConfigurationHelper;
 import com.repoachiever.service.vendor.git.github.GitGitHubVendorService;
@@ -25,13 +26,14 @@ import org.springframework.stereotype.Component;
 @Component
 @Import({
         ConfigService.class,
-        CommandExecutorService.class,
         PropertiesEntity.class,
         VendorConfigurationHelper.class,
         GitGitHubVendorService.class,
         VendorFacade.class,
+        VendorConfigService.class,
         SchedulerConfigService.class,
         ApiServerHealthCheckCommunicationService.class,
+        ApiServerLockCommunicationService.class,
         ClusterCommunicationResource.class,
         ClusterCommunicationConfigService.class,
         ApiServerCommunicationResource.class,

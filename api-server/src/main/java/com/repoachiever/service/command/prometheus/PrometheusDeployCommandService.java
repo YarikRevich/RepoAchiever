@@ -40,18 +40,3 @@ public class PrometheusDeployCommandService extends SProcess {
         return osType;
     }
 }
-
-//prometheus:
-//        image: prom/prometheus:v2.36.2
-//        volumes:
-//        - ./prometheus/:/etc/prometheus/
-//        - prometheus_data:/prometheus
-//        command:
-//        - '--config.file=/etc/prometheus/prometheus.yml'
-//        - '--storage.tsdb.path=/prometheus'
-//        - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-//        - '--web.console.templates=/usr/share/prometheus/consoles'
-//        - '--web.enable-lifecycle'
-//        - '--web.enable-admin-api'
-//        ports:
-//        - 9090:9090

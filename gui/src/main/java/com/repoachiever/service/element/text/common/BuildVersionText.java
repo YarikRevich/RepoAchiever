@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class BuildVersionText implements IElementResizable, IElement<Label> {
-  UUID id = UUID.randomUUID();
+  private final UUID id = UUID.randomUUID();
 
   public BuildVersionText(@Autowired PropertiesEntity properties) {
     Label label = new Label(String.format("BuildVersion: %s", properties.getGitCommitId()));

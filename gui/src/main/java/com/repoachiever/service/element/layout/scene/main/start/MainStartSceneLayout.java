@@ -1,6 +1,5 @@
 package com.repoachiever.service.element.layout.scene.main.start;
 
-import com.repoachiever.entity.PropertiesEntity;
 import com.repoachiever.service.element.layout.common.ContentGrid;
 import com.repoachiever.service.element.layout.scene.main.start.common.MainStartFooterGrid;
 import com.repoachiever.service.element.layout.scene.main.start.common.MainStartHeaderGrid;
@@ -9,7 +8,7 @@ import com.repoachiever.service.element.storage.ElementStorage;
 import com.repoachiever.service.element.text.common.IElement;
 import com.repoachiever.service.element.text.common.IElementResizable;
 import com.repoachiever.service.element.text.common.LandingAnnouncementText;
-import com.repoachiever.service.event.state.LocalState;
+import com.repoachiever.service.state.StateService;
 import java.util.UUID;
 import javafx.scene.layout.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +17,9 @@ import org.springframework.stereotype.Service;
 /** Represents start scene layout of the main stage. */
 @Service
 public class MainStartSceneLayout implements IElementResizable, IElement<GridPane> {
-  UUID id = UUID.randomUUID();
+  private final UUID id = UUID.randomUUID();
 
   public MainStartSceneLayout(
-      @Autowired PropertiesEntity properties,
       @Autowired MainStartMenuButtonBox mainStartMenuButtonBox,
       @Autowired LandingAnnouncementText landingAnnouncementText,
       @Autowired MainStartHeaderGrid mainStartHeaderGrid,
@@ -68,7 +66,7 @@ public class MainStartSceneLayout implements IElementResizable, IElement<GridPan
    */
   @Override
   public void handlePrefWidth() {
-    getContent().setPrefWidth(LocalState.getMainWindowWidth());
+    getContent().setPrefWidth(StateService.getMainWindowWidth());
   }
 
   /**
@@ -76,6 +74,6 @@ public class MainStartSceneLayout implements IElementResizable, IElement<GridPan
    */
   @Override
   public void handlePrefHeight() {
-    getContent().setPrefHeight(LocalState.getMainWindowHeight());
+    getContent().setPrefHeight(StateService.getMainWindowHeight());
   }
 }

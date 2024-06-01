@@ -7,7 +7,9 @@ import com.repoachiever.exception.ApiServerOperationFailureException;
 import com.repoachiever.model.ContentDownload;
 import com.repoachiever.model.ContentWithdrawal;
 import com.repoachiever.service.client.common.IClient;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -23,6 +25,10 @@ public class DownloadContentClientService implements IClient<byte[], ContentDown
 
     public DownloadContentClientService(String host) {
         ApiClient apiClient = new ApiClient(WebClient.builder()
+                .exchangeStrategies(ExchangeStrategies.builder()
+                        .codecs(codecs -> codecs.defaultCodecs()
+                                .maxInMemorySize(-1))
+                        .build())
                 .clientConnector(new ReactorClientHttpConnector(
                         HttpClient.create().followRedirect(true)))
                 .build())

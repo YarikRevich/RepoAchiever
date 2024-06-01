@@ -1,114 +1,145 @@
 package com.repoachiever.service.element.list;
 
+import com.repoachiever.dto.ListVisualizerCellInputDto;
 import com.repoachiever.entity.PropertiesEntity;
-import com.repoachiever.model.TopicLogsResult;
+import com.repoachiever.model.ContentRetrievalResult;
+import com.repoachiever.model.ContentRetrievalUnit;
 import com.repoachiever.service.element.list.cell.ListVisualizerCell;
+import com.repoachiever.service.element.scene.main.deployment.MainDeploymentScene;
 import com.repoachiever.service.element.storage.ElementStorage;
 import com.repoachiever.service.element.text.common.IElement;
 import com.repoachiever.service.element.text.common.IElementActualizable;
 import com.repoachiever.service.element.text.common.IElementResizable;
-import com.repoachiever.service.event.payload.SwapFileOpenWindowEvent;
-import com.repoachiever.service.event.state.LocalState;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import com.repoachiever.service.event.payload.ContentSwapEvent;
+import com.repoachiever.service.state.StateService;
+
+import java.util.*;
 import java.util.stream.Stream;
+
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ListView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-/** Represents list visualizer for deployment data. */
+/**
+ * Represents list visualizer for deployment data.
+ */
 @Service
 public class ListVisualizer
-    implements IElementResizable, IElementActualizable, IElement<ListView<String>> {
-  UUID id = UUID.randomUUID();
+        implements IElementResizable, IElementActualizable, IElement<ListView<ListVisualizerCellInputDto>> {
+    private final UUID id = UUID.randomUUID();
 
-  @Autowired private PropertiesEntity properties;
+    @Lazy
+    @Autowired
+    private MainDeploymentScene deploymentScene;
 
-  public ListVisualizer(@Autowired ApplicationEventPublisher applicationEventPublisher) {
-    ListView<String> listView = new ListView<>();
-    listView.setOnMouseClicked(
-        event -> {
-          applicationEventPublisher.publishEvent(
-              new SwapFileOpenWindowEvent(
-                  LocalState.getDeploymentState().getResult().stream()
-                      .filter(
-                          element ->
-                              element
-                                  .getName()
-                                  .equals(listView.getSelectionModel().getSelectedItem()))
-                      .toList()));
-        });
+    public ListVisualizer(
+            @Autowired PropertiesEntity properties,
+            @Autowired ApplicationEventPublisher applicationEventPublisher,
+            @Lazy @Autowired MainDeploymentScene deploymentScene) {
+        ListView<ListVisualizerCellInputDto> listView = new ListView<>();
 
-    ElementStorage.setElement(id, listView);
-    ElementStorage.setActualizable(this);
-    ElementStorage.setResizable(this);
-  }
+        listView.setCellFactory(element ->
+                new ListVisualizerCell(properties, applicationEventPublisher, deploymentScene));
 
-  /**
-   * @see IElement
-   */
-  @Override
-  public ListView<String> getContent() {
-    return ElementStorage.getElement(id);
-  }
+        listView.setOnMouseClicked(
+                event -> {
+                    if (Objects.nonNull(listView.getSelectionModel().getSelectedItem())) {
+                        ContentRetrievalResult content = StateService.getContent();
 
-  /**
-   * @see IElementResizable
-   */
-  @Override
-  public void handlePrefWidth() {
-    getContent().setMaxWidth(LocalState.getMainWindowWidth());
-  }
+                        applicationEventPublisher.publishEvent(
+                                new ContentSwapEvent(
+                                        content
+                                                .getLocations()
+                                                .stream()
+                                                .filter(
+                                                        element ->
+                                                                element
+                                                                        .getName()
+                                                                        .equals(
+                                                                                listView
+                                                                                        .getSelectionModel()
+                                                                                        .getSelectedItem()
+                                                                                        .getName()))
+                                                .toList()
+                                                .getFirst()));
+                    }
+                });
 
-  /**
-   * @see IElementResizable
-   */
-  @Override
-  public void handlePrefHeight() {
-    getContent().setMaxHeight(LocalState.getMainWindowHeight());
-  }
+        ElementStorage.setElement(id, listView);
+        ElementStorage.setActualizable(this);
+        ElementStorage.setResizable(this);
+    }
 
-  /**
-   * @see IElementActualizable
-   */
-  @Override
-  public void handleBackgroundUpdates() {
-    TopicLogsResult deploymentState = LocalState.getDeploymentState();
+    /**
+     * @see IElement
+     */
+    @Override
+    public ListView<ListVisualizerCellInputDto> getContent() {
+        return ElementStorage.getElement(id);
+    }
 
-    Platform.runLater(
-        () -> {
-          if (!Objects.isNull(deploymentState)) {
-            Set<String> items =
-                deploymentState.getResult().stream()
-                    .map(element -> new ListVisualizerCell(element.getName()))
-                    .map(element -> element.getContent().getText())
-                    .collect(Collectors.toSet());
+    /**
+     * @see IElementResizable
+     */
+    @Override
+    public void handlePrefWidth() {
+        getContent().setMaxWidth(StateService.getMainWindowWidth());
+    }
 
-            ObservableList<String> myObservableList =
-                FXCollections.observableList(items.stream().toList());
-            getContent().setItems(myObservableList);
+    /**
+     * @see IElementResizable
+     */
+    @Override
+    public void handlePrefHeight() {
+        getContent().setMaxHeight(StateService.getMainWindowHeight());
+    }
 
-            getContent().setMouseTransparent(false);
-            getContent().setFocusTraversable(true);
-          } else {
-            List<String> items =
-                Stream.of(new ListVisualizerCell(properties.getListViewStubName()))
-                    .map(element -> element.getContent().getText())
-                    .toList();
+    /**
+     * @see IElementActualizable
+     */
+    @Override
+    public void handleBackgroundUpdates() {
+        ContentRetrievalResult content = StateService.getContent();
 
-            ObservableList<String> myObservableList = FXCollections.observableList(items);
-            getContent().setItems(myObservableList);
+        Platform.runLater(
+                () -> {
+                    ObservableList<ListVisualizerCellInputDto> observableList;
 
-            getContent().setMouseTransparent(true);
-            getContent().setFocusTraversable(false);
-          }
-        });
-  }
+                    if (!Objects.isNull(content)) {
+                        List<ListVisualizerCellInputDto> items =
+                                content
+                                        .getLocations()
+                                        .stream()
+                                        .sorted(Comparator.comparing(ContentRetrievalUnit::getName))
+                                        .map(element ->
+                                                ListVisualizerCellInputDto.of(
+                                                        element.getName(),
+                                                        element.getActive(),
+                                                        element.getAdditional().getVersions().isEmpty()
+                                                                && element.getRaw().getVersions().isEmpty()))
+                                        .toList();
+
+                        observableList =
+                                FXCollections.observableList(items);
+
+                        getContent().setMouseTransparent(false);
+                        getContent().setFocusTraversable(true);
+                    } else {
+                        List<ListVisualizerCellInputDto> items = Stream.of(ListVisualizerCellInputDto.stub()).toList();
+
+                        observableList =
+                                FXCollections.observableList(items);
+
+                        getContent().setMouseTransparent(true);
+                        getContent().setFocusTraversable(false);
+                    }
+
+                    getContent().setItems(observableList);
+                });
+    }
 }

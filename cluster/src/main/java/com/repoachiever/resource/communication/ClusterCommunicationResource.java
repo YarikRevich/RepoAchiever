@@ -67,14 +67,6 @@ public class ClusterCommunicationResource extends UnicastRemoteObject implements
      * @see IClusterCommunicationService
      */
     @Override
-    public void performRetrievalReset() throws RemoteException {
-        StateService.resetContentUpdatesHeadCounter();
-    }
-
-    /**
-     * @see IClusterCommunicationService
-     */
-    @Override
     public Boolean retrieveHealthCheck() throws RemoteException {
         return true;
     }

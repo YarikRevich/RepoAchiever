@@ -9,7 +9,7 @@ import javafx.scene.layout.*;
 
 /** Represents content grid used in main stage. */
 public class ContentGrid implements IElement<GridPane> {
-  UUID id = UUID.randomUUID();
+  private final UUID id = UUID.randomUUID();
 
   public ContentGrid(VBox buttons, Node element) {
     GridPane grid = new GridPane();

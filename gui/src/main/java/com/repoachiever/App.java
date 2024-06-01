@@ -1,11 +1,11 @@
 package com.repoachiever;
 
-import com.repoachiever.service.client.observer.ResourceObserver;
+import com.repoachiever.service.integration.apiserver.healthcheck.ApiServerHealthCheckService;
 import com.repoachiever.service.element.font.FontLoader;
-import com.repoachiever.service.element.observer.ElementObserver;
+import com.repoachiever.service.integration.element.ElementConfigService;
 import com.repoachiever.service.element.stage.MainStage;
-import com.repoachiever.service.event.state.LocalState;
-import com.repoachiever.service.scheduler.SchedulerHelper;
+import com.repoachiever.service.integration.event.EventConfigService;
+import com.repoachiever.service.scheduler.SchedulerConfigurationHelper;
 import javafx.application.Application;
 import javafx.application.HostServices;
 import javafx.application.Platform;
@@ -16,66 +16,76 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.stereotype.Component;
 
-/** Represents entrypoint for the application. */
+/**
+ * Represents initialization point for the RepoAchiever GUI application.
+ */
+@Component
 public class App extends Application {
-  private ConfigurableApplicationContext applicationContext;
+    private ConfigurableApplicationContext applicationContext;
 
-  @Autowired private LocalState localState;
+    @Autowired
+    private ApiServerHealthCheckService apiServerHealthCheckService;
 
-  @Autowired private ElementObserver elementObserver;
+    @Autowired
+    private ElementConfigService elementConfigService;
 
-  @Autowired private ResourceObserver resourceObserver;
+    @Autowired
+    private EventConfigService eventConfigService;
 
-  @Autowired private FontLoader fontLoader;
+    @Autowired
+    private FontLoader fontLoader;
 
-  @Autowired private MainStage mainStage;
+    @Autowired
+    private MainStage mainStage;
 
-  /**
-   * @see Application
-   */
-  public void launch() {
-    Application.launch();
-  }
+    /**
+     * @see Application
+     */
+    public void launch() {
+        Application.launch();
+    }
 
-  /**
-   * @see Application
-   */
-  @Override
-  public void init() {
-    System.setProperty("apple.laf.useScreenMenuBar", "true");
-    System.setProperty("apple.awt.UIElement", "true");
+    /**
+     * @see Application
+     */
+    @Override
+    public void init() {
+        System.setProperty("apple.laf.useScreenMenuBar", "true");
+        System.setProperty("apple.awt.UIElement", "true");
 
-    ApplicationContextInitializer<GenericApplicationContext> initializer =
-        applicationContext -> {
-          applicationContext.registerBean(Application.class, () -> App.this);
-          applicationContext.registerBean(Parameters.class, this::getParameters);
-          applicationContext.registerBean(HostServices.class, this::getHostServices);
-        };
+        ApplicationContextInitializer<GenericApplicationContext> initializer =
+                applicationContext -> {
+                    applicationContext.registerBean(Application.class, () -> App.this);
+                    applicationContext.registerBean(Parameters.class, this::getParameters);
+                    applicationContext.registerBean(HostServices.class, this::getHostServices);
+                };
 
-    applicationContext =
-        new SpringApplicationBuilder()
-            .sources(GUI.class)
-            .initializers(initializer)
-            .run(getParameters().getRaw().toArray(new String[0]));
-  }
+        applicationContext =
+                new SpringApplicationBuilder()
+                        .sources(GUI.class)
+                        .initializers(initializer)
+                        .run(getParameters().getRaw().toArray(new String[0]));
+    }
 
-  /**
-   * @see Application
-   */
-  @Override
-  public void stop() {
-    applicationContext.close();
-    SchedulerHelper.close();
-    Platform.exit();
-  }
+    /**
+     * @see Application
+     */
+    @Override
+    public void stop() {
+        applicationContext.close();
+        SchedulerConfigurationHelper.close();
 
-  /**
-   * @see Application
-   */
-  @Override
-  @SneakyThrows
-  public void start(Stage stage) {
-    mainStage.getContent().show();
-  }
+        Platform.exit();
+    }
+
+    /**
+     * @see Application
+     */
+    @Override
+    @SneakyThrows
+    public void start(Stage stage) {
+        mainStage.getContent().show();
+    }
 }

@@ -104,57 +104,6 @@ public class RepositoryFacade {
     }
 
     /**
-     * Checks if content location is present in content repository with the help of the given properties.
-     *
-     * @param location    given content location.
-     * @param provider    given content provider.
-     * @param credentials given content credentials.
-     * @return result of the check.
-     * @throws ContentValidationFailureException if content validation fails.
-     */
-    public Boolean isContentLocationValid(
-            String location, Provider provider, CredentialsFieldsFull credentials) throws ContentValidationFailureException {
-        ProviderEntity rawProvider;
-
-        try {
-            rawProvider = providerRepository.findByName(provider.toString());
-        } catch (RepositoryOperationFailureException e) {
-            throw new ContentValidationFailureException(e.getMessage());
-        }
-
-        Optional<String> rawCredentials = RepositoryConfigurationHelper.getExternalCredentials(
-                provider, credentials.getExternal());
-
-        try {
-            if (!secretRepository.isPresentBySessionAndCredentials(
-                    credentials.getInternal().getId(), rawCredentials)) {
-                return false;
-            }
-        } catch (RepositoryOperationFailureException e) {
-            throw new ContentValidationFailureException(e.getMessage());
-        }
-
-        SecretEntity secret;
-
-        try {
-            secret = secretRepository.findBySessionAndCredentials(
-                    credentials.getInternal().getId(),
-                    rawCredentials);
-        } catch (RepositoryOperationFailureException e) {
-            throw new ContentValidationFailureException(e.getMessage());
-        }
-
-        try {
-            return contentRepository
-                    .findByProviderAndSecret(rawProvider.getId(), secret.getId())
-                    .stream()
-                    .anyMatch(element -> Objects.equals(element.getLocation(), location));
-        } catch (RepositoryOperationFailureException e) {
-            throw new ContentValidationFailureException(e);
-        }
-    }
-
-    /**
      * Retrieves all the data from content repository in a form of content applications.
      *
      * @return retrieved set of content applications.

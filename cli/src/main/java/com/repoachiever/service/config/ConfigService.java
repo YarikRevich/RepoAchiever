@@ -52,7 +52,7 @@ public class ConfigService {
             ConfigFileReadingFailureException,
             ConfigValidationException,
             ConfigFileClosureFailureException {
-        InputStream file = null;
+        InputStream file;
 
         try {
             file = new FileInputStream(Paths.get(configLocation).toString());

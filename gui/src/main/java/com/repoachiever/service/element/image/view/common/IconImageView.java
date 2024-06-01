@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 /** Represents main icon image view. */
 @Service
 public class IconImageView implements IElement<Image> {
-  UUID id = UUID.randomUUID();
+  private final UUID id = UUID.randomUUID();
 
   public IconImageView(@Autowired PropertiesEntity properties)
       throws ApplicationImageFileNotFoundException {

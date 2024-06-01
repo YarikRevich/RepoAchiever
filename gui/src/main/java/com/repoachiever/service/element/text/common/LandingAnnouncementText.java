@@ -3,7 +3,7 @@ package com.repoachiever.service.element.text.common;
 import com.repoachiever.entity.PropertiesEntity;
 import com.repoachiever.service.element.font.FontLoader;
 import com.repoachiever.service.element.storage.ElementStorage;
-import com.repoachiever.service.event.state.LocalState;
+import com.repoachiever.service.state.StateService;
 import java.util.UUID;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -14,13 +14,11 @@ import org.springframework.stereotype.Service;
 /** Represents landing announcement text presented at start scene. */
 @Service
 public class LandingAnnouncementText implements IElementResizable, IElement<Label> {
-  UUID id = UUID.randomUUID();
+  private final UUID id = UUID.randomUUID();
 
   public LandingAnnouncementText(@Autowired PropertiesEntity properties) {
-    Label label =
-        new Label(
-            "Welcome to ResourceTracker GUI!\n"
-                + "This application was developed to interact with API Server");
+    Label label = new Label(properties.getLabelWelcomeMessage());
+
     label.setFont(FontLoader.getFont20());
     label.setAlignment(Pos.TOP_CENTER);
     label.setTextAlignment(TextAlignment.CENTER);
@@ -50,7 +48,7 @@ public class LandingAnnouncementText implements IElementResizable, IElement<Labe
    */
   @Override
   public void handlePrefWidth() {
-    getContent().setMaxWidth(LocalState.getMainWindowWidth());
+    getContent().setMaxWidth(StateService.getMainWindowWidth());
   }
 
   /**
@@ -58,6 +56,6 @@ public class LandingAnnouncementText implements IElementResizable, IElement<Labe
    */
   @Override
   public void handlePrefHeight() {
-    getContent().setMaxHeight(LocalState.getMainWindowHeight());
+    getContent().setMaxHeight(StateService.getMainWindowHeight());
   }
 }

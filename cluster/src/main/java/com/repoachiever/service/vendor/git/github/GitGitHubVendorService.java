@@ -9,30 +9,20 @@ import com.repoachiever.exception.GitHubContentIsEmptyException;
 import com.repoachiever.exception.GitHubContentRetrievalFailureException;
 import com.repoachiever.exception.GitHubGraphQlClientDocumentNotFoundException;
 import com.repoachiever.exception.GitHubServiceNotAvailableException;
-import com.repoachiever.logging.common.LoggingConfigurationHelper;
 import com.repoachiever.service.config.ConfigService;
-import com.repoachiever.service.integration.communication.cluster.ClusterCommunicationConfigService;
-import com.repoachiever.service.integration.scheduler.SchedulerConfigService;
+import com.repoachiever.service.state.StateService;
 import com.repoachiever.service.vendor.common.VendorConfigurationHelper;
 import jakarta.annotation.PostConstruct;
 import jakarta.ws.rs.core.HttpHeaders;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.client.ClientHttpRequestFactories;
-import org.springframework.boot.web.client.ClientHttpRequestFactorySettings;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.graphql.client.HttpGraphQlClient;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.client.reactive.ClientHttpConnector;
-import org.springframework.http.client.reactive.JdkClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -40,21 +30,18 @@ import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URI;
 import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Service used to represent GitHub external service operations.
  */
 @Service
 public class GitGitHubVendorService {
-    private static final Logger logger = LogManager.getLogger(GitGitHubVendorService.class);
-
     @Autowired
     private PropertiesEntity properties;
 
@@ -69,6 +56,9 @@ public class GitGitHubVendorService {
     private WebClient restClient;
 
     private String document;
+
+    private final ScheduledExecutorService scheduledExecutorService =
+            Executors.newScheduledThreadPool(0, Thread.ofVirtual().factory());
 
     /**
      * Performs initial GraphQL client and HTTP client configuration.
@@ -97,6 +87,10 @@ public class GitGitHubVendorService {
             }
 
             this.restClient = WebClient.builder()
+                    .exchangeStrategies(ExchangeStrategies.builder()
+                            .codecs(codecs -> codecs.defaultCodecs()
+                                    .maxInMemorySize(-1))
+                            .build())
                     .baseUrl(properties.getRestClientGitHubUrl())
                     .clientConnector(new ReactorClientHttpConnector(
                             HttpClient.create().followRedirect(true)))
@@ -105,18 +99,6 @@ public class GitGitHubVendorService {
                             vendorConfigurationHelper.getWrappedToken(
                                     configService.getConfig().getService().getCredentials().getToken()))
                     .build();
-
-//            this.restClient = RestClient.builder()
-//                    .requestFactory(ClientHttpRequestFactories.get(new ClientHttpRequestFactorySettings(
-//                            Duration.ofSeconds(properties.getRestClientTimeout()),
-//                            Duration.ofSeconds(properties.getRestClientTimeout()),
-//                            false)))
-//                    .baseUrl(properties.getRestClientGitHubUrl())
-//                    .defaultHeader(
-//                            HttpHeaders.AUTHORIZATION,
-//                            vendorConfigurationHelper.getWrappedToken(
-//                                    configService.getConfig().getService().getCredentials().getToken()))
-//                    .build();
         }
     }
 
@@ -269,28 +251,63 @@ public class GitGitHubVendorService {
      * @param name       given repository name.
      * @param commitHash given commit hash.
      * @param format     given content format type.
-     * @return retrieved raw content from the repository with the given name and given commit hash as an input stream.
+     * @return retrieved raw content from the repository with the given name and given commit hash.
      * @throws GitHubContentRetrievalFailureException if GitHub REST API client content retrieval fails.
      */
-    public InputStream getCommitContent(String owner, String name, String format, String commitHash) throws
+    public DataBuffer getCommitContent(String owner, String name, String format, String commitHash) throws
             GitHubContentRetrievalFailureException {
-        DataBuffer response = restClient
-                .get()
-                .uri(uriBuilder -> uriBuilder
-                        .path(
-                                String.format("/repos/%s/%s/%s/%s", owner, name, format, commitHash))
-                        .build())
-                .retrieve()
-                .bodyToMono(DataBuffer.class)
-                .timeout(Duration.ofSeconds(properties.getRestClientTimeout()))
-                .onErrorResume(element -> Mono.empty())
-                .block();
+        AtomicReference<DataBuffer> dataBufferAtomic = new AtomicReference<>(null);
 
-        if (Objects.isNull(response)) {
+        Thread task = Thread.ofVirtual().start(() -> {
+            DataBuffer response = restClient
+                    .get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path(
+                                    String.format("/repos/%s/%s/%s/%s", owner, name, format, commitHash))
+                            .build())
+                    .retrieve()
+                    .bodyToMono(DataBuffer.class)
+                    .block();
+
+            dataBufferAtomic.set(response);
+        });
+
+        CountDownLatch awaiter = new CountDownLatch(1);
+
+        ScheduledFuture<?> manager = scheduledExecutorService.scheduleWithFixedDelay(
+                () -> {
+                    if (awaiter.getCount() == 0) {
+                        return;
+                    }
+
+                    if (!Objects.isNull(dataBufferAtomic.get())) {
+                        awaiter.countDown();
+
+                        return;
+                    }
+
+                    if (!StateService.getVendorAvailability().get()) {
+                        DataBufferUtils.release(dataBufferAtomic.get());
+
+                        task.interrupt();
+
+                        awaiter.countDown();
+                    }
+                }, 0, properties.getRestClientDynamicTimeoutAwaiterFrequency(), TimeUnit.MILLISECONDS);
+
+        try {
+            awaiter.await();
+        } catch (InterruptedException e) {
+            throw new GitHubContentRetrievalFailureException(e.getMessage());
+        }
+
+        manager.cancel(true);
+
+        if (Objects.isNull(dataBufferAtomic.get())) {
             throw new GitHubContentRetrievalFailureException(new GitHubContentIsEmptyException().getMessage());
         }
 
-        return response.asInputStream();
+        return dataBufferAtomic.get();
     }
 
     /**
@@ -299,10 +316,10 @@ public class GitGitHubVendorService {
      * @param owner      given repository owner.
      * @param name       given repository name.
      * @param commitHash given commit hash.
-     * @return retrieved raw content from the repository with the given name and given commit hash as an input stream.
+     * @return retrieved raw content from the repository with the given name and given commit hash.
      * @throws GitHubContentRetrievalFailureException if GitHub REST API client content retrieval fails.
      */
-    public InputStream getCommitContentAsZip(String owner, String name, String commitHash) throws
+    public DataBuffer getCommitContentAsZip(String owner, String name, String commitHash) throws
             GitHubContentRetrievalFailureException {
         return getCommitContent(owner, name, "zipball", commitHash);
     }
@@ -313,10 +330,10 @@ public class GitGitHubVendorService {
      * @param owner      given repository owner.
      * @param name       given repository name.
      * @param commitHash given commit hash.
-     * @return retrieved raw content from the repository with the given name and given commit hash as an input stream.
+     * @return retrieved raw content from the repository with the given name and given commit hash.
      * @throws GitHubContentRetrievalFailureException if GitHub REST API client content retrieval fails.
      */
-    public InputStream getCommitContentAsTar(String owner, String name, String commitHash) throws
+    public DataBuffer getCommitContentAsTar(String owner, String name, String commitHash) throws
             GitHubContentRetrievalFailureException {
         return getCommitContent(owner, name, "tarball", commitHash);
     }
@@ -324,8 +341,8 @@ public class GitGitHubVendorService {
     /**
      * Retrieves additional content from the repository with the given name and given commit hash.
      *
-     * @param owner      given repository owner.
-     * @param name       given repository name.
+     * @param owner given repository owner.
+     * @param name  given repository name.
      * @return retrieved pull requests content from the repository with the given name and given commit hash as an input stream.
      * @throws GitHubContentRetrievalFailureException if GitHub REST API client content retrieval fails.
      */

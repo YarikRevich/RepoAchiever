@@ -55,25 +55,25 @@ public class BaseCommandService {
     private ApplyExternalCommandService applyExternalCommandService;
 
     @Autowired
-    private WithdrawExternalCommandService withdrawCommandService;
+    private WithdrawExternalCommandService withdrawExternalCommandService;
 
     @Autowired
-    private CleanExternalCommandService cleanCommandService;
+    private CleanExternalCommandService cleanExternalCommandService;
 
     @Autowired
     private CleanAllExternalCommandService cleanAllExternalCommandService;
 
     @Autowired
-    private ContentExternalCommandService contentCommandService;
+    private ContentExternalCommandService contentExternalCommandService;
 
     @Autowired
-    private DownloadExternalCommandService downloadCommandService;
+    private DownloadExternalCommandService downloadExternalCommandService;
 
     @Autowired
-    private TopologyExternalCommandService topologyCommandService;
+    private TopologyExternalCommandService topologyExternalCommandService;
 
     @Autowired
-    private VersionExternalCommandService versionCommandService;
+    private VersionExternalCommandService versionExternalCommandService;
 
     @Autowired
     private HealthCheckInternalCommandService healthCheckInternalCommandService;
@@ -110,6 +110,8 @@ public class BaseCommandService {
 
     /**
      * Provides access to apply command service.
+     *
+     * @param configLocation given custom configuration file location.
      */
     @Command(description = "Apply remote configuration")
     private void apply(
@@ -153,6 +155,8 @@ public class BaseCommandService {
 
     /**
      * Provides access to withdraw command service.
+     *
+     * @param configLocation given custom configuration file location.
      */
     @Command(description = "Withdraw remote configuration")
     private void withdraw(
@@ -184,7 +188,7 @@ public class BaseCommandService {
         }
 
         try {
-            withdrawCommandService.process(configService.getConfig());
+            withdrawExternalCommandService.process(configService.getConfig());
         } catch (ApiServerOperationFailureException e) {
             logger.fatal(e.getMessage());
 
@@ -196,6 +200,9 @@ public class BaseCommandService {
 
     /**
      * Provides access to clean command service.
+     *
+     * @param configLocation given custom configuration file location.
+     * @param location given remote content location name.
      */
     @Command(description = "Clean remote content")
     private void clean(
@@ -229,7 +236,7 @@ public class BaseCommandService {
         }
 
         try {
-            cleanCommandService.process(CleanExternalCommandDto.of(configService.getConfig(), location));
+            cleanExternalCommandService.process(CleanExternalCommandDto.of(configService.getConfig(), location));
         } catch (ApiServerOperationFailureException e) {
             logger.fatal(e.getMessage());
 
@@ -241,6 +248,8 @@ public class BaseCommandService {
 
     /**
      * Provides access to cleanall command service.
+     *
+     * @param configLocation given custom configuration file location.
      */
     @Command(description = "Clean all remote content")
     private void cleanAll(
@@ -284,12 +293,13 @@ public class BaseCommandService {
 
     /**
      * Provides access to content command service.
+     *
+     * @param configLocation given custom configuration file location.
      */
     @Command(description = "Retrieve remote content state")
     private void content(
             @Option(names = {"--config"}, description = "A location of configuration file", defaultValue = "null")
-            String configLocation,
-            @Option(names = {"--output"}, description = "", defaultValue = "null") String outputLocation) {
+            String configLocation) {
         if (Objects.equals(configLocation, "null")) {
             configLocation = properties.getConfigDefaultLocation();
         }
@@ -316,7 +326,7 @@ public class BaseCommandService {
         }
 
         try {
-            contentCommandService.process(configService.getConfig());
+            contentExternalCommandService.process(configService.getConfig());
         } catch (ApiServerOperationFailureException e) {
             logger.fatal(e.getMessage());
 
@@ -328,6 +338,10 @@ public class BaseCommandService {
 
     /**
      * Provides access to download command service.
+     *
+     * @param configLocation given custom configuration file location.
+     * @param location given remote content location name.
+     * @param outputLocation given output file location.
      */
     @Command(description = "Retrieve remote content state")
     private void download(
@@ -362,7 +376,7 @@ public class BaseCommandService {
         }
 
         try {
-            downloadCommandService.process(DownloadExternalCommandDto.of(configService.getConfig(), outputLocation, location));
+            downloadExternalCommandService.process(DownloadExternalCommandDto.of(configService.getConfig(), outputLocation, location));
         } catch (ApiServerOperationFailureException e) {
             logger.fatal(e.getMessage());
 
@@ -374,6 +388,8 @@ public class BaseCommandService {
 
     /**
      * Provides access to topology command service.
+     *
+     * @param configLocation given custom configuration file location.
      */
     @Command(description = "Retrieve topology configuration)")
     private void topology(
@@ -405,7 +421,7 @@ public class BaseCommandService {
         }
 
         try {
-            topologyCommandService.process(configService.getConfig());
+            topologyExternalCommandService.process(configService.getConfig());
         } catch (ApiServerOperationFailureException e) {
             logger.fatal(e.getMessage());
 
@@ -417,6 +433,8 @@ public class BaseCommandService {
 
     /**
      * Provides access to version command service.
+     *
+     * @param configLocation given custom configuration file location.
      */
     @Command(description = "Retrieve versions of infrastructure)")
     private void version(
@@ -448,7 +466,7 @@ public class BaseCommandService {
         }
 
         try {
-            versionCommandService.process(configService.getConfig());
+            versionExternalCommandService.process(configService.getConfig());
         } catch (ApiServerOperationFailureException e) {
             logger.fatal(e.getMessage());
 
