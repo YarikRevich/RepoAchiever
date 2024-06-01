@@ -27,6 +27,7 @@ public class MainApplicationBarGrid implements IElementResizable, IElement<GridP
             @Autowired WithdrawImageView withdrawImageView,
             @Autowired RetrieveContentImageView retrieveContentImageView,
             @Autowired CleanAllImageView cleanAllImageView,
+            @Autowired TopologyImageView topologyImageView,
             @Autowired EditImageView editImageView,
             @Autowired OpenImageView openImageView) {
         GridPane grid = new GridPane();
@@ -63,9 +64,13 @@ public class MainApplicationBarGrid implements IElementResizable, IElement<GridP
 
         ColumnConstraints column7 = new ColumnConstraints();
         column7.setHgrow(Priority.ALWAYS);
-        column7.setPercentWidth(40);
+        column7.setPercentWidth(10);
 
-        grid.getColumnConstraints().addAll(column1, column2, column3, column4, column5, column6, column7);
+        ColumnConstraints column8 = new ColumnConstraints();
+        column8.setHgrow(Priority.ALWAYS);
+        column8.setPercentWidth(30);
+
+        grid.getColumnConstraints().addAll(column1, column2, column3, column4, column5, column6, column7, column8);
 
         grid.addRow(
                 0,
@@ -73,6 +78,7 @@ public class MainApplicationBarGrid implements IElementResizable, IElement<GridP
                 withdrawImageView.getContent(),
                 retrieveContentImageView.getContent(),
                 cleanAllImageView.getContent(),
+                topologyImageView.getContent(),
                 editImageView.getContent(),
                 openImageView.getContent());
 

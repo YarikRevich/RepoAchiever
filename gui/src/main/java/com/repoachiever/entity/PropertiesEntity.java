@@ -161,11 +161,20 @@ public class PropertiesEntity {
   @Value(value = "${image.download.name}")
   private String imageDownloadName;
 
+  @Value(value = "${image.topology.name}")
+  private String imageTopologyName;
+
   @Value(value = "${image.edit.name}")
   private String imageEditName;
 
   @Value(value = "${image.open.name}")
   private String imageOpenName;
+
+  @Value(value = "${image.active.name}")
+  private String imageActiveName;
+
+  @Value(value = "${image.non-active.name}")
+  private String imageNonActiveName;
 
   @Value(value = "${image.bar.width}")
   private Integer imageBarWidth;
@@ -191,11 +200,20 @@ public class PropertiesEntity {
   @Value(value = "${button.download.description}")
   private String buttonDownloadDescription;
 
+  @Value(value = "${button.topology.description}")
+  private String buttonTopologyDescription;
+
   @Value(value = "${button.edit.description}")
   private String buttonEditDescription;
 
   @Value(value = "${button.open.description}")
   private String buttonOpenDescription;
+
+  @Value(value = "${label.active.description}")
+  private String labelActiveDescription;
+
+  @Value(value = "${label.non-active.description}")
+  private String labelNonActiveDescription;
 
   @Value(value = "${label.connection-status-success.description}")
   private String labelConnectionStatusSuccessDescription;
@@ -232,12 +250,6 @@ public class PropertiesEntity {
 
   @Value(value = "${alert.editor-close-reminder.message}")
   private String alertEditorCloseReminderMessage;
-
-  @Value(value = "${graph.css.location}")
-  private String graphCssFileLocation;
-
-  @Value(value = "${graph.properties.location}")
-  private String graphPropertiesLocation;
 
   @Value(value = "${config.default.directory}")
   private String configDefaultDirectory;

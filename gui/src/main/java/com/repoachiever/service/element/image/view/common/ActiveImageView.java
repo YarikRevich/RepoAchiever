@@ -2,62 +2,43 @@ package com.repoachiever.service.element.image.view.common;
 
 import com.repoachiever.entity.PropertiesEntity;
 import com.repoachiever.exception.ApplicationImageFileNotFoundException;
-import com.repoachiever.service.element.scene.main.deployment.MainDeploymentScene;
+import com.repoachiever.service.element.common.ElementHelper;
+import com.repoachiever.service.element.image.collection.ConnectionStatusImageCollection;
 import com.repoachiever.service.element.storage.ElementStorage;
 import com.repoachiever.service.element.text.common.IElement;
 import com.repoachiever.service.element.text.common.IElementActualizable;
 import com.repoachiever.service.element.text.common.IElementResizable;
-import com.repoachiever.service.event.payload.DownloadEvent;
-import ink.bluecloud.css.CssResources;
-import ink.bluecloud.css.ElementButton;
-import ink.bluecloud.css.ElementButtonKt;
+import com.repoachiever.service.state.StateService;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.BorderPane;
-import javafx.stage.DirectoryChooser;
-import org.springframework.context.ApplicationEventPublisher;
+import javafx.scene.paint.Color;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.io.InputStream;
 import java.util.Objects;
 import java.util.UUID;
 
 /**
- * Represents download image view.
+ * Represents active image view.
  */
-public class DownloadImageView implements IElement<BorderPane> {
+public class ActiveImageView implements IElement<BorderPane> {
     private final UUID id = UUID.randomUUID();
 
-    public DownloadImageView(
-            PropertiesEntity properties,
-            ApplicationEventPublisher applicationEventPublisher,
-            MainDeploymentScene deploymentScene,
-            String location)
-            throws ApplicationImageFileNotFoundException {
+    public ActiveImageView(PropertiesEntity properties) throws ApplicationImageFileNotFoundException {
         Button button = new Button();
 
-        ElementButtonKt.theme(button, ElementButton.greenButton);
-        button.getStylesheets().add(CssResources.globalCssFile);
-        button.getStylesheets().add(CssResources.buttonCssFile);
-        button.getStylesheets().add(CssResources.textFieldCssFile);
-
-        DirectoryChooser directoryChooser = new DirectoryChooser();
-
-        button.setOnMouseClicked(
-                event -> {
-                    File destination = directoryChooser.showDialog(deploymentScene.getContent().getWindow());
-
-                    if (Objects.nonNull(destination)) {
-                        applicationEventPublisher.publishEvent(new DownloadEvent(location, destination));
-                    }
-                });
+        button.setDisable(true);
 
         InputStream imageSource =
-                getClass().getClassLoader().getResourceAsStream(properties.getImageDownloadName());
+                getClass().getClassLoader().getResourceAsStream(properties.getImageActiveName());
         if (Objects.isNull(imageSource)) {
             throw new ApplicationImageFileNotFoundException();
         }
@@ -71,7 +52,14 @@ public class DownloadImageView implements IElement<BorderPane> {
         button.setAlignment(Pos.CENTER_RIGHT);
 
         SplitPane splitPane = new SplitPane(button);
-        splitPane.setTooltip(new Tooltip(properties.getButtonDownloadDescription()));
+        splitPane.setTooltip(new Tooltip(properties.getLabelActiveDescription()));
+
+        splitPane.setBackground(
+                Background.fill(
+                        Color.rgb(
+                                properties.getCommonSceneHeaderConnectionStatusBackgroundColorR(),
+                                properties.getCommonSceneHeaderConnectionStatusBackgroundColorG(),
+                                properties.getCommonSceneHeaderConnectionStatusBackgroundColorB())));
 
         BorderPane borderPane = new BorderPane();
         borderPane.setRight(splitPane);

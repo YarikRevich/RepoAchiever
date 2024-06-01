@@ -31,6 +31,7 @@ public class ConnectionStatusImageView
 
   public ConnectionStatusImageView(@Autowired PropertiesEntity properties) {
     Button button = new Button();
+
     button.setDisable(true);
     button.setAlignment(Pos.CENTER_RIGHT);
 

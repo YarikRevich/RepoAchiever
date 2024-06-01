@@ -26,7 +26,7 @@ import org.springframework.stereotype.Service;
 
 /** Represents edit image view. */
 @Service
-public class EditImageView implements IElementResizable, IElement<BorderPane> {
+public class EditImageView implements IElement<BorderPane> {
   private final UUID id = UUID.randomUUID();
 
   public EditImageView(
@@ -64,7 +64,6 @@ public class EditImageView implements IElementResizable, IElement<BorderPane> {
     borderPane.setRight(splitPane);
 
     ElementStorage.setElement(id, borderPane);
-    ElementStorage.setResizable(this);
   }
 
   /**
@@ -74,16 +73,4 @@ public class EditImageView implements IElementResizable, IElement<BorderPane> {
   public BorderPane getContent() {
     return ElementStorage.getElement(id);
   }
-
-  /**
-   * @see IElementResizable
-   */
-  @Override
-  public void handlePrefWidth() {}
-
-  /**
-   * @see IElementResizable
-   */
-  @Override
-  public void handlePrefHeight() {}
 }

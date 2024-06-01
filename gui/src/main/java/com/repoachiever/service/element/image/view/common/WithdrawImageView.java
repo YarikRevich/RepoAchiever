@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 
 /** Represents  withdraw image view. */
 @Service
-public class WithdrawImageView implements IElementResizable, IElement<BorderPane> {
+public class WithdrawImageView implements IElement<BorderPane> {
   private final UUID id = UUID.randomUUID();
 
   public WithdrawImageView(
@@ -65,7 +65,6 @@ public class WithdrawImageView implements IElementResizable, IElement<BorderPane
     borderPane.setRight(splitPane);
 
     ElementStorage.setElement(id, borderPane);
-    ElementStorage.setResizable(this);
   }
 
   /**
@@ -75,16 +74,4 @@ public class WithdrawImageView implements IElementResizable, IElement<BorderPane
   public BorderPane getContent() {
     return ElementStorage.getElement(id);
   }
-
-  /**
-   * @see IElementResizable
-   */
-  @Override
-  public void handlePrefWidth() {}
-
-  /**
-   * @see IElementResizable
-   */
-  @Override
-  public void handlePrefHeight() {}
 }

@@ -1,12 +1,14 @@
 package com.repoachiever.service.integration.event;
 
 import com.repoachiever.converter.ContentRetrievalUnitToJsonConverter;
+import com.repoachiever.converter.TopologyInfoUnitsToJsonConverter;
 import com.repoachiever.dto.CleanExternalCommandDto;
 import com.repoachiever.dto.DownloadExternalCommandDto;
 import com.repoachiever.entity.PropertiesEntity;
 import com.repoachiever.exception.*;
 import com.repoachiever.model.ContentRetrievalResult;
 import com.repoachiever.model.HealthCheckResult;
+import com.repoachiever.model.TopologyInfoUnit;
 import com.repoachiever.model.VersionInfoResult;
 import com.repoachiever.service.command.config.open.OpenConfigCommandService;
 import com.repoachiever.service.command.swap.open.OpenSwapCommandService;
@@ -45,6 +47,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Objects;
 
 import process.SProcessExecutor;
@@ -131,6 +134,24 @@ public class EventConfigService {
                             ElementHelper.showAlert(
                                     errorAlert.getContent(),
                                     new DefaultConfigurationFailureException(e.getMessage()).getMessage());
+
+                            return;
+                        }
+
+                        VersionInfoResult versionInfoResult;
+
+                        try {
+                            versionInfoResult =
+                                    versionExternalCommandService.process(configService.getConfig());
+                        } catch (ApiServerOperationFailureException e) {
+                            ElementHelper.showAlert(errorAlert.getContent(), e.getMessage());
+
+                            return;
+                        }
+
+                        if (!versionInfoResult.getExternalApi().getHash().equals(properties.getGitCommitId())) {
+                            ElementHelper.showAlert(
+                                    errorAlert.getContent(), properties.getAlertVersionMismatchMessage());
 
                             return;
                         }
@@ -573,6 +594,8 @@ public class EventConfigService {
                         if (!versionInfoResult.getExternalApi().getHash().equals(properties.getGitCommitId())) {
                             ElementHelper.showAlert(
                                     errorAlert.getContent(), properties.getAlertVersionMismatchMessage());
+
+                            return;
                         }
 
                         try {
@@ -672,6 +695,24 @@ public class EventConfigService {
                             return;
                         }
 
+                        VersionInfoResult versionInfoResult;
+
+                        try {
+                            versionInfoResult =
+                                    versionExternalCommandService.process(configService.getConfig());
+                        } catch (ApiServerOperationFailureException e) {
+                            ElementHelper.showAlert(errorAlert.getContent(), e.getMessage());
+
+                            return;
+                        }
+
+                        if (!versionInfoResult.getExternalApi().getHash().equals(properties.getGitCommitId())) {
+                            ElementHelper.showAlert(
+                                    errorAlert.getContent(), properties.getAlertVersionMismatchMessage());
+
+                            return;
+                        }
+
                         StateService.setConfigLocation(event.getConfigLocation());
 
                         ContentRetrievalResult contentRetrievalResult;
@@ -697,18 +738,107 @@ public class EventConfigService {
     }
 
     /**
-     * Handles incoming swap event.
+     * Handles incoming topology swap event.
      *
-     * @param event given swap event.
+     * @param event given topology swap event.
+     */
+    @EventListener
+    private void handleTopologySwapEvent(TopologySwapEvent event) {
+        SchedulerConfigurationHelper.scheduleOnce(
+                () -> {
+                    if (Objects.isNull(StateService.getConfigLocation())) {
+                        ElementHelper.showAlert(
+                                errorAlert.getContent(),
+                                properties.getAlertConfigNotOpenedMessage());
+
+                        return;
+                    }
+
+                    if (!StateService.getConnectionEstablished()) {
+                        ElementHelper.showAlert(
+                                errorAlert.getContent(),
+                                properties.getAlertApiServerUnavailableMessage());
+
+                        return;
+                    }
+
+                    ElementHelper.toggleElementVisibility(mainDeploymentCircleProgressBar.getContent());
+
+                    List<TopologyInfoUnit> topologyInfoUnits;
+
+                    try {
+                        topologyInfoUnits = topologyExternalCommandService.process(configService.getConfig());
+                    } catch (ApiServerOperationFailureException e) {
+                        ElementHelper.showAlert(errorAlert.getContent(), e.getMessage());
+
+                        return;
+                    }
+
+                    String swapLocation = eventConfigurationHelper.getSwapLocation();
+
+                    try {
+                        String topologyInfoUnitsRaw;
+
+                        try {
+                            topologyInfoUnitsRaw =
+                                    TopologyInfoUnitsToJsonConverter.convert(topologyInfoUnits);
+                        } catch (TopologyInfoUnitsToJsonConversionFailureException e) {
+                            ElementHelper.showAlert(
+                                    errorAlert.getContent(),
+                                    new SwapFileCreationFailureException(e.getMessage()).getMessage());
+
+                            return;
+                        }
+
+                        try {
+                            Files.writeString(Path.of(swapLocation), topologyInfoUnitsRaw);
+                        } catch (IOException e) {
+                            ElementHelper.showAlert(
+                                    errorAlert.getContent(),
+                                    new SwapFileCreationFailureException(e.getMessage()).getMessage());
+
+                            return;
+                        }
+
+                        OpenSwapCommandService openSwapCommandService = new OpenSwapCommandService(swapLocation);
+
+                        if (commandExecutorService.getOSType() == SProcessExecutor.OS.MAC) {
+                            ElementHelper.showAlert(
+                                    informationAlert.getContent(), properties.getAlertEditorCloseReminderMessage());
+                        }
+
+                        try {
+                            commandExecutorService.executeCommand(openSwapCommandService);
+                        } catch (CommandExecutorException e) {
+                            ElementHelper.showAlert(errorAlert.getContent(), e.getMessage());
+                        }
+                    } finally {
+                        try {
+                            Files.deleteIfExists(Paths.get(swapLocation));
+                        } catch (IOException e) {
+                            ElementHelper.showAlert(
+                                    errorAlert.getContent(),
+                                    new SwapFileDeletionFailureException(e.getMessage()).getMessage());
+                        } finally {
+                            ElementHelper.toggleElementVisibility(mainDeploymentCircleProgressBar.getContent());
+                        }
+                    }
+                });
+    }
+
+    /**
+     * Handles incoming details swap event.
+     *
+     * @param event given details swap event.
      */
     @EventListener
     private void handleDetailsSwapEvent(ContentSwapEvent event) {
         SchedulerConfigurationHelper.scheduleOnce(
                 () -> {
                     ElementHelper.toggleElementVisibility(mainDeploymentCircleProgressBar.getContent());
-//
+
                     String swapLocation = eventConfigurationHelper.getSwapLocation();
-//
+
                     try {
                         String contentRetrievalUnitRaw;
 

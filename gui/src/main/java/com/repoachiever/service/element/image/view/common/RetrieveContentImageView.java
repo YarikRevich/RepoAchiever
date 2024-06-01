@@ -26,7 +26,7 @@ import org.springframework.stereotype.Service;
 
 /** Represents retrieve content image view. */
 @Service
-public class RetrieveContentImageView implements IElementResizable, IElement<BorderPane> {
+public class RetrieveContentImageView implements IElement<BorderPane> {
   private final UUID id = UUID.randomUUID();
 
   public RetrieveContentImageView(
@@ -64,7 +64,6 @@ public class RetrieveContentImageView implements IElementResizable, IElement<Bor
     borderPane.setRight(splitPane);
 
     ElementStorage.setElement(id, borderPane);
-    ElementStorage.setResizable(this);
   }
 
   /**
@@ -74,16 +73,4 @@ public class RetrieveContentImageView implements IElementResizable, IElement<Bor
   public BorderPane getContent() {
     return ElementStorage.getElement(id);
   }
-
-  /**
-   * @see IElementResizable
-   */
-  @Override
-  public void handlePrefWidth() {}
-
-  /**
-   * @see IElementResizable
-   */
-  @Override
-  public void handlePrefHeight() {}
 }

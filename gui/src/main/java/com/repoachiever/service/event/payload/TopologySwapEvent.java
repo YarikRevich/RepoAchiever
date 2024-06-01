@@ -11,12 +11,8 @@ import java.util.List;
 /** Represents topology swap file open window event used for state management. */
 @Getter
 public class TopologySwapEvent extends ApplicationEvent implements IEvent {
-    private final List<TopologyInfoUnit> content;
-
-    public TopologySwapEvent(List<TopologyInfoUnit> content) {
-        super(content);
-
-        this.content = content;
+    public TopologySwapEvent() {
+        super(new Object());
     }
 
     /**

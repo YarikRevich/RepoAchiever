@@ -28,7 +28,7 @@ import java.util.UUID;
 
 /** Represents cleanall image view. */
 @Service
-public class CleanAllImageView implements IElementResizable, IElement<BorderPane> {
+public class CleanAllImageView implements IElement<BorderPane> {
   private final UUID id = UUID.randomUUID();
 
   public CleanAllImageView(
@@ -66,7 +66,6 @@ public class CleanAllImageView implements IElementResizable, IElement<BorderPane
     borderPane.setRight(splitPane);
 
     ElementStorage.setElement(id, borderPane);
-    ElementStorage.setResizable(this);
   }
 
   /**
@@ -76,16 +75,4 @@ public class CleanAllImageView implements IElementResizable, IElement<BorderPane
   public BorderPane getContent() {
     return ElementStorage.getElement(id);
   }
-
-  /**
-   * @see IElementResizable
-   */
-  @Override
-  public void handlePrefWidth() {}
-
-  /**
-   * @see IElementResizable
-   */
-  @Override
-  public void handlePrefHeight() {}
 }
