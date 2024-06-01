@@ -12,6 +12,8 @@ import jakarta.annotation.PostConstruct;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
@@ -72,16 +74,18 @@ public class ApiServerCommunicationResource {
      * @param name     given content name.
      * @throws ApiServerOperationFailureException if RepoAchiever API Server operation fails.
      */
-    public void performRawContentUpload(String location, String name, InputStream content) throws ApiServerOperationFailureException {
+    public void performRawContentUpload(String location, String name, DataBuffer content) throws ApiServerOperationFailureException {
         IApiServerCommunicationService allocation = retrieveAllocation();
 
         RemoteInputStream contentWrapped;
 
         try {
-            contentWrapped = new SimpleRemoteInputStream(content)
+            contentWrapped = new SimpleRemoteInputStream(content.asInputStream())
                     .export();
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            DataBufferUtils.release(content);
+
+            throw new ApiServerOperationFailureException(e.getMessage());
         }
 
         try {
@@ -91,8 +95,12 @@ public class ApiServerCommunicationResource {
                     name,
                     contentWrapped);
         } catch (RemoteException e) {
+            DataBufferUtils.release(content);
+
             throw new ApiServerOperationFailureException(e.getMessage());
         }
+
+        DataBufferUtils.release(content);
     }
 
     /**

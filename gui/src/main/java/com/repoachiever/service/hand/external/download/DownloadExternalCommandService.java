@@ -16,12 +16,12 @@ import java.io.InputStream;
  * Represents download external command service.
  */
 @Service
-public class DownloadExternalCommandService implements ICommand<InputStream, DownloadExternalCommandDto> {
+public class DownloadExternalCommandService implements ICommand<byte[], DownloadExternalCommandDto> {
     /**
      * @see ICommand
      */
     @Override
-    public InputStream process(DownloadExternalCommandDto downloadExternalCommand) throws ApiServerOperationFailureException {
+    public byte[] process(DownloadExternalCommandDto downloadExternalCommand) throws ApiServerOperationFailureException {
         DownloadContentClientService downloadContentClientService =
                 new DownloadContentClientService(downloadExternalCommand.getConfig().getApiServer().getHost());
 
@@ -33,8 +33,6 @@ public class DownloadExternalCommandService implements ICommand<InputStream, Dow
                         downloadExternalCommand.getConfig().getService().getProvider(),
                         downloadExternalCommand.getConfig().getService().getCredentials()));
 
-        byte[] contentDownloadResult = downloadContentClientService.process(request);
-
-        return new ByteArrayInputStream(contentDownloadResult);
+        return downloadContentClientService.process(request);
     }
 }

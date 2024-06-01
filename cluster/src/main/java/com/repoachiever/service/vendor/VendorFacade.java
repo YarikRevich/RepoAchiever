@@ -14,6 +14,7 @@ import lombok.ToString;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
@@ -127,7 +128,7 @@ public class VendorFacade {
      * @throws LocationDefinitionsAreNotValidException if given location definitions are not valid.
      * @throws GitHubContentRetrievalFailureException  if GitHub client content retrieval fails.
      */
-    public InputStream getRecordRawContent(String location, String record) throws
+    public DataBuffer getRecordRawContent(String location, String record) throws
             LocationDefinitionsAreNotValidException,
             GitHubContentRetrievalFailureException {
         return switch (configService.getConfig().getService().getProvider()) {

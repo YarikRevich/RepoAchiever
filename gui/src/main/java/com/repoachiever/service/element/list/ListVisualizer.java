@@ -3,12 +3,14 @@ package com.repoachiever.service.element.list;
 import com.repoachiever.dto.ListVisualizerCellInputDto;
 import com.repoachiever.entity.PropertiesEntity;
 import com.repoachiever.model.ContentRetrievalResult;
+import com.repoachiever.model.ContentRetrievalUnit;
 import com.repoachiever.service.element.list.cell.ListVisualizerCell;
 import com.repoachiever.service.element.scene.main.deployment.MainDeploymentScene;
 import com.repoachiever.service.element.storage.ElementStorage;
 import com.repoachiever.service.element.text.common.IElement;
 import com.repoachiever.service.element.text.common.IElementActualizable;
 import com.repoachiever.service.element.text.common.IElementResizable;
+import com.repoachiever.service.event.payload.ContentSwapEvent;
 import com.repoachiever.service.state.StateService;
 
 import java.util.*;
@@ -32,7 +34,8 @@ public class ListVisualizer
     private final UUID id = UUID.randomUUID();
 
     @Lazy
-    @Autowired private MainDeploymentScene deploymentScene;
+    @Autowired
+    private MainDeploymentScene deploymentScene;
 
     public ListVisualizer(
             @Autowired PropertiesEntity properties,
@@ -46,17 +49,25 @@ public class ListVisualizer
         listView.setOnMouseClicked(
                 event -> {
                     if (Objects.nonNull(listView.getSelectionModel().getSelectedItem())) {
-                        System.out.println(listView.getSelectionModel().getSelectedItem().getName());
+                        ContentRetrievalResult content = StateService.getContent();
+
+                        applicationEventPublisher.publishEvent(
+                                new ContentSwapEvent(
+                                        content
+                                                .getLocations()
+                                                .stream()
+                                                .filter(
+                                                        element ->
+                                                                element
+                                                                        .getName()
+                                                                        .equals(
+                                                                                listView
+                                                                                        .getSelectionModel()
+                                                                                        .getSelectedItem()
+                                                                                        .getName()))
+                                                .toList()
+                                                .getFirst()));
                     }
-//          applicationEventPublisher.publishEvent(
-//              new SwapFileOpenWindowEvent(
-//                  LocalState.getDeploymentState().getResult().stream()
-//                      .filter(
-//                          element ->
-//                              element
-//                                  .getName()
-//                                  .equals(listView.getSelectionModel().getSelectedItem()))
-//                      .toList()));
                 });
 
         ElementStorage.setElement(id, listView);
@@ -104,8 +115,13 @@ public class ListVisualizer
                                 content
                                         .getLocations()
                                         .stream()
+                                        .sorted(Comparator.comparing(ContentRetrievalUnit::getName))
                                         .map(element ->
-                                                ListVisualizerCellInputDto.of(element.getName(), element.getActive()))
+                                                ListVisualizerCellInputDto.of(
+                                                        element.getName(),
+                                                        element.getActive(),
+                                                        element.getAdditional().getVersions().isEmpty()
+                                                                && element.getRaw().getVersions().isEmpty()))
                                         .toList();
 
                         observableList =
@@ -114,9 +130,7 @@ public class ListVisualizer
                         getContent().setMouseTransparent(false);
                         getContent().setFocusTraversable(true);
                     } else {
-                        List<ListVisualizerCellInputDto> items =
-                                Stream.of(ListVisualizerCellInputDto.empty())
-                                        .toList();
+                        List<ListVisualizerCellInputDto> items = Stream.of(ListVisualizerCellInputDto.stub()).toList();
 
                         observableList =
                                 FXCollections.observableList(items);

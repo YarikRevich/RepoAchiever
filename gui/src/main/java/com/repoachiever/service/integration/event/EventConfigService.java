@@ -1,12 +1,15 @@
 package com.repoachiever.service.integration.event;
 
+import com.repoachiever.converter.ContentRetrievalUnitToJsonConverter;
 import com.repoachiever.dto.CleanExternalCommandDto;
+import com.repoachiever.dto.DownloadExternalCommandDto;
 import com.repoachiever.entity.PropertiesEntity;
 import com.repoachiever.exception.*;
 import com.repoachiever.model.ContentRetrievalResult;
 import com.repoachiever.model.HealthCheckResult;
 import com.repoachiever.model.VersionInfoResult;
 import com.repoachiever.service.command.config.open.OpenConfigCommandService;
+import com.repoachiever.service.command.swap.open.OpenSwapCommandService;
 import com.repoachiever.service.config.ConfigService;
 import com.repoachiever.service.element.alert.ErrorAlert;
 import com.repoachiever.service.element.alert.InformationAlert;
@@ -23,10 +26,13 @@ import com.repoachiever.service.hand.external.topology.TopologyExternalCommandSe
 import com.repoachiever.service.hand.external.version.VersionExternalCommandService;
 import com.repoachiever.service.hand.external.withdraw.WithdrawExternalCommandService;
 import com.repoachiever.service.hand.internal.health.HealthCheckInternalCommandService;
+import com.repoachiever.service.integration.event.common.EventConfigurationHelper;
 import com.repoachiever.service.scheduler.SchedulerConfigurationHelper;
 import com.repoachiever.service.state.StateService;
+import jakarta.annotation.PostConstruct;
 import javafx.geometry.Rectangle2D;
 import javafx.stage.Screen;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -34,7 +40,11 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Objects;
 
 import process.SProcessExecutor;
@@ -93,6 +103,61 @@ public class EventConfigService {
     @Autowired
     private ErrorAlert errorAlert;
 
+    @Autowired
+    private EventConfigurationHelper eventConfigurationHelper;
+
+    /**
+     * Attempts to perform configuration setup.
+     */
+    @PostConstruct
+    private void configure() {
+        SchedulerConfigurationHelper.scheduleOnce(
+                () -> {
+                    try {
+                        StateService.getStartupGuard().await();
+                    } catch (InterruptedException e) {
+                        ElementHelper.showAlert(errorAlert.getContent(), e.getMessage());
+
+                        return;
+                    }
+
+                    ElementHelper.toggleElementVisibility(mainDeploymentCircleProgressBar.getContent());
+
+                    try {
+                        try {
+                            configService.configure(new File(properties.getConfigDefaultLocation()));
+                        } catch (ConfigFileNotFoundException | ConfigFileReadingFailureException |
+                                 ConfigValidationException | ConfigFileClosureFailureException e) {
+                            ElementHelper.showAlert(
+                                    errorAlert.getContent(),
+                                    new DefaultConfigurationFailureException(e.getMessage()).getMessage());
+
+                            return;
+                        }
+
+                        StateService.setConfigLocation(new File(properties.getConfigDefaultLocation()));
+
+                        ContentRetrievalResult contentRetrievalResult;
+
+                        try {
+                            contentRetrievalResult =
+                                    contentExternalCommandService.process(configService.getConfig());
+                        } catch (ApiServerOperationFailureException e) {
+                            ElementHelper.showAlert(errorAlert.getContent(), e.getMessage());
+
+                            return;
+                        }
+
+                        if (!contentRetrievalResult.getLocations().isEmpty()) {
+                            StateService.setContent(contentRetrievalResult);
+                        } else {
+                            StateService.setContent(null);
+                        }
+                    } finally {
+                        ElementHelper.toggleElementVisibility(mainDeploymentCircleProgressBar.getContent());
+                    }
+                });
+    }
 
     /**
      * Provides initial window resolution setup.
@@ -100,7 +165,7 @@ public class EventConfigService {
      * @param contextRefreshedEvent embedded context refreshed event.
      */
     @EventListener(classes = {ContextRefreshedEvent.class})
-    public void eventListener(ContextRefreshedEvent contextRefreshedEvent) {
+    private void eventListener(ContextRefreshedEvent contextRefreshedEvent) {
         Rectangle2D defaultBounds = Screen.getPrimary().getVisualBounds();
 
         Rectangle2D window =
@@ -112,6 +177,8 @@ public class EventConfigService {
 
         applicationEventPublisher.publishEvent(new MainWindowWidthUpdateEvent(window.getWidth()));
         applicationEventPublisher.publishEvent(new MainWindowHeightUpdateEvent(window.getHeight()));
+
+        StateService.getStartupGuard().countDown();
     }
 
     /**
@@ -120,7 +187,7 @@ public class EventConfigService {
      * @param event given health check event.
      */
     @EventListener
-    public void handleHealthCheckEvent(HealthCheckEvent event) {
+    private void handleHealthCheckEvent(HealthCheckEvent event) {
         SchedulerConfigurationHelper.scheduleOnce(
                 () -> {
                     HealthCheckResult healthCheckResult;
@@ -147,7 +214,7 @@ public class EventConfigService {
      * @param event given apply event.
      */
     @EventListener
-    public void handleApplyEvent(ApplyEvent event) {
+    private void handleApplyEvent(ApplyEvent event) {
         SchedulerConfigurationHelper.scheduleOnce(
                 () -> {
                     if (Objects.isNull(StateService.getConfigLocation())) {
@@ -209,7 +276,7 @@ public class EventConfigService {
      * @param event given withdraw event.
      */
     @EventListener
-    public void handleWithdrawEvent(WithdrawEvent event) {
+    private void handleWithdrawEvent(WithdrawEvent event) {
         SchedulerConfigurationHelper.scheduleOnce(
                 () -> {
                     if (Objects.isNull(StateService.getConfigLocation())) {
@@ -257,7 +324,22 @@ public class EventConfigService {
                             return;
                         }
 
-                        StateService.setContent(null);
+                        ContentRetrievalResult contentRetrievalResult;
+
+                        try {
+                            contentRetrievalResult =
+                                    contentExternalCommandService.process(configService.getConfig());
+                        } catch (ApiServerOperationFailureException e) {
+                            ElementHelper.showAlert(errorAlert.getContent(), e.getMessage());
+
+                            return;
+                        }
+
+                        if (!contentRetrievalResult.getLocations().isEmpty()) {
+                            StateService.setContent(contentRetrievalResult);
+                        } else {
+                            StateService.setContent(null);
+                        }
 
                         ElementHelper.showAlert(
                                 informationAlert.getContent(), properties.getAlertWithdrawalFinishedMessage());
@@ -273,7 +355,7 @@ public class EventConfigService {
      * @param event given retrieve content event.
      */
     @EventListener
-    public void handleRetrieveContentEvent(RetrieveContentEvent event) {
+    private void handleRetrieveContentEvent(RetrieveContentEvent event) {
         SchedulerConfigurationHelper.scheduleOnce(
                 () -> {
                     if (Objects.isNull(StateService.getConfigLocation())) {
@@ -326,6 +408,8 @@ public class EventConfigService {
 
                         if (!contentRetrievalResult.getLocations().isEmpty()) {
                             StateService.setContent(contentRetrievalResult);
+                        } else {
+                            StateService.setContent(null);
                         }
                     } finally {
                         ElementHelper.toggleElementVisibility(mainDeploymentCircleProgressBar.getContent());
@@ -339,7 +423,7 @@ public class EventConfigService {
      * @param event given download event.
      */
     @EventListener
-    synchronized void handleDownloadEvent(DownloadEvent event) {
+    private void handleDownloadEvent(DownloadEvent event) {
         SchedulerConfigurationHelper.scheduleOnce(() -> {
             if (!StateService.getConnectionEstablished()) {
                 ElementHelper.showAlert(
@@ -370,7 +454,29 @@ public class EventConfigService {
                     return;
                 }
 
-                Path.of(event.getDestination().getPath(), event.getLocation());
+                byte[] contentDownloadResult;
+
+                try {
+                    contentDownloadResult = downloadExternalCommandService.process(
+                            DownloadExternalCommandDto.of(configService.getConfig(), event.getLocation()));
+                } catch (ApiServerOperationFailureException e) {
+                    ElementHelper.showAlert(errorAlert.getContent(), e.getMessage());
+
+                    return;
+                }
+
+                try {
+                    FileUtils.writeByteArrayToFile(
+                            new File(
+                                    eventConfigurationHelper.getOutputLocation(
+                                            Path.of(event.getDestination().getPath(), event.getLocation()).toString())),
+                            contentDownloadResult);
+                } catch (IOException e) {
+                    ElementHelper.showAlert(errorAlert.getContent(), e.getMessage());
+                }
+
+                ElementHelper.showAlert(
+                        informationAlert.getContent(), properties.getAlertDownloadFinishedMessage());
             } finally {
                 ElementHelper.toggleElementVisibility(mainDeploymentCircleProgressBar.getContent());
             }
@@ -383,7 +489,7 @@ public class EventConfigService {
      * @param event given clean event.
      */
     @EventListener
-    synchronized void handleCleanEvent(CleanEvent event) {
+    private void handleCleanEvent(CleanEvent event) {
         SchedulerConfigurationHelper.scheduleOnce(() -> {
             if (!StateService.getConnectionEstablished()) {
                 ElementHelper.showAlert(
@@ -431,7 +537,7 @@ public class EventConfigService {
      * @param event given cleanall event.
      */
     @EventListener
-    synchronized void handleCleanAllEvent(CleanAllEvent event) {
+    private void handleCleanAllEvent(CleanAllEvent event) {
         SchedulerConfigurationHelper.scheduleOnce(
                 () -> {
                     if (Objects.isNull(StateService.getConfigLocation())) {
@@ -468,6 +574,29 @@ public class EventConfigService {
                             ElementHelper.showAlert(
                                     errorAlert.getContent(), properties.getAlertVersionMismatchMessage());
                         }
+
+                        try {
+                            cleanAllExternalCommandService.process(configService.getConfig());
+                        } catch (ApiServerOperationFailureException e) {
+                            ElementHelper.showAlert(errorAlert.getContent(), e.getMessage());
+                        }
+
+                        ContentRetrievalResult contentRetrievalResult;
+
+                        try {
+                            contentRetrievalResult =
+                                    contentExternalCommandService.process(configService.getConfig());
+                        } catch (ApiServerOperationFailureException e) {
+                            ElementHelper.showAlert(errorAlert.getContent(), e.getMessage());
+
+                            return;
+                        }
+
+                        if (!contentRetrievalResult.getLocations().isEmpty()) {
+                            StateService.setContent(contentRetrievalResult);
+                        } else {
+                            StateService.setContent(null);
+                        }
                     } finally {
                         ElementHelper.toggleElementVisibility(mainDeploymentCircleProgressBar.getContent());
                     }
@@ -480,7 +609,7 @@ public class EventConfigService {
      * @param event given edit event.
      */
     @EventListener
-    synchronized void handleEditEvent(EditEvent event) {
+    private void handleEditEvent(EditEvent event) {
         SchedulerConfigurationHelper.scheduleOnce(
                 () -> {
                     if (Objects.isNull(StateService.getConfigLocation())) {
@@ -528,7 +657,7 @@ public class EventConfigService {
      * @param event given open event.
      */
     @EventListener
-    synchronized void handleOpenEvent(OpenEvent event) {
+    private void handleOpenEvent(OpenEvent event) {
         SchedulerConfigurationHelper.scheduleOnce(
                 () -> {
                     ElementHelper.toggleElementVisibility(mainDeploymentCircleProgressBar.getContent());
@@ -558,6 +687,8 @@ public class EventConfigService {
 
                         if (!contentRetrievalResult.getLocations().isEmpty()) {
                             StateService.setContent(contentRetrievalResult);
+                        } else {
+                            StateService.setContent(null);
                         }
                     } finally {
                         ElementHelper.toggleElementVisibility(mainDeploymentCircleProgressBar.getContent());
@@ -571,44 +702,60 @@ public class EventConfigService {
      * @param event given swap event.
      */
     @EventListener
-    synchronized void handleSwapEvent(SwapEvent event) {
+    private void handleDetailsSwapEvent(ContentSwapEvent event) {
         SchedulerConfigurationHelper.scheduleOnce(
                 () -> {
-//                    ElementHelper.toggleElementVisibility(mainDeploymentCircleProgressBar.getContent());
+                    ElementHelper.toggleElementVisibility(mainDeploymentCircleProgressBar.getContent());
 //
-//                    String swapFilePath = null;
+                    String swapLocation = eventConfigurationHelper.getSwapLocation();
 //
-//                    try {
-//                        try {
-//                            swapFilePath = swapService.createSwapFile(
-//                                    Paths.get(properties.getSwapRoot()).toString(), event.getContent());
-//                        } catch (SwapFileCreationFailureException e) {
-//                            ElementHelper.showAlert(errorAlert.getContent(), e.getMessage());
-//                            return;
-//                        }
-//
-//                        OpenSwapFileEditorCommandService openSwapFileEditorCommandService =
-//                                new OpenSwapFileEditorCommandService(swapFilePath);
-//
-//                        if (commandExecutorService.getOSType() == SProcessExecutor.OS.MAC) {
-//                            ElementHelper.showAlert(
-//                                    informationAlert.getContent(), properties.getAlertEditorCloseReminderMessage());
-//                        }
-//
-//                        try {
-//                            commandExecutorService.executeCommand(openSwapFileEditorCommandService);
-//                        } catch (CommandExecutorException e) {
-//                            ElementHelper.showAlert(errorAlert.getContent(), e.getMessage());
-//                        }
-//                    } finally {
-//                        try {
-//                            swapService.deleteSwapFile(swapFilePath);
-//                        } catch (SwapFileDeletionFailureException e) {
-//                            ElementHelper.showAlert(errorAlert.getContent(), e.getMessage());
-//                        } finally {
-//                            ElementHelper.toggleElementVisibility(mainDeploymentCircleProgressBar.getContent());
-//                        }
-//                    }
+                    try {
+                        String contentRetrievalUnitRaw;
+
+                        try {
+                            contentRetrievalUnitRaw =
+                                    ContentRetrievalUnitToJsonConverter.convert(event.getContent());
+                        } catch (ContentRetrievalUnitToJsonConversionFailureException e) {
+                            ElementHelper.showAlert(
+                                    errorAlert.getContent(),
+                                    new SwapFileCreationFailureException(e.getMessage()).getMessage());
+
+                            return;
+                        }
+
+                        try {
+                            Files.writeString(Path.of(swapLocation), contentRetrievalUnitRaw);
+                        } catch (IOException e) {
+                            ElementHelper.showAlert(
+                                    errorAlert.getContent(),
+                                    new SwapFileCreationFailureException(e.getMessage()).getMessage());
+
+                            return;
+                        }
+
+                        OpenSwapCommandService openSwapCommandService = new OpenSwapCommandService(swapLocation);
+
+                        if (commandExecutorService.getOSType() == SProcessExecutor.OS.MAC) {
+                            ElementHelper.showAlert(
+                                    informationAlert.getContent(), properties.getAlertEditorCloseReminderMessage());
+                        }
+
+                        try {
+                            commandExecutorService.executeCommand(openSwapCommandService);
+                        } catch (CommandExecutorException e) {
+                            ElementHelper.showAlert(errorAlert.getContent(), e.getMessage());
+                        }
+                    } finally {
+                        try {
+                            Files.deleteIfExists(Paths.get(swapLocation));
+                        } catch (IOException e) {
+                            ElementHelper.showAlert(
+                                    errorAlert.getContent(),
+                                    new SwapFileDeletionFailureException(e.getMessage()).getMessage());
+                        } finally {
+                            ElementHelper.toggleElementVisibility(mainDeploymentCircleProgressBar.getContent());
+                        }
+                    }
                 });
     }
 
@@ -618,7 +765,7 @@ public class EventConfigService {
      * @param event main window height update event, which contains new window height.
      */
     @EventListener
-    synchronized void handleMainWindowHeightUpdateEvent(MainWindowHeightUpdateEvent event) {
+    private void handleMainWindowHeightUpdateEvent(MainWindowHeightUpdateEvent event) {
         StateService.setMainWindowHeight(event.getHeight());
 
         if (StateService.getMainWindowHeightUpdateMutex().getCount() > 0) {
@@ -632,7 +779,7 @@ public class EventConfigService {
      * @param event main window width update event, which contains new window width.
      */
     @EventListener
-    synchronized void handleMainWindowWidthUpdateEvent(MainWindowWidthUpdateEvent event) {
+    private void handleMainWindowWidthUpdateEvent(MainWindowWidthUpdateEvent event) {
         StateService.setMainWindowWidth(event.getWidth());
 
         if (StateService.getMainWindowWidthUpdateMutex().getCount() > 0) {

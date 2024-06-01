@@ -246,6 +246,7 @@ components:
     ContentRetrievalUnit:
       required:
         - name
+        - active
         - raw
         - additional
       properties:
@@ -258,12 +259,16 @@ components:
         additional:
           $ref: "#/components/schemas/ContentRetrievalUnitAdditional"
     ContentRetrievalUnitRaw:
+      required:
+        - versions
       properties:
         versions:
           type: array
           items:
             type: string
     ContentRetrievalUnitAdditional:
+      required:
+        - versions
       properties:
         versions:
           type: array

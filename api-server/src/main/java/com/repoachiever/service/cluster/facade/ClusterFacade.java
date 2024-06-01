@@ -76,6 +76,17 @@ public class ClusterFacade {
             throw new ClusterContentRetrievalFailureException(e.getMessage());
         }
 
+        List<RepositoryContentLocationUnitDto> repositoryContentLocations;
+
+        try {
+            repositoryContentLocations =
+                    repositoryFacade.retrieveLocations(contentRetrievalApplication);
+        } catch (ContentLocationsRetrievalFailureException e) {
+            StateService.getTopologyStateGuard().unlock();
+
+            throw new ClusterContentRetrievalFailureException(e.getMessage());
+        }
+
         ContentRetrievalResult result = new ContentRetrievalResult();
 
         for (String locationUnit : locationUnits) {
@@ -89,6 +100,7 @@ public class ClusterFacade {
                 throw new ClusterContentRetrievalFailureException(e.getMessage());
             }
 
+
             List<String> additionalContentUnits;
 
             try {
@@ -100,15 +112,10 @@ public class ClusterFacade {
                 throw new ClusterContentRetrievalFailureException(e.getMessage());
             }
 
-            Boolean active = false;
-
-            try {
-                active = repositoryFacade.isContentLocationValid(
-                        locationUnit,
-                        contentRetrievalApplication.getProvider(),
-                        contentRetrievalApplication.getCredentials());
-            } catch (ContentValidationFailureException ignored) {
-            }
+            Boolean active =
+                    repositoryContentLocations
+                            .stream()
+                            .anyMatch(element -> Objects.equals(element.getLocation(), locationUnit));
 
             result.addLocationsItem(
                     ContentRetrievalUnit.of(
@@ -116,6 +123,23 @@ public class ClusterFacade {
                             active,
                             ContentRetrievalUnitRaw.of(rawContentUnits),
                             ContentRetrievalUnitAdditional.of(additionalContentUnits)));
+        }
+
+        for (RepositoryContentLocationUnitDto repositoryContentLocation : repositoryContentLocations) {
+            if (!result
+                    .getLocations()
+                    .stream()
+                    .anyMatch(element ->
+                            Objects.equals(
+                                    element.getName(), repositoryContentLocation.getLocation()))) {
+                result.addLocationsItem(
+                        ContentRetrievalUnit.of(
+                                repositoryContentLocation.getLocation(),
+                                true,
+                                ContentRetrievalUnitRaw.of(new ArrayList<>()),
+                                ContentRetrievalUnitAdditional.of(new ArrayList<>())));
+
+            }
         }
 
         StateService.getTopologyStateGuard().unlock();

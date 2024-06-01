@@ -7,6 +7,8 @@ import com.repoachiever.service.element.progressbar.main.start.MainStartCirclePr
 import com.repoachiever.service.element.storage.ElementStorage;
 import com.repoachiever.service.element.text.common.IElement;
 import java.util.UUID;
+
+import com.repoachiever.service.state.StateService;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.paint.Color;

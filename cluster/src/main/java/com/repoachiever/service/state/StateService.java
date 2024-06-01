@@ -97,37 +97,37 @@ public class StateService {
     @Getter
     private final static ReentrantLock suspendGuard = new ReentrantLock();
 
-    /**
-     * Represents a set of content updates head counter, pointing at the latest scanned head of the stream for the
-     * provided content locations. As keys there are used provided location names and as values commit amounts are used.
-     */
-    private final static Map<String, Integer> contentUpdatesHeadCounterSet = new HashMap<>();
+//    /**
+//     * Represents a set of content updates head counter, pointing at the latest scanned head of the stream for the
+//     * provided content locations. As keys there are used provided location names and as values commit amounts are used.
+//     */
+//    private final static Map<String, Integer> contentUpdatesHeadCounterSet = new HashMap<>();
+//
+//    /**
+//     * Adds current content update head counter for the given location name with the given value.
+//     *
+//     * @param location given content location.
+//     * @param value  given content value.
+//     */
+//    public static void setContentUpdatesHeadCounter(String location, Integer value) {
+//        contentUpdatesHeadCounterSet.put(location, value);
+//    }
 
-    /**
-     * Adds current content update head counter for the given location name with the given value.
-     *
-     * @param location given content location.
-     * @param value  given content value.
-     */
-    public static void setContentUpdatesHeadCounter(String location, Integer value) {
-        contentUpdatesHeadCounterSet.put(location, value);
-    }
+//    /**
+//     * Checks if current content update head counter for the given location name is below or equal to the given value.
+//     *
+//     * @return result of the check.
+//     */
+//    public static Boolean isContentUpdateHeadCounterBelow(String location, Integer value) {
+//        return contentUpdatesHeadCounterSet.getOrDefault(location, 0) < value;
+//    }
 
-    /**
-     * Checks if current content update head counter for the given location name is below or equal to the given value.
-     *
-     * @return result of the check.
-     */
-    public static Boolean isContentUpdateHeadCounterBelow(String location, Integer value) {
-        return contentUpdatesHeadCounterSet.getOrDefault(location, 0) < value;
-    }
-
-    /**
-     * Resets current content update head counter.
-     */
-    public static void resetContentUpdatesHeadCounter() {
-        contentUpdatesHeadCounterSet.clear();
-    }
+//    /**
+//     * Resets current content update head counter.
+//     */
+//    public static void resetContentUpdatesHeadCounter() {
+//        contentUpdatesHeadCounterSet.clear();
+//    }
 
     /**
      * Represents log message queue used to handle RepoAchiever API Server log message transfer.

@@ -68,7 +68,7 @@ public class ClusterCommunicationResource extends UnicastRemoteObject implements
      */
     @Override
     public void performRetrievalReset() throws RemoteException {
-        StateService.resetContentUpdatesHeadCounter();
+//        StateService.resetContentUpdatesHeadCounter();
     }
 
     /**

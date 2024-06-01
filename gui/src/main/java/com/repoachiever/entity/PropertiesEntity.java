@@ -224,6 +224,9 @@ public class PropertiesEntity {
   @Value(value = "${alert.withdrawal-finished.message}")
   private String alertWithdrawalFinishedMessage;
 
+  @Value(value = "${alert.download-finished.message}")
+  private String alertDownloadFinishedMessage;
+
   @Value(value = "${alert.version-mismatch.message}")
   private String alertVersionMismatchMessage;
 

@@ -13,18 +13,20 @@ public class ListVisualizerCellInputDto {
 
     private final Boolean active;
 
-    private Boolean empty = false;
+    private final Boolean empty;
+
+    private Boolean stub = false;
 
     /**
-     * Creates empty instance.
+     * Creates stub instance.
      *
-     * @return created empty instance.
+     * @return created stub instance.
      */
-    public static ListVisualizerCellInputDto empty() {
+    public static ListVisualizerCellInputDto stub() {
         ListVisualizerCellInputDto result =
-                ListVisualizerCellInputDto.of(null, null);
+                ListVisualizerCellInputDto.of(null, null, null);
 
-        result.empty = true;
+        result.stub = true;
 
         return result;
     }

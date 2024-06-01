@@ -57,8 +57,10 @@ public class ListVisualizerCell extends ListCell<ListVisualizerCellInputDto> {
     protected void updateItem(ListVisualizerCellInputDto item, boolean empty) {
         super.updateItem(item, empty);
 
-        setText(null);
-        setGraphic(null);
+//        if (hbox != null) {
+//            getItem
+//            System.out.println(String.format("%d-%b", hbox.hashCode(), empty));
+//        }
 
         if (!empty) {
             if (Objects.isNull(StateService.getConfigLocation())) {
@@ -71,7 +73,7 @@ public class ListVisualizerCell extends ListCell<ListVisualizerCellInputDto> {
 
                     hbox.getChildren().addAll(label);
                 }
-            } else if (item.getEmpty()) {
+            } else if (item.getStub()) {
                 if (Objects.isNull(label)) {
                     label = new Label(properties.getListViewEmptyName());
                 }
@@ -89,7 +91,39 @@ public class ListVisualizerCell extends ListCell<ListVisualizerCellInputDto> {
 
                     hbox.getChildren().addAll(label);
                 }
+            } else if (item.getEmpty()) {
+                if (Objects.isNull(label)) {
+                    label = new Label(item.getName());
+                }
+
+                if (!label.getText().equals(item.getName())) {
+                    label.setText(item.getName());
+                }
+
+                if (Objects.isNull(hbox)) {
+                    hbox = new HBox();
+
+                    hbox.getChildren().addAll(label);
+                }
+
+                if (hbox.getChildren().size() > 1) {
+                    hbox.getChildren().clear();
+
+                    hbox.getChildren().addAll(label);
+                }
             } else {
+                if (Objects.isNull(label)) {
+                    label = new Label(item.getName());
+                }
+
+                if (!label.getText().equals(item.getName())) {
+                    label.setText(item.getName());
+                }
+
+                if (Objects.isNull(hbox)) {
+                    hbox = new HBox();
+                }
+
                 if (Objects.isNull(cleanImageView)) {
                     this.cleanImageView = new CleanImageView(
                             properties, applicationEventPublisher, item.getName());
@@ -100,24 +134,19 @@ public class ListVisualizerCell extends ListCell<ListVisualizerCellInputDto> {
                             properties, applicationEventPublisher, deploymentScene, item.getName());
                 }
 
-                if (Objects.isNull(label)) {
-                    label = new Label(item.getName());
-                }
+                if (hbox.getChildren().size() < 3) {
+                    hbox.getChildren().clear();
 
-                if (!label.getText().equals(item.getName())) {
-                    label.setText(item.getName());
-
-                    if (Objects.isNull(hbox)) {
-                        hbox = new HBox();
-                    }
-
-                    hbox.getChildren().addAll(pane, cleanImageView.getContent(), downloadImageView.getContent());
+                    hbox.getChildren().addAll(label, pane, cleanImageView.getContent(), downloadImageView.getContent());
                 }
             }
+
+            HBox.setHgrow(pane, Priority.ALWAYS);
+
+            setGraphic(hbox);
+        } else {
+            setText(null);
+            setGraphic(null);
         }
-
-        HBox.setHgrow(pane, Priority.ALWAYS);
-
-        setGraphic(hbox);
     }
 }

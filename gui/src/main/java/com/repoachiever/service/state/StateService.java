@@ -29,11 +29,23 @@ public class StateService {
     @Setter
     private static Double mainWindowWidth;
 
+    /**
+     *
+     */
     @Getter
     private static final CountDownLatch mainWindowWidthUpdateMutex = new CountDownLatch(1);
 
+    /**
+     *
+     */
     @Getter
     private static final CountDownLatch mainWindowHeightUpdateMutex = new CountDownLatch(1);
+
+    /**
+     *
+     */
+    @Getter
+    private static final CountDownLatch startupGuard = new CountDownLatch(1);
 
     /**
      * Represents state when connection with RepoAchiever API Server is established or not.

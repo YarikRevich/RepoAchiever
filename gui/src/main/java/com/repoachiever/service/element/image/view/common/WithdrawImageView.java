@@ -7,6 +7,7 @@ import com.repoachiever.service.element.text.common.IElement;
 import com.repoachiever.service.element.text.common.IElementActualizable;
 import com.repoachiever.service.element.text.common.IElementResizable;
 import com.repoachiever.service.event.payload.ApplyEvent;
+import com.repoachiever.service.event.payload.WithdrawEvent;
 import ink.bluecloud.css.CssResources;
 import ink.bluecloud.css.ElementButton;
 import ink.bluecloud.css.ElementButtonKt;
@@ -41,7 +42,7 @@ public class WithdrawImageView implements IElementResizable, IElement<BorderPane
     button.getStylesheets().add(CssResources.textFieldCssFile);
 
     button.setOnMouseClicked(
-        event -> applicationEventPublisher.publishEvent(new ApplyEvent()));
+        event -> applicationEventPublisher.publishEvent(new WithdrawEvent()));
 
     InputStream imageSource =
         getClass().getClassLoader().getResourceAsStream(properties.getImageWithdrawName());

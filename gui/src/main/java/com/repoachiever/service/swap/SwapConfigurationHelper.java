@@ -20,17 +20,6 @@ import org.springframework.stereotype.Service;
 /** Represents service responsible for temporate swap file creation. */
 @Service
 public class SwapConfigurationHelper {
-//  /**
-//   * Creates swap key for swap file.
-//   *
-//   * @return created key for swap file.
-//   */
-//  @SneakyThrows
-//  public static String createKey() {
-//    MessageDigest md = MessageDigest.getInstance("SHA3-256");
-//    return DatatypeConverter.printHexBinary(md.digest(String.join(".", segments).getBytes()));
-//  }
-
   /**
    * Creates temporate swap file with the given properties.
    *
@@ -61,30 +50,5 @@ public class SwapConfigurationHelper {
 //    return absoluteSwapFilePath;
 
     return null;
-  }
-//
-//  /**
-//   * Composes name for RepoAchiever Cluster using pre-defined prefix and UUID.
-//   *
-//   * @param prefix given name prefix.
-//   * @return composed RepoAchiever Cluster name.
-//   */
-//  public static String getName(String prefix) {
-//    return String.format("%s-%s", prefix, UUID.randomUUID());
-//  }
-
-
-  /**
-   * Deletes previously created temporate swap file.
-   *
-   * @param swapLocation given location of the swap file to be removed.
-   * @throws SwapFileDeletionFailureException if swap file deletion failed.
-   */
-  public static void deleteSwapFile(String swapLocation) throws SwapFileDeletionFailureException {
-    try {
-      Files.deleteIfExists(Paths.get(swapLocation));
-    } catch (IOException e) {
-      throw new SwapFileDeletionFailureException(e.getMessage());
-    }
   }
 }
