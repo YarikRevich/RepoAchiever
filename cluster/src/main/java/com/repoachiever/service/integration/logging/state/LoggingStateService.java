@@ -21,8 +21,7 @@ public class LoggingStateService {
     @Autowired
     private PropertiesEntity properties;
 
-    private final ScheduledExecutorService scheduledExecutorService =
-            Executors.newScheduledThreadPool(0, Thread.ofVirtual().factory());
+    private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
     /**
      * Performs application exit if the required state has been changed.
