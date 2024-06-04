@@ -57,8 +57,7 @@ public class GitGitHubVendorService {
 
     private String document;
 
-    private final ScheduledExecutorService scheduledExecutorService =
-            Executors.newScheduledThreadPool(0, Thread.ofVirtual().factory());
+    private ScheduledExecutorService scheduledExecutorService;
 
     /**
      * Performs initial GraphQL client and HTTP client configuration.
@@ -67,6 +66,10 @@ public class GitGitHubVendorService {
      */
     @PostConstruct
     private void configure() throws GitHubGraphQlClientDocumentNotFoundException {
+        scheduledExecutorService =
+                Executors.newScheduledThreadPool(
+                        configService.getConfig().getContent().getLocations().size() * 2);
+
         if (configService.getConfig().getService().getProvider() == ConfigEntity.Service.Provider.GIT_GITHUB) {
             WebClient client = WebClient.builder()
                     .baseUrl(properties.getGraphQlClientGitHubUrl())

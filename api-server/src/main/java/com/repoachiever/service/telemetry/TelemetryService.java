@@ -38,44 +38,45 @@ public class TelemetryService {
 
     private final ConcurrentLinkedQueue<Runnable> additionalContentUploadQueue = new ConcurrentLinkedQueue<>();
 
-    private final static ScheduledExecutorService executorService = Executors.newScheduledThreadPool(6);
+    private final static ScheduledExecutorService scheduledExecutorService =
+            Executors.newScheduledThreadPool(0, Thread.ofVirtual().factory());
 
     /**
      * Starts telemetries listener, which handles incoming telemetries to be processed in a sequential way.
      */
     @PostConstruct
     private void configure() {
-        executorService.scheduleWithFixedDelay(() -> {
+        scheduledExecutorService.scheduleWithFixedDelay(() -> {
             if (!apiServerHealthCheckQueue.isEmpty()) {
                 apiServerHealthCheckQueue.poll().run();
             }
         }, 0, properties.getDiagnosticsScrapeDelay(), TimeUnit.MILLISECONDS);
 
-        executorService.scheduleWithFixedDelay(() -> {
+        scheduledExecutorService.scheduleWithFixedDelay(() -> {
             if (!clusterHealthCheckQueue.isEmpty()) {
                 clusterHealthCheckQueue.poll().run();
             }
         }, 0, properties.getDiagnosticsScrapeDelay(), TimeUnit.MILLISECONDS);
 
-        executorService.scheduleWithFixedDelay(() -> {
+        scheduledExecutorService.scheduleWithFixedDelay(() -> {
             if (!clusterStateQueue.isEmpty()) {
                 clusterStateQueue.poll().run();
             }
         }, 0, properties.getDiagnosticsScrapeDelay(), TimeUnit.MILLISECONDS);
 
-        executorService.scheduleWithFixedDelay(() -> {
+        scheduledExecutorService.scheduleWithFixedDelay(() -> {
             if (!clusterDownloadQueue.isEmpty()) {
                 clusterDownloadQueue.poll().run();
             }
         }, 0, properties.getDiagnosticsScrapeDelay(), TimeUnit.MILLISECONDS);
 
-        executorService.scheduleWithFixedDelay(() -> {
+        scheduledExecutorService.scheduleWithFixedDelay(() -> {
             if (!rawContentUploadQueue.isEmpty()) {
                 rawContentUploadQueue.poll().run();
             }
         }, 0, properties.getDiagnosticsScrapeDelay(), TimeUnit.MILLISECONDS);
 
-        executorService.scheduleWithFixedDelay(() -> {
+        scheduledExecutorService.scheduleWithFixedDelay(() -> {
             if (!additionalContentUploadQueue.isEmpty()) {
                 additionalContentUploadQueue.poll().run();
             }

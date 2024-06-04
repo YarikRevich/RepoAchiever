@@ -34,11 +34,6 @@ public class SchedulerConfigService {
     @Autowired
     private ApiServerCommunicationResource apiServerCommunicationResource;
 
-    private final ExecutorService starterExecutorService = Executors.newVirtualThreadPerTaskExecutor();
-
-    private final ScheduledExecutorService operationScheduledExecutorService =
-            Executors.newScheduledThreadPool(0, Thread.ofVirtual().factory());
-
     /**
      * Performs configuration of RepoAchiever Cluster workers.
      *
@@ -46,6 +41,12 @@ public class SchedulerConfigService {
      */
     @PostConstruct
     private void process() throws SchedulerPeriodRetrievalFailureException {
+        ExecutorService starterExecutorService =
+                Executors.newFixedThreadPool(configService.getConfig().getContent().getLocations().size());
+
+        ScheduledExecutorService operationScheduledExecutorService =
+                Executors.newScheduledThreadPool(configService.getConfig().getContent().getLocations().size());
+
         Long period;
 
         try {
