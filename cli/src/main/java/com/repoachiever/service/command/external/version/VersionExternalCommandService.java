@@ -7,6 +7,7 @@ import com.repoachiever.model.VersionInfoResult;
 import com.repoachiever.service.client.info.version.VersionInfoClientService;
 import com.repoachiever.service.command.common.ICommand;
 import com.repoachiever.service.visualization.state.VisualizationState;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +25,7 @@ public class VersionExternalCommandService implements ICommand<ConfigEntity> {
     /**
      * @see ICommand
      */
-    public void process(ConfigEntity config) throws ApiServerOperationFailureException {
+    public void process(ConfigEntity config) {
         visualizationState.getLabel().pushNext();
 
         VersionInfoClientService versionInfoClientService =
@@ -36,10 +37,11 @@ public class VersionExternalCommandService implements ICommand<ConfigEntity> {
             visualizationState.addResult(
                     String.format(
                             "API Server version: %s", versionInfoResult.getExternalApi().getHash()));
-        } finally {
-            visualizationState.addResult(
-                    String.format("Client version: %s", properties.getGitCommitId()));
+        } catch (ApiServerOperationFailureException ignored) {
         }
+
+        visualizationState.addResult(
+                String.format("Client version: %s", properties.getGitCommitId()));
 
         visualizationState.getLabel().pushNext();
     }

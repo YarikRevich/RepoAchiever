@@ -17,6 +17,9 @@ public class PropertiesEntity {
   @Value(value = "${git.commit.id.abbrev}")
   private String gitCommitId;
 
+  @Value(value = "${rest-client.timeout}")
+  private String restClientTimeout;
+
   @Value(value = "${config.default.location}")
   private String configDefaultLocation;
 

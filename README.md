@@ -1,19 +1,19 @@
 # RepoAchiever
 
-[![Build](https://github.com/YarikRevich/ResourceTracker/actions/workflows/build.yml/badge.svg)](https://github.com/YarikRevich/ResourceTracker/actions/workflows/build.yml)
+[![Build](https://github.com/YarikRevich/RepoAchiever/actions/workflows/build.yml/badge.svg)](https://github.com/YarikRevich/ResourceTracker/actions/workflows/build.yml)
 ![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
 ![MacOS](https://img.shields.io/badge/MacOS-8773f5?style=for-the-badge&logo=macos&logoColor=black)
 [![StandWithUkraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/README.md)
 
 ## General Information
 
-A tool used for remote Git repositories achieving operations.
+A tool used for remote content achieving operations.
 
 ![](./docs/high-level-design.png)
 
-![](./docs/detailed-design.png)
+![](./docs/detailed-design-raw.png)
 
-![](./docs/workspace-design.png)
+![](./docs/internal-storage-design.png)
 
 RepoAchiever uses server-side data validation. It means, that on client side no data transformation or further analysis are made.
 Only API Server calls are on client side responsibility. 
@@ -31,7 +31,7 @@ make build-cli
 
 After the execution of command given above the executable will be generated and placed into **bin** folder in the root directory of the project
 
-**CLI** build automatically places default **user.yaml** configuration file into ~/.resourcetracker/config directory.
+**CLI** build automatically places default **user.yaml** configuration file into ~/.repoachiever/config directory.
 
 ### GUI
 
@@ -42,7 +42,7 @@ make build-gui
 
 After the execution of command given above the executable will be generated and placed into **bin** folder in the root directory of the project
 
-**GUI** build automatically compiles **API Server** and places both executable JAR and other dependencies into **~/.resourcetracker/bin/api-server** directory
+**GUI** build automatically compiles **API Server** and places both executable JAR and other dependencies into **~/.repoachiever/bin/api-server** directory
 
 It's highly recommended not to move **API Server** files from the default local directory
 
