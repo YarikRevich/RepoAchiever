@@ -465,13 +465,7 @@ public class BaseCommandService {
             return;
         }
 
-        try {
-            versionExternalCommandService.process(configService.getConfig());
-        } catch (ApiServerOperationFailureException e) {
-            logger.fatal(e.getMessage());
-
-            return;
-        }
+        versionExternalCommandService.process(configService.getConfig());
 
         visualizationService.await();
     }

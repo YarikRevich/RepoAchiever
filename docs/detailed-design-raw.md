@@ -2,75 +2,95 @@
 !pragma teoz true
 
 title 
-    Detailed design of "ResourceTracker" 
+    Detailed design of "RepoAchiever" 
 end title
 
+box "External environment" #MOTIVATION
 actor "Client" as client
+actor "Diagnostics" as diagnostics
+end box
 
 box "Control plain" #MOTIVATION
 participant "API Server" as apiserver
+database "Local storage" as localstorage
 
-box "Cloud environment" #Lavender
-queue "Kafka" as kafka
-participant "Kafka starter" as kafkastarter
-participant "Agent" as agent
-entity "Cloud provider" as cloudprovider
+entity "Metrics registry" as metricsregistry
+
+box "Decentralized environment" #Lavender
+participant "Cluster" as cluster
+entity "Worker" as worker
 end box
 
 end box
 
-note over [[[[[[kafka]]]]]]: Kafka is considered to be used in persisted mode
+box "Third-party environment" #MOTIVATION
+entity "External service" as externalservice 
+end box
 
 opt "endpoints"
-opt "/v1/secrets/acquire [POST]"
-apiserver -> cloudprovider: validate provided credentials
-cloudprovider -> apiserver: validation result
+opt "/v1/content [POST]"
+localstorage -> apiserver: retrieve details about all the available content for the given user
 end
-opt "/v1/topic/logs [GET]"
-apiserver -> kafka: retrieve state for the given "logs" topic
-kafka -> apiserver: transform data stream according to the specified filters
+opt "/v1/content/apply [POST]"
+apiserver -> externalservice: validate provided credentials
+apiserver -> localstorage: apply provided user configuration
+apiserver -> cluster: update topology according to the new configuration 
 end
-opt "/v1/terraform/apply [POST]"
-apiserver -> cloudprovider: deploy resource tracking infrastructure
-apiserver -> kafkastarter: request kafka cluster startup 
-kafkastarter -> kafka: start kafka cluster
+opt "/v1/content/withdraw [DELETE]"
+apiserver -> localstorage: remove configuration for the given user
+apiserver -> cluster: remove topology
 end
-opt "/v1/terraform/destroy [POST]"
-apiserver -> cloudprovider: destroy resource tracking infrastructure
+opt "/v1/content/download [POST]"
+localstorage -> apiserver: retrieve requested content in a form of achieve
 end
+opt "/v1/content/clean [DELETE]"
+apiserver -> localstorage: remove requested content for the given user
+end
+opt "/v1/content/clean/all [DELETE]"
+apiserver -> localstorage: remove all content for the given user
 end
 
-opt "agent execution flow"
-agent -> cloudprovider: execute remote operations
-agent <-- cloudprovider: remote operation result
-agent --> kafka: push latest resource state to "logs" topic
+opt "cluster execution flow"
+cluster -> worker: allocate instances according to the provided locations
+worker -> externalservice: retrieve content with the given identification
+worker -> apiserver: transfer retrieved content
 end
 
 opt "requests"
-note over client: Uses properties specified in a client\nconfiguration file located in\n a common directory
-opt "credentials validation"
-client -> apiserver: /v1/secrets/acquire [POST]
+
+opt "retrieve available content"
+client -> apiserver: /v1/content [POST]
 end
-opt "script validation"
-client -> apiserver: /v1/script/acquire [POST]
+opt "configuration application"
+client -> apiserver: /v1/content/apply [POST]
+end
+opt "configuration withdrawal"
+client -> apiserver: /v1/content/withdraw [DELETE]
+end
+opt "download content"
+client -> apiserver: /v1/content/download [POST]
+end
+opt "clean selected content"
+client -> apiserver: /v1/content/clean [DELETE]
+end
+opt "clean all the content for the given user"
+client -> apiserver: /v1/content/clean/all [DELETE]
 end
 opt "health check"
 client -> apiserver: /v1/health [GET]
 end
-opt "readiness check"
-client -> apiserver: /v1/readiness [GET]
-end
-opt "version validation"
+opt "version retrieval"
 client -> apiserver: /v1/info/version [GET]
 end
-opt "infrustructure deployment"
-client -> apiserver: /v1/terraform/apply [POST]
+opt "topology retrieval"
+client -> apiserver: /v1/info/topology [GET]
 end
-opt "infrustructure clean up"
+opt ""
 client -> apiserver: /v1/terraform/destroy [POST]
 end
-opt "state retrieval"
-client -> apiserver: /v1/topic/logs [GET]
-end 
+opt "metrics retrieval"
+diagnostics -> metricsregistry: / [GET] 
+end
+
 end
 ```
