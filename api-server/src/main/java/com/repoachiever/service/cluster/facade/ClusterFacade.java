@@ -100,7 +100,6 @@ public class ClusterFacade {
                 throw new ClusterContentRetrievalFailureException(e.getMessage());
             }
 
-
             List<String> additionalContentUnits;
 
             try {
@@ -367,6 +366,8 @@ public class ClusterFacade {
 
             logger.info(
                     String.format("Removing RepoAchiever Cluster allocation: '%s'", clusterAllocation.getName()));
+
+            System.out.println(clusterAllocation.getPid());
 
             try {
                 clusterService.destroy(clusterAllocation.getPid());

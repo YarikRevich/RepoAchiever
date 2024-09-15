@@ -307,7 +307,7 @@ public class RepositoryFacade {
                     contentWithdrawal.getCredentials().getInternal().getId(),
                     credentials);
         } catch (RepositoryOperationFailureException e) {
-            throw new RepositoryContentDestructionFailureException(e.getMessage());
+            return;
         }
 
         try {

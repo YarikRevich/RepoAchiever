@@ -6,6 +6,42 @@ content:
 
       # Enables additional content download of repositories of VCS provider repositories.
       additional: true
+    - name: "[YarikRevich]scripts:master" # Represents location definition name.
+
+      # Enables additional content download of repositories of VCS provider repositories.
+      additional: true
+    - name: "[YarikRevich]odb:master" # Represents location definition name.
+
+      # Enables additional content download of repositories of VCS provider repositories.
+      additional: true
+    - name: "[YarikRevich]tetris:main" # Represents location definition name.
+
+      # Enables additional content download of repositories of VCS provider repositories.
+      additional: true
+    - name: "[YarikRevich]tmpm:master" # Represents location definition name.
+
+      # Enables additional content download of repositories of VCS provider repositories.
+      additional: true
+    - name: "[YarikRevich]portfolio:master" # Represents location definition name.
+
+      # Enables additional content download of repositories of VCS provider repositories.
+      additional: true
+    - name: "[YarikRevich]ai-commit-generator:master" # Represents location definition name.
+
+      # Enables additional content download of repositories of VCS provider repositories.
+      additional: true
+    - name: "[YarikRevich]website:main" # Represents location definition name.
+
+      # Enables additional content download of repositories of VCS provider repositories.
+      additional: true
+    - name: "[YarikRevich]vim-config:master" # Represents location definition name.
+
+      # Enables additional content download of repositories of VCS provider repositories.
+      additional: true
+    - name: "[YarikRevich]critical_db_framework:master" # Represents location definition name.
+
+      # Enables additional content download of repositories of VCS provider repositories.
+      additional: true
 
 # Represents section used for VCS provider configuration.
 service:
@@ -27,7 +63,7 @@ service:
     id: "1"
 
     # Represents authentication token intended to be used for VCS provider API access permission.
-    token: "ghp_UMz4cQAD87xXAtEbsPazlRcLw7kVPu1zF8bq"
+    token: ""
 
 # Represents section used for RepoAchiever API Server configuration.
 api-server:
