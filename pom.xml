@@ -530,7 +530,7 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <configuration>
             <release>22</release>
-            <compilerArgs>--enable-preview</compilerArgs>
+            <enablePreview>true</enablePreview>
           </configuration>
         </plugin>
 
