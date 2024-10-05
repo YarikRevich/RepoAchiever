@@ -28,13 +28,13 @@ lint: ## Run Apache Spotless linter
 	@mvn spotless:apply
 
 .PHONY: create-local-client
-create-local-client: ## Create ResourceTracker local directory for client
+create-local-client: ## Create RepoAchiever local directory for client
 .PHONY: create-local-client
-create-local-client: ## Create ResourceTracker local directory for client
+create-local-client: ## Create RepoAchiever local directory for client
 	@mkdir -p $(HOME)/.repoachiever/config/swap
 
 .PHONY: create-local-api-server
-create-local-api-server: ## Create ResourceTracker local directory for API Server
+create-local-api-server: ## Create RepoAchiever local directory for API Server
 	@mkdir -p $(HOME)/.repoachiever/config
 	@mkdir -p $(HOME)/.repoachiever/diagnostics/prometheus/internal
 	@mkdir -p $(HOME)/.repoachiever/diagnostics/prometheus/config
@@ -57,13 +57,6 @@ clone-api-server-config: ## Clone RepoAchiever API Server configuration files to
 	@cp -r ./config/prometheus/prometheus.tmpl $(HOME)/.repoachiever/diagnostics/prometheus/config
 	@cp -r ./samples/config/api-server/api-server.yaml $(HOME)/.repoachiever/config
 
-.PHONY: clone-worker
-clone-worker: ## Clone Worker JAR into a RepoAchiever local directory
-ifeq (,$(wildcard $(HOME)/.repoachiever/bin/worker))
-	@mkdir -p $(HOME)/.repoachiever/bin
-endif
-	@cp -r ./bin/worker $(HOME)/.repoachiever/bin/
-
 .PHONY: clone-cluster
 clone-cluster: ## Clone Cluster JAR into a RepoAchiever local directory
 ifeq (,$(wildcard $(HOME)/.repoachiever/bin/cluster))
@@ -77,18 +70,6 @@ ifeq (,$(wildcard $(HOME)/.repoachiever/bin/api-server))
 	@mkdir -p $(HOME)/.repoachiever/bin
 endif
 	@cp -r ./bin/api-server $(HOME)/.repoachiever/bin/
-
-.PHONY: build-worker
-build-worker: clean ## Build Worker application
-ifneq (,$(wildcard ./bin/worker))
-	@rm -r ./bin/worker
-endif
-ifeq ($(dev), 'false')
-	@mvn -pl worker -T10 install
-else
-	@mvn -P dev -pl worker -T10 install
-endif
-	$(MAKE) clone-worker
 
 .PHONY: build-cluster
 build-cluster: clean ## Build Cluster application

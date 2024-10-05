@@ -174,14 +174,14 @@
           <groupId>com.google.cloud.tools</groupId>
           <artifactId>jib-maven-plugin</artifactId>
         </plugin>
-        <plugin>
+        <!-- <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <configuration>
-            <source>19</source>
-            <target>19</target>
+            <source>22</source>
+            <target>22</target>
           </configuration>
-        </plugin>
+        </plugin> -->
         <plugin>
           <groupId>com.coderplus.maven.plugins</groupId>
           <artifactId>copy-rename-maven-plugin</artifactId>

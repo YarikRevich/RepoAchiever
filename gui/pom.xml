@@ -4,7 +4,7 @@
     <artifactId>gui</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>gui</name>
-    <description>GUI for ResourceTracker</description>
+    <description>GUI for RepoAchiever</description>
 
     <parent>
         <groupId>com.repoachiever</groupId>

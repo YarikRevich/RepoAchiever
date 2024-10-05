@@ -1,8 +1,9 @@
 # RepoAchiever
 
-[![Build](https://github.com/YarikRevich/RepoAchiever/actions/workflows/build.yml/badge.svg)](https://github.com/YarikRevich/ResourceTracker/actions/workflows/build.yml)
+[![Build](https://github.com/YarikRevich/RepoAchiever/actions/workflows/build.yml/badge.svg)](https://github.com/YarikRevich/RepoAchiever/actions/workflows/build.yml)
 ![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
 ![MacOS](https://img.shields.io/badge/MacOS-8773f5?style=for-the-badge&logo=macos&logoColor=black)
+![OpenJDK](https://img.shields.io/badge/JDK-23-65bd60?style=for-the-badge)
 [![StandWithUkraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/README.md)
 
 ## General Information
