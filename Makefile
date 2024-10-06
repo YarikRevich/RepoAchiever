@@ -28,13 +28,13 @@ lint: ## Run Apache Spotless linter
 	@mvn spotless:apply
 
 .PHONY: create-local-client
-create-local-client: ## Create ResourceTracker local directory for client
+create-local-client: ## Create RepoAchiever local directory for client
 .PHONY: create-local-client
-create-local-client: ## Create ResourceTracker local directory for client
+create-local-client: ## Create RepoAchiever local directory for client
 	@mkdir -p $(HOME)/.repoachiever/config/swap
 
 .PHONY: create-local-api-server
-create-local-api-server: ## Create ResourceTracker local directory for API Server
+create-local-api-server: ## Create RepoAchiever local directory for API Server
 	@mkdir -p $(HOME)/.repoachiever/config
 	@mkdir -p $(HOME)/.repoachiever/diagnostics/prometheus/internal
 	@mkdir -p $(HOME)/.repoachiever/diagnostics/prometheus/config
@@ -57,13 +57,6 @@ clone-api-server-config: ## Clone RepoAchiever API Server configuration files to
 	@cp -r ./config/prometheus/prometheus.tmpl $(HOME)/.repoachiever/diagnostics/prometheus/config
 	@cp -r ./samples/config/api-server/api-server.yaml $(HOME)/.repoachiever/config
 
-.PHONY: clone-worker
-clone-worker: ## Clone Worker JAR into a RepoAchiever local directory
-ifeq (,$(wildcard $(HOME)/.repoachiever/bin/worker))
-	@mkdir -p $(HOME)/.repoachiever/bin
-endif
-	@cp -r ./bin/worker $(HOME)/.repoachiever/bin/
-
 .PHONY: clone-cluster
 clone-cluster: ## Clone Cluster JAR into a RepoAchiever local directory
 ifeq (,$(wildcard $(HOME)/.repoachiever/bin/cluster))
@@ -78,27 +71,15 @@ ifeq (,$(wildcard $(HOME)/.repoachiever/bin/api-server))
 endif
 	@cp -r ./bin/api-server $(HOME)/.repoachiever/bin/
 
-.PHONY: build-worker
-build-worker: clean ## Build Worker application
-ifneq (,$(wildcard ./bin/worker))
-	@rm -r ./bin/worker
-endif
-ifeq ($(dev), 'false')
-	@mvn -pl worker -T10 install
-else
-	@mvn -P dev -pl worker -T10 install
-endif
-	$(MAKE) clone-worker
-
 .PHONY: build-cluster
 build-cluster: clean ## Build Cluster application
 ifneq (,$(wildcard ./bin/cluster))
 	@rm -r ./bin/cluster
 endif
 ifeq ($(dev), 'false')
-	@mvn -pl cluster -T10 install
+	@mvn -pl cluster -T10 install -U
 else
-	@mvn -P dev -pl cluster -T10 install
+	@mvn -P dev -pl cluster -T10 install -U
 endif
 	$(MAKE) clone-cluster
 
@@ -108,9 +89,9 @@ ifneq (,$(wildcard ./bin/api-server))
 	@rm -r ./bin/api-server
 endif
 ifeq ($(dev), 'false')
-	@mvn -pl api-server -T10 install
+	@mvn -pl api-server -T10 install -U
 else
-	@mvn -P dev -pl api-server -T10 install
+	@mvn -P dev -pl api-server -T10 install -U
 endif
 	$(MAKE) clone-api-server
 
@@ -120,9 +101,9 @@ ifneq (,$(wildcard ./bin/cli))
 	@rm -r ./bin/cli
 endif
 ifeq ($(dev), 'false')
-	@mvn -pl cli -T10 install
+	@mvn -pl cli -T10 install -U
 else
-	@mvn -P dev -pl cli -T10 install
+	@mvn -P dev -pl cli -T10 install -U
 endif
 
 .PHONY: build-gui
@@ -131,7 +112,7 @@ ifneq (,$(wildcard ./bin/gui))
 	@rm -r ./bin/gui
 endif
 ifeq ($(dev), 'false')
-	@mvn -pl gui -T10 install
+	@mvn -pl gui -T10 install -U
 else
-	@mvn -P dev -pl gui -T10 install
+	@mvn -P dev -pl gui -T10 install -U
 endif

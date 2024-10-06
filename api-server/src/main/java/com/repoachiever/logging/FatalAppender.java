@@ -15,7 +15,7 @@ import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 /**
  * Service used for logging fatal level application state changes.
  */
-@Plugin(name = "FatalAppender", category = Core.CATEGORY_NAME, elementType = Appender.ELEMENT_TYPE)
+@Plugin(name = "fatalappender", category = Core.CATEGORY_NAME, elementType = Appender.ELEMENT_TYPE)
 public class FatalAppender extends AbstractAppender {
   protected FatalAppender(String name, Filter filter) {
     super(name, filter, null, false, null);

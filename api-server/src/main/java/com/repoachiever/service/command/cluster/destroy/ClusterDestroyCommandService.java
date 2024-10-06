@@ -15,7 +15,7 @@ public class ClusterDestroyCommandService extends SProcess {
 
         this.command = switch (osType) {
             case WINDOWS -> null;
-            case UNIX, MAC, ANY -> String.format("kill -15 %d", pid);
+            case UNIX, MAC, ANY -> String.format("kill -9 %d", pid);
         };
     }
 
