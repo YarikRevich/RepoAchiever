@@ -77,9 +77,9 @@ ifneq (,$(wildcard ./bin/cluster))
 	@rm -r ./bin/cluster
 endif
 ifeq ($(dev), 'false')
-	@mvn -pl cluster -T10 install
+	@mvn -pl cluster -T10 install -U
 else
-	@mvn -P dev -pl cluster -T10 install
+	@mvn -P dev -pl cluster -T10 install -U
 endif
 	$(MAKE) clone-cluster
 
@@ -89,9 +89,9 @@ ifneq (,$(wildcard ./bin/api-server))
 	@rm -r ./bin/api-server
 endif
 ifeq ($(dev), 'false')
-	@mvn -pl api-server -T10 install
+	@mvn -pl api-server -T10 install -U
 else
-	@mvn -P dev -pl api-server -T10 install
+	@mvn -P dev -pl api-server -T10 install -U
 endif
 	$(MAKE) clone-api-server
 
@@ -101,9 +101,9 @@ ifneq (,$(wildcard ./bin/cli))
 	@rm -r ./bin/cli
 endif
 ifeq ($(dev), 'false')
-	@mvn -pl cli -T10 install
+	@mvn -pl cli -T10 install -U
 else
-	@mvn -P dev -pl cli -T10 install
+	@mvn -P dev -pl cli -T10 install -U
 endif
 
 .PHONY: build-gui
@@ -112,7 +112,7 @@ ifneq (,$(wildcard ./bin/gui))
 	@rm -r ./bin/gui
 endif
 ifeq ($(dev), 'false')
-	@mvn -pl gui -T10 install
+	@mvn -pl gui -T10 install -U
 else
-	@mvn -P dev -pl gui -T10 install
+	@mvn -P dev -pl gui -T10 install -U
 endif
