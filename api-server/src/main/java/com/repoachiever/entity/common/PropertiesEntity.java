@@ -23,6 +23,15 @@ public class PropertiesEntity {
     @ConfigProperty(name = "quarkus.rest-client.github.url")
     String restClientGitHubUrl;
 
+    @ConfigProperty(name = "rest-client.github.page-size")
+    Integer restClientGitHubPageSize;
+
+    @ConfigProperty(name = "rest-client.github.max-page")
+    Integer restClientGitHubMaxPage;
+
+    @ConfigProperty(name = "rest-client.github.repo-visibility")
+    String restClientGitHubRepoVisibility;
+
     @ConfigProperty(name = "github.location.notation")
     String gitHubLocationNotation;
 

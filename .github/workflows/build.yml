@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up JDK 23
+      - name: "Set up JDK 23"
         uses: oracle-actions/setup-java@v1
         with:
           website: oracle.com

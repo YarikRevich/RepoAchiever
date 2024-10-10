@@ -367,8 +367,6 @@ public class ClusterFacade {
             logger.info(
                     String.format("Removing RepoAchiever Cluster allocation: '%s'", clusterAllocation.getName()));
 
-            System.out.println(clusterAllocation.getPid());
-
             try {
                 clusterService.destroy(clusterAllocation.getPid());
             } catch (ClusterDestructionFailureException e) {

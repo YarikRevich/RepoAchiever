@@ -9,11 +9,14 @@ import com.repoachiever.exception.GitHubContentIsEmptyException;
 import com.repoachiever.exception.GitHubContentRetrievalFailureException;
 import com.repoachiever.exception.GitHubGraphQlClientDocumentNotFoundException;
 import com.repoachiever.exception.GitHubServiceNotAvailableException;
+import com.repoachiever.logging.common.LoggingConfigurationHelper;
 import com.repoachiever.service.config.ConfigService;
+import com.repoachiever.service.integration.scheduler.SchedulerConfigService;
 import com.repoachiever.service.state.StateService;
 import com.repoachiever.service.vendor.common.VendorConfigurationHelper;
 import jakarta.annotation.PostConstruct;
 import jakarta.ws.rs.core.HttpHeaders;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -270,6 +273,7 @@ public class GitGitHubVendorService {
                             .build())
                     .retrieve()
                     .bodyToMono(DataBuffer.class)
+                    .onErrorResume(element -> Mono.empty())
                     .block();
 
             dataBufferAtomic.set(response);

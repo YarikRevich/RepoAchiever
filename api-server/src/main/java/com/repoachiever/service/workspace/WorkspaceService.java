@@ -392,7 +392,7 @@ public class WorkspaceService {
      *
      * @param workspaceUnitDirectory given workspace unit directory.
      * @param location               given location of the additional content file.
-     * @param name                   given name of the additional content file.
+     * @param name                   given name of the raws content file.
      * @return result if additional content file exists in the given workspace unit directory.
      */
     public Boolean isRawContentFileExist(String workspaceUnitDirectory, String location, String name) {

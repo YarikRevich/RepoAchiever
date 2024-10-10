@@ -51,4 +51,4 @@ resource:
   # Represents a set of options used for RepoAchiever Cluster worker configuration.
   worker:
     # Represents frequency of requests to selected VCS provider resources.
-    frequency: "0/30 * * * * ?"
+    frequency: "0 */5 * * * ?"
