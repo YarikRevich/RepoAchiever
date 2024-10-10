@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>api-server</artifactId>
     <version>1.0-SNAPSHOT</version>
@@ -103,6 +103,10 @@
         <dependency>
             <groupId>org.jboss.logging</groupId>
             <artifactId>jboss-logging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.logmanager</groupId>
+            <artifactId>log4j2-jboss-logmanager</artifactId>
         </dependency>
         <dependency>
             <groupId>jakarta.json</groupId>
@@ -236,7 +240,9 @@
                                 <typeMapping>file=byte[]</typeMapping>
                             </typeMappings>
                             <configOptions>
-                                <additionalModelTypeAnnotations>@lombok.Data @lombok.NoArgsConstructor @lombok.AllArgsConstructor(staticName = "of")</additionalModelTypeAnnotations>
+                                <additionalModelTypeAnnotations>@lombok.Data
+                                    @lombok.NoArgsConstructor @lombok.AllArgsConstructor(staticName
+                                    = "of")</additionalModelTypeAnnotations>
                                 <sourceFolder>src/main/java</sourceFolder>
                                 <unhandledException>true</unhandledException>
                                 <serializableModel>true</serializableModel>

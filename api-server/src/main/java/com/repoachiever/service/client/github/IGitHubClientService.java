@@ -4,6 +4,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -24,12 +25,13 @@ public interface IGitHubClientService {
     Response getPermissionScopes(@HeaderParam(HttpHeaders.AUTHORIZATION) String token);
 
     @GET
-    @Path("/repos/{owner}/{name}}")
+    @Path("/user/repos")
     @Produces(MediaType.APPLICATION_JSON)
-    Response getRepository(
+    Response getRepositories(
             @HeaderParam(HttpHeaders.AUTHORIZATION) String token,
-            @PathParam("owner") String owner,
-            @PathParam("name") String name);
+            @QueryParam("per_page") Integer perPage,
+            @QueryParam("page") Integer page,
+            @QueryParam("visibility") String visibility);
 
     @GET
     @Path("/repos/{owner}/{name}/branches/{branch}")

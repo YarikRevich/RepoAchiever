@@ -12,6 +12,7 @@ import com.repoachiever.exception.ConfigFileClosureFailureException;
 import com.repoachiever.exception.ConfigFileReadingFailureException;
 import com.repoachiever.exception.ConfigNotGivenException;
 import com.repoachiever.exception.ConfigValidationException;
+import com.repoachiever.exception.ConfigCronExpressionValidationException;
 import jakarta.annotation.PostConstruct;
 
 import java.io.IOException;
@@ -28,6 +29,7 @@ import lombok.Getter;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.util.CronExpression;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -94,6 +96,12 @@ public class ConfigService {
                                     .map(ConstraintViolation::getMessage)
                                     .collect(Collectors.joining(", ")));
                 }
+            }
+
+            if (!CronExpression.isValidExpression(
+                    config.getResource().getWorker().getFrequency())) {
+                throw new ConfigValidationException(
+                        new ConfigCronExpressionValidationException().getMessage());
             }
         } finally {
             try {

@@ -37,15 +37,16 @@ public class SchedulerConfigService {
     /**
      * Performs configuration of RepoAchiever Cluster workers.
      *
-     * @throws SchedulerPeriodRetrievalFailureException if scheduler period retrieval process failed.
+     * @throws SchedulerPeriodRetrievalFailureException if scheduler period
+     *                                                  retrieval process failed.
      */
     @PostConstruct
     private void process() throws SchedulerPeriodRetrievalFailureException {
-        ExecutorService starterExecutorService =
-                Executors.newFixedThreadPool(configService.getConfig().getContent().getLocations().size());
+        ExecutorService starterExecutorService = Executors
+                .newFixedThreadPool(configService.getConfig().getContent().getLocations().size());
 
-        ScheduledExecutorService operationScheduledExecutorService =
-                Executors.newScheduledThreadPool(configService.getConfig().getContent().getLocations().size());
+        ScheduledExecutorService operationScheduledExecutorService = Executors
+                .newScheduledThreadPool(configService.getConfig().getContent().getLocations().size());
 
         Long period;
 
@@ -74,8 +75,7 @@ public class SchedulerConfigService {
                         logger.info(
                                 LoggingConfigurationHelper.getTransferableMessage(
                                         String.format("Skipping execution for '%s' location due to suspension",
-                                                element.getName())
-                                ));
+                                                element.getName())));
 
                         return;
                     }
@@ -87,17 +87,14 @@ public class SchedulerConfigService {
 
                         StateService.resetSuspenderByName(element.getName());
 
-                        CountDownLatch awaiter = StateService.getSuspenderAwaiterByName(element.getName());
-
                         if (!vendorFacade.isVendorAvailable()) {
                             logger.info(
                                     LoggingConfigurationHelper.getTransferableMessage(
                                             String.format("Remote provider '%s' is not available: '%s'",
                                                     configService.getConfig().getService().getProvider().toString(),
-                                                    element.getName())
-                                    ));
+                                                    element.getName())));
 
-                            awaiter.countDown();
+                            StateService.countDownSuspenderByName(element.getName());
 
                             return;
                         }
@@ -116,8 +113,6 @@ public class SchedulerConfigService {
                                                     element.getName(),
                                                     e.getMessage())));
 
-                            StateService.removeSuspenderByName(element.getName());
-
                             closable.countDown();
 
                             return;
@@ -129,7 +124,7 @@ public class SchedulerConfigService {
                                                     element.getName(),
                                                     e.getMessage())));
 
-                            awaiter.countDown();
+                            StateService.countDownSuspenderByName(element.getName());
 
                             return;
                         }
@@ -137,13 +132,19 @@ public class SchedulerConfigService {
                         Boolean rawContentPresent = false;
 
                         try {
-                            rawContentPresent =
-                                    apiServerCommunicationResource.retrieveRawContentPresent(
-                                            element.getName(), record);
+                            rawContentPresent = apiServerCommunicationResource.retrieveRawContentPresent(
+                                    element.getName(), record);
                         } catch (ApiServerOperationFailureException ignored) {
                         }
 
                         if (!rawContentPresent) {
+                            logger.info(
+                                    LoggingConfigurationHelper.getTransferableMessage(
+                                            String.format(
+                                                    "Raw content record '%s' for '%s' location is not present",
+                                                    record,
+                                                    element.getName())));
+
                             logger.info(
                                     LoggingConfigurationHelper.getTransferableMessage(
                                             String.format(
@@ -191,8 +192,6 @@ public class SchedulerConfigService {
                                     }
                                 }
 
-                                StateService.removeSuspenderByName(element.getName());
-
                                 closable.countDown();
 
                                 return;
@@ -217,7 +216,7 @@ public class SchedulerConfigService {
                                     }
                                 }
 
-                                awaiter.countDown();
+                                StateService.countDownSuspenderByName(element.getName());
 
                                 return;
                             }
@@ -253,7 +252,7 @@ public class SchedulerConfigService {
                                                         element.getName(),
                                                         e.getMessage())));
 
-                                awaiter.countDown();
+                                StateService.countDownSuspenderByName(element.getName());
 
                                 return;
                             }
@@ -264,6 +263,13 @@ public class SchedulerConfigService {
                                                     "Raw content transfer finished for '%s' location and '%s' record",
                                                     element.getName(),
                                                     record)));
+                        } else {
+                            logger.info(
+                                    LoggingConfigurationHelper.getTransferableMessage(
+                                            String.format(
+                                                    "Raw content record '%s' for '%s' location is already present",
+                                                    record,
+                                                    element.getName())));
                         }
 
                         AdditionalContentDto additionalContent;
@@ -278,8 +284,6 @@ public class SchedulerConfigService {
                                                     element.getName(),
                                                     e.getMessage())));
 
-                            StateService.removeSuspenderByName(element.getName());
-
                             closable.countDown();
 
                             return;
@@ -291,7 +295,7 @@ public class SchedulerConfigService {
                                                     element.getName(),
                                                     e.getMessage())));
 
-                            awaiter.countDown();
+                            StateService.countDownSuspenderByName(element.getName());
 
                             return;
                         }
@@ -300,13 +304,19 @@ public class SchedulerConfigService {
                             Boolean additionalContentPresent = false;
 
                             try {
-                                additionalContentPresent =
-                                        apiServerCommunicationResource.retrieveAdditionalContentPresent(
+                                additionalContentPresent = apiServerCommunicationResource
+                                        .retrieveAdditionalContentPresent(
                                                 element.getName(), additionalContent.getHash());
                             } catch (ApiServerOperationFailureException ignored) {
                             }
 
                             if (!additionalContentPresent) {
+                                logger.info(
+                                    LoggingConfigurationHelper.getTransferableMessage(
+                                            String.format(
+                                                    "Additional content for '%s' location is not present",
+                                                    element.getName())));
+
                                 logger.info(
                                         LoggingConfigurationHelper.getTransferableMessage(
                                                 String.format(
@@ -316,7 +326,8 @@ public class SchedulerConfigService {
 
                                 try {
                                     apiServerCommunicationResource.performAdditionalContentUpload(
-                                            element.getName(), additionalContent.getHash(), additionalContent.getData());
+                                            element.getName(), additionalContent.getHash(),
+                                            additionalContent.getData());
                                 } catch (ApiServerOperationFailureException e) {
                                     logger.info(
                                             LoggingConfigurationHelper.getTransferableMessage(
@@ -325,7 +336,7 @@ public class SchedulerConfigService {
                                                             element.getName(),
                                                             e.getMessage())));
 
-                                    awaiter.countDown();
+                                    StateService.countDownSuspenderByName(element.getName());
 
                                     return;
                                 }
@@ -336,11 +347,23 @@ public class SchedulerConfigService {
                                                         "Additional content transfer finished for '%s' location and '%s' hash",
                                                         element.getName(),
                                                         additionalContent.getHash())));
+                            } else {
+                                logger.info(
+                                    LoggingConfigurationHelper.getTransferableMessage(
+                                            String.format(
+                                                    "Additional content for '%s' location is already present",
+                                                    element.getName())));
                             }
                         }
+                    } catch (Exception e) {
+                        StateService.countDownSuspenderByName(element.getName());
 
-                        awaiter.countDown();
+                        logger.info(
+                                LoggingConfigurationHelper.getTransferableMessage(
+                                        String.format("ERROR APPERAED '%s' location", element.getName())));
                     } finally {
+                        StateService.countDownSuspenderByName(element.getName());
+
                         logger.info(
                                 LoggingConfigurationHelper.getTransferableMessage(
                                         String.format("Exiting execution for '%s' location", element.getName())));
@@ -353,7 +376,13 @@ public class SchedulerConfigService {
                     logger.fatal(e.getMessage());
                 }
 
+                StateService.removeSuspenderByName(element.getName());
+
                 execution.cancel(true);
+
+                logger.info(
+                        LoggingConfigurationHelper.getTransferableMessage(
+                                String.format("Operations were cancelled for '%s' location", element.getName())));
             });
         });
     }

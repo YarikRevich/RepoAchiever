@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,7 +45,9 @@ public class VendorConfigurationHelper {
 
         matcher.find();
 
-        if (matcher.groupCount() == 4) {
+        String optionalMatch = matcher.group(4);
+
+        if (matcher.groupCount() == 4 && Objects.nonNull(optionalMatch)) {
             return GitHubLocationNotationDto.of(
                     matcher.group(1),
                     matcher.group(2),
